@@ -32,8 +32,9 @@ DEFAULT_REFRESH_SECONDS = 600
 DEFAULT_MAX_ITEMS = 200
 DEFAULT_THREADS = 4
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-SITE_DIR = os.path.join(os.path.dirname(__file__), "site")
+PROJECT_ROOT = os.path.dirname(__file__)
+DATA_DIR = os.path.join(PROJECT_ROOT, "data")
+SITE_DIR = PROJECT_ROOT
 IMAGES_DIR = os.path.join(SITE_DIR, "images")
 FEED_CACHE_PATH = os.path.join(DATA_DIR, "feed_cache.json")
 FULLTEXT_CACHE_PATH = os.path.join(DATA_DIR, "fulltext_cache.json")
@@ -51,6 +52,7 @@ class Item:
     pub_text: str
     source: str
     summary: str
+    rss_image: str
 
 
 def ensure_dirs() -> None:
@@ -241,6 +243,36 @@ def get_rss_image(item: ET.Element, base_url: str) -> str:
     return ""
 
 
+def get_rss_image_from_desc(desc: str, base_url: str) -> str:
+    if not desc:
+        return ""
+    match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
+    if match:
+        return normalize_image_url(base_url, match.group(1))
+    match = re.search(r'<img[^>]+data-src=["\']([^"\']+)["\']', desc)
+    if match:
+        return normalize_image_url(base_url, match.group(1))
+    return ""
+
+
+def is_generic_image(url: str) -> bool:
+    if not url:
+        return True
+    lowered = url.lower()
+    return any(
+        key in lowered
+        for key in (
+            "logo",
+            "default",
+            "placeholder",
+            "site-logo",
+            "share",
+            "social",
+            "/seo/",
+        )
+    )
+
+
 def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
     if not url:
         return "", ""
@@ -394,6 +426,7 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
             pub_text = find_text(item, "pubDate")
             pub_dt = parse_pub_date(pub_text)
             summary = find_text(item, "encoded") or find_text(item, "description")
+            rss_image = get_rss_image(item, link)
             items.append(
                 Item(
                     title=strip_html(title),
@@ -402,6 +435,7 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                     pub_text=pub_text,
                     source=source,
                     summary=strip_html(summary),
+                    rss_image=rss_image,
                 )
             )
         return items
@@ -423,7 +457,9 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                 link = lxml_text(item, "link")
                 pub_text = lxml_text(item, "pubDate")
                 pub_dt = parse_pub_date(pub_text)
-                summary = lxml_text(item, "encoded") or lxml_text(item, "description")
+                desc_raw = lxml_text(item, "encoded") or lxml_text(item, "description")
+                summary = desc_raw
+                rss_image = get_rss_image_from_desc(desc_raw, link)
                 items.append(
                     Item(
                         title=strip_html(title),
@@ -432,6 +468,7 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                         pub_text=pub_text,
                         source=source,
                         summary=strip_html(summary),
+                        rss_image=rss_image,
                     )
                 )
             return items
@@ -500,12 +537,12 @@ def build_html(
     cards = []
     for idx, item in enumerate(items, start=1):
         content = item.summary
-        image_url = ""
+        image_url = item.rss_image
         if item.link:
             fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
-            if should_use_fulltext(item.summary, fulltext):
+            if fulltext:
                 content = fulltext
-            if og_image:
+            if og_image and not is_generic_image(og_image):
                 image_url = og_image
         content = clean_content_text(strip_html(content))
         content = re.sub(r"。(」)", r"。\1\n", content)
@@ -698,6 +735,14 @@ def build_html(
       color: var(--recent);
       font-weight: 600;
     }}
+    .info-link {{
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }}
+    .info-link:hover {{
+      text-decoration: underline;
+    }}
     .hero {{
       width: 100%;
       border-radius: 12px;
@@ -732,7 +777,7 @@ def build_html(
 <body>
   <header class="site">
     <h1>即時焦點</h1>
-    <div class="meta">{meta_line}</div>
+    <div class="meta">{meta_line}｜<a class="info-link" href="info.html">說明</a></div>
   </header>
   <div class="toolbar">
     <input id="search" type="search" placeholder="搜尋標題或內容…">

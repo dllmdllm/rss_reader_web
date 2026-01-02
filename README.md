@@ -10,7 +10,7 @@
 python3 generate_site.py
 ```
 
-輸出：`site/index.html`
+輸出：`index.html`
 
 ## 自動更新
 
