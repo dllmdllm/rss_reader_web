@@ -1,0 +1,4 @@
+/data/
+/site/images/
+*.pyc
+__pycache__/

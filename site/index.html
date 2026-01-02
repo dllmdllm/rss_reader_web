@@ -1,0 +1,954 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="600">
+  <title>即時焦點</title>
+  <style>
+    :root {
+      --bg: #f6f2ea;
+      --card: #ffffff;
+      --fg: #1d1d1f;
+      --muted: #6a6a6a;
+      --accent: #0b5fff;
+      --recent: #c1121f;
+      --border: #e7e2d8;
+      --shadow: rgba(10, 10, 10, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Noto Sans TC", "PingFang TC", "Heiti TC", sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.7;
+    }
+    header.site {
+      padding: 24px 16px 8px;
+      text-align: center;
+    }
+    header.site h1 {
+      font-size: 28px;
+      margin: 0 0 6px;
+    }
+    header.site .meta {
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      background: rgba(246, 242, 234, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .toolbar input {
+      flex: 1 1 260px;
+      max-width: 360px;
+      padding: 10px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #fff;
+      font-size: 14px;
+    }
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .chip {
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      background: #fff;
+      cursor: pointer;
+      user-select: none;
+    }
+    .chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: transparent;
+    }
+    main {
+      max-width: 920px;
+      margin: 0 auto;
+      padding: 16px;
+      display: grid;
+      gap: 16px;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 10px 24px var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .card-head {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      align-items: start;
+    }
+    .index {
+      background: #f0ede7;
+      border-radius: 12px;
+      padding: 6px 10px;
+      font-weight: 700;
+      font-size: 12px;
+      color: #8a6d3b;
+    }
+    h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+      line-height: 1.4;
+      font-family: "Noto Serif TC", "PingFang TC", "Heiti TC", serif;
+    }
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .tag {
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: #eef2f7;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .date {
+      color: var(--accent);
+      font-size: 12px;
+    }
+    .date.recent {
+      color: var(--recent);
+      font-weight: 600;
+    }
+    .hero {
+      width: 100%;
+      border-radius: 12px;
+      margin: 10px 0;
+    }
+    .content {
+      font-size: 15px;
+      color: #262626;
+      white-space: normal;
+    }
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px 16px;
+    }
+    @media (max-width: 640px) {
+      header.site h1 {
+        font-size: 22px;
+      }
+      .card {
+        padding: 14px;
+      }
+      h2 {
+        font-size: 18px;
+      }
+      .toolbar {
+        padding: 10px 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="site">
+    <h1>即時焦點</h1>
+    <div class="meta">過去12小時共49則｜更新時間 2026-01-02 15:34｜最新新聞時間 2026-01-02 15:20</div>
+  </header>
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="搜尋標題或內容…">
+    <div class="filters">
+      <span class="chip active" data-source="all">全部</span>
+      <span class="chip" data-source="RTHK">RTHK</span>
+      <span class="chip" data-source="mingpao">Mingpao</span>
+    </div>
+  </div>
+  <main id="list">
+    
+      <article class="card" data-source="mingpao" data-title="2026馬年｜全港商場利是封換領攻略 新地五大商場推 「錦鯉迎春御吉祥」利是封【不斷更新】">
+        <header class="card-head">
+          <span class="index">01</span>
+          <div>
+            <h2>2026馬年｜全港商場利是封換領攻略 新地五大商場推 「錦鯉迎春御吉祥」利是封【不斷更新】</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767338480312/2026%e9%a6%ac%e5%b9%b4-%e5%85%a8%e6%b8%af%e5%95%86%e5%a0%b4%e5%88%a9%e6%98%af%e5%b0%81%e6%8f%9b%e9%a0%98%e6%94%bb%e7%95%a5-%e6%96%b0%e5%9c%b0%e4%ba%94%e5%a4%a7%e5%95%86%e5%a0%b4%e6%8e%a8-%e3%80%8c%e9%8c%a6%e9%af%89%e8%bf%8e%e6%98%a5%e5%be%a1%e5%90%89%e7%a5%a5%e3%80%8d%e5%88%a9%e6%98%af%e5%b0%81%e3%80%90%e4%b8%8d%e6%96%b7%e6%9b%b4%e6%96%b0%e3%80%91&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 15:20</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">馬年將至，各大商場爭相推出多款精美的利是封，《明報》整合多個商場利是封換領方法供讀者參考。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="新年即錄大額成交 緹外4房特色戶逾1.76億沽">
+        <header class="card-head">
+          <span class="index">02</span>
+          <div>
+            <h2>新年即錄大額成交 緹外4房特色戶逾1.76億沽</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767338951974/%e6%96%b0%e5%b9%b4%e5%8d%b3%e9%8c%84%e5%a4%a7%e9%a1%8d%e6%88%90%e4%ba%a4-%e7%b7%b9%e5%a4%964%e6%88%bf%e7%89%b9%e8%89%b2%e6%88%b6%e9%80%be1-76%e5%84%84%e6%b2%bd&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 15:19</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">踏入新一年，新盤市場即錄大額市區豪宅成交；嘉里（0683）旗下九龍半山龍駒道、屬現樓的緹外，據成交紀錄冊顯示，新錄2026年首宗成交，招標售出第2座1樓A室，實用面積4398方呎4房4套間隔、連255方呎前庭，連車位成交價1.768億元、實呎4.02萬元，買家需於今年4月2日或之前完成交易，但可提前入住，並可獲4.25%梲項津貼。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="滶晨系列新年首兩日連沽3伙兩房 吸金3700萬">
+        <header class="card-head">
+          <span class="index">03</span>
+          <div>
+            <h2>滶晨系列新年首兩日連沽3伙兩房 吸金3700萬</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767338261858/%e6%bb%b6%e6%99%a8%e7%b3%bb%e5%88%97%e6%96%b0%e5%b9%b4%e9%a6%96%e5%85%a9%e6%97%a5%e9%80%a3%e6%b2%bd3%e4%bc%99%e5%85%a9%e6%88%bf-%e5%90%b8%e9%87%913700%e8%90%ac&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 15:16</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">剛踏入新年，新盤市場暫時以銷售餘貨為主，新世界(0017)及港鐵(0066)等合作的黃竹坑站港島南岸滶晨系列，新年首兩日連沽3伙兩房單位、套現約3700萬元，其中第2座36樓H室，實用面積494方呎、屬兩房琉璃晶廚設計，成交價1280.2萬元、實呎25,915元。<br>滶晨系列去年中開售至今共沽709伙，總共套現近122億元。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="匯豪峰兩房租2.05萬 呎租逾45元">
+        <header class="card-head">
+          <span class="index">04</span>
+          <div>
+            <h2>匯豪峰兩房租2.05萬 呎租逾45元</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767337912396/%e5%8c%af%e8%b1%aa%e5%b3%b0%e5%85%a9%e6%88%bf%e7%a7%9f2-05%e8%90%ac-%e5%91%8e%e7%a7%9f%e9%80%be45%e5%85%83&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 15:07</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">市區私宅租盤持續具承接，美聯區域經理吳肇基表示，鰂魚涌匯豪峰一伙高層F室，屬實用面積451方呎兩房間隔，業主原叫價約為2.2萬元，獲外區客洽租，議價後減1500元或約7%，以2.05萬元成交、實用呎租逾45元；業主2011年以約518萬元購入，享租金回報約4.7厘。<br>其他報道</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="電影《尋秦記》港澳累計票房破2000萬">
+        <header class="card-head">
+          <span class="index">05</span>
+          <div>
+            <h2>電影《尋秦記》港澳累計票房破2000萬</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://ol.mingpao.com/ldy/showbiz/latest/20260102/1767336930144/%e9%9b%bb%e5%bd%b1%e3%80%8a%e5%b0%8b%e7%a7%a6%e8%a8%98%e3%80%8b%e6%b8%af%e6%be%b3%e7%b4%af%e8%a8%88%e7%a5%a8%e6%88%bf%e7%a0%b42000%e8%90%ac&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 14:55</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">古天樂、林峯、宣萱、郭羡妮、滕麗名、朱鑑然等，主演的電影《尋秦記》前天（12月31日）開畫，首日港澳票房已超過1100萬，成為香港電影史上首日最高開畫票房冠軍。<br>電影公司今天宣布港澳累計票房已衝破2000萬！</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="國防部：台海現狀就是兩岸同屬一中">
+        <header class="card-head">
+          <span class="index">06</span>
+          <div>
+            <h2>國防部：台海現狀就是兩岸同屬一中</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e5%85%a9%e5%b2%b8/article/20260102/s00004/1767336779503/%e5%9c%8b%e9%98%b2%e9%83%a8-%e5%8f%b0%e6%b5%b7%e7%8f%be%e7%8b%80%e5%b0%b1%e6%98%af%e5%85%a9%e5%b2%b8%e5%90%8c%e5%b1%ac%e4%b8%80%e4%b8%ad">mingpao</span>
+              <span class="date recent">2026-01-02 14:52</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">台灣及美、日、澳、菲、歐盟等近日指摘解放軍東部戰區舉行的「正義使命2025」演習影響區域局勢，反對單方面改變台海現狀，中國國防部發言人張曉剛今日（2日）就此回應稱，台海最大的現狀就是海峽兩岸同屬一個中國，台海和平穩定的最大威脅就是「台獨」分裂行徑和外部勢力縱容支持。<br><br>張曉剛表示，「正義使命2025」演習全面檢驗任務部隊一體化聯合作戰能力，充分展示打「獨」促統、反制干涉的強大實力，鮮明昭示任何在台灣問題上越線挑釁的惡劣行徑必遭堅決回擊，任何阻撓中國實現統一的險惡圖謀都不可能得逞。<br><br>張曉剛指出，台灣是中國領土不可分割的一部分，台灣問題純屬中國內政，不容任何外來干涉。<br>解放軍於台島周邊組織反分裂反干涉行動，完全正當必要、無可非議。<br>解放軍將持續加強練兵備戰，隨時準備回擊謀「獨」挑釁行徑，堅決挫敗一切外來干涉圖謀，捍衛國家主權、統一、領土完整。<br>（央視新聞）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="謝安琪奪獎憶方大同落淚 自揭曾爆肺6次 連呼吸都有問題">
+        <header class="card-head">
+          <span class="index">07</span>
+          <div>
+            <h2>謝安琪奪獎憶方大同落淚 自揭曾爆肺6次 連呼吸都有問題</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://ol.mingpao.com/ldy/showbiz/latest/20260102/1767335152403/%e8%ac%9d%e5%ae%89%e7%90%aa%e5%a5%aa%e7%8d%8e%e6%86%b6%e6%96%b9%e5%a4%a7%e5%90%8c%e8%90%bd%e6%b7%9a-%e8%87%aa%e6%8f%ad%e6%9b%be%e7%88%86%e8%82%ba6%e6%ac%a1-%e9%80%a3%e5%91%bc%e5%90%b8%e9%83%bd%e6%9c%89%e5%95%8f%e9%a1%8c&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 14:39</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">謝安琪（Kay）昨晚（1日）憑歌曲《50/50》於《2025年度叱咤樂壇流行榜頒獎典禮》榮獲「專業推介叱咤十大」第二位。<br>她在台上分享得獎感受時一度哽咽流淚，其後於後台受訪時更難掩哀傷，情緒激動落淚，並透露先後爆肺6次，令唱歌、呼吸及運動均受到影響。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="中國公民元旦悉尼海灘遇難">
+        <header class="card-head">
+          <span class="index">08</span>
+          <div>
+            <h2>中國公民元旦悉尼海灘遇難</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e5%85%a9%e5%b2%b8/article/20260102/s00004/1767334219408/%e4%b8%ad%e5%9c%8b%e5%85%ac%e6%b0%91%e5%85%83%e6%97%a6%e6%82%89%e5%b0%bc%e6%b5%b7%e7%81%98%e9%81%87%e9%9b%a3">mingpao</span>
+              <span class="date recent">2026-01-02 14:15</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">中國駐悉尼總領館周五（2日）表示，確認一名中國公民周四元旦日在澳洲悉尼附近海中遇難。<br><br>當地傳媒報道，緊急救援部門在周四清晨4時左右接報，指涉事25歲女子在悉尼東部馬魯布拉海灘（Maroubra Beach）附近被巨浪捲入海中。<br>多個部門組成的聯合搜救隊1小時後尋獲女子，但她已無生命迹象。<br><br>中國駐悉尼總領館官員說，總領館正與各方密切聯繫，積極處理和提供協助。<br>（新華社/ABC）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="2026年請假攻略　最多可請3放10　一圖看4個自製長假日期">
+        <header class="card-head">
+          <span class="index">09</span>
+          <div>
+            <h2>2026年請假攻略　最多可請3放10　一圖看4個自製長假日期</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1767178928034/2026%e5%b9%b4%e8%ab%8b%e5%81%87%e6%94%bb%e7%95%a5-%e6%9c%80%e5%a4%9a%e5%8f%af%e8%ab%8b3%e6%94%be10-%e4%b8%80%e5%9c%96%e7%9c%8b4%e5%80%8b%e8%87%aa%e8%a3%bd%e9%95%b7%e5%81%87%e6%97%a5%e6%9c%9f">mingpao</span>
+              <span class="date recent">2026-01-02 14:13</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">踏入2026年，元旦過後公眾假期剩餘16日。<br>明報電子平台組整合長假請假攻略，以五天工作兼放周六日計算，2026年農曆新年請2日假，可連放9日；復活節和清明節相連，請多3日假可連放10日。<br>(2026<br>●農曆新年：請2日放9日公眾假期：2026年2月17日至19日（年初一至年初三）請假日子：2026年2月16日及20日（請2日放9日，2026年2月14日至22日）<br>●復活節＋清明節：請3日放10日公眾假期：2026年4月3日至4日、6日至7日請假日子：2026年4月8日至10日（請3日放10日，2026年4月3日至12日）<br>●中秋節＋國慶：請4日放9日公眾假期：2026年9月26日、10月1日請假日子：2026年9月28日至30日、10月2日（請4日放9日，2026年9月26日至10月4日）<br>●2026年聖誕＋2027年元旦：請4日放10日公眾假期：2026年12月25日至26日、2027年1月1日請假日子：2026年12月28日至31日（請4日放10日，2026年12月25日至2027年1月3日）<br>*勞動節（5月1日）、佛誕翌日（5月25日）、端午節（6月19日）、香港特別行政區成立紀念日（7月1日）及重陽節翌日（10月19日）前後連周六周日，都可以請4日放9日。<br>2026年公眾假期每個星期日 1月1日元旦2月17日農曆年初一2月18日農曆年初二2月19日農曆年初三4月3日耶穌受難節4月4日耶穌受難節翌日4月6日清明節翌日4月7日復活節星期一翌日5月1日勞動節5月25日佛誕翌日6月19日端午節7月1日香港特別行政區成立紀念日9月26日中秋節翌日10月1日國慶日10月19日重陽節翌日12月25日聖誕節12月26日聖誕節後第一個周日</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="政府統計師涉校內遊蕩及跟蹤女學生　准保釋候訊">
+        <header class="card-head">
+          <span class="index">10</span>
+          <div>
+            <h2>政府統計師涉校內遊蕩及跟蹤女學生　准保釋候訊</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767332755311/%e6%94%bf%e5%ba%9c%e7%b5%b1%e8%a8%88%e5%b8%ab%e6%b6%89%e6%a0%a1%e5%85%a7%e9%81%8a%e8%95%a9%e5%8f%8a%e8%b7%9f%e8%b9%a4%e5%a5%b3%e5%ad%b8%e7%94%9f-%e5%87%86%e4%bf%9d%e9%87%8b%e5%80%99%e8%a8%8a">mingpao</span>
+              <span class="date recent">2026-01-02 13:52</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">一名政府統計處統計師去年7月，涉嫌趁銅鑼灣聖保祿學校舉行開放日及文化表演當日，進入校內遊蕩且跟蹤一名女學生。<br>他被控一項「遊蕩導致他人擔心」罪，案件今日（2日）在東區裁判法院提堂。<br>被告暫毋須答辯，辯方申請押後案件以待索取文件及給予被告法律意見。<br>裁判官將案件押後至2月13日再訊，其間被告獲准保釋，保釋條件包括3萬元現金、不得騷擾控方證人及不得返回案發地點。<br><br>被告林永康（59歲，報稱政府統計處統計師）被控於2025年7月5日，在銅鑼灣禮頓道140號聖保祿學校4樓在上述公眾地方遊蕩，他單獨在該處出現，導致X合理擔心本身的安全或利益。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="高息定存丨PAObank推1個月16厘港元定存吸新客">
+        <header class="card-head">
+          <span class="index">11</span>
+          <div>
+            <h2>高息定存丨PAObank推1個月16厘港元定存吸新客</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767333408316/%e9%ab%98%e6%81%af%e5%ae%9a%e5%ad%98%e4%b8%a8paobank%e6%8e%a81%e5%80%8b%e6%9c%8816%e5%8e%98%e6%b8%af%e5%85%83%e5%ae%9a%e5%ad%98%e5%90%b8%e6%96%b0%e5%ae%a2&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 13:52</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">PAObank宣布，推出2026年優惠第一擊，包括全新中小企外匯服務登場，限時跨境匯款零手續費、全新個人客戶1個月港元定存高達16厘，以及現有個人客戶可享外幣兌換定存優惠。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="上環消防局鐵架翻倒撞傷兩名工人">
+        <header class="card-head">
+          <span class="index">12</span>
+          <div>
+            <h2>上環消防局鐵架翻倒撞傷兩名工人</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767332154793/%e4%b8%8a%e7%92%b0%e6%b6%88%e9%98%b2%e5%b1%80%e9%90%b5%e6%9e%b6%e7%bf%bb%e5%80%92%e6%92%9e%e5%82%b7%e5%85%a9%e5%90%8d%e5%b7%a5%e4%ba%ba">mingpao</span>
+              <span class="date recent">2026-01-02 13:51</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">上午10時許，兩名工人在上環消防局搬運一個大型鐵架期間，鐵架懷疑突然塌下，撞傷兩名分別53歲及65歲的工人，兩人腳部受傷，清醒送往瑪麗醫院。<br>警方到場圍封鐵架，經調查列作工業意外，勞工處派員跟進意外原因。<br><br>據悉，鐵架約2米長、2米高、50厘米闊、重100公斤，事發時有3名工人準備搬運鐵架到士多房，其間疑地面凹凸不平，鐵架翻倒，兩人走避不及被鐵架撞傷。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="2026旅遊須知｜日本多地、蘇格蘭徵住宿稅　歐洲30國第四季起須申請ETIAS">
+        <header class="card-head">
+          <span class="index">13</span>
+          <div>
+            <h2>2026旅遊須知｜日本多地、蘇格蘭徵住宿稅　歐洲30國第四季起須申請ETIAS</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1765284853605/2026%e6%97%85%e9%81%8a%e9%a0%88%e7%9f%a5-%e6%97%a5%e6%9c%ac%e5%a4%9a%e5%9c%b0-%e8%98%87%e6%a0%bc%e8%98%ad%e5%be%b5%e4%bd%8f%e5%ae%bf%e7%a8%85-%e6%ad%90%e6%b4%b230%e5%9c%8b%e7%ac%ac%e5%9b%9b%e5%ad%a3%e8%b5%b7%e9%a0%88%e7%94%b3%e8%ab%8betias">mingpao</span>
+              <span class="date recent">2026-01-02 13:47</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">踏入2026年，各地也向遊客實施新措施，本文綜合相關資訊，讓大家在2026年更好計劃出遊的行程。<br><br>日本<br>●日本各地徵住宿稅   沖繩：2026年4月起向遊客收取住宿稅，以房價2%計算，每人每晚上限2000日圓（約100港元）<br>北海道及札幌市：2026年4月起，北海道及札幌市同時向遊客收取住宿稅，意味住在北海道札幌市的旅客，須支付兩筆住宿稅，每人每晚最多付1000日圓，詳情如下或【按此】： 北海道及札幌市徵收遊客住宿稅表住宿費用札幌市住宿稅北海道住宿稅合計金額2萬日圓以下200日圓100日圓300日圓2萬至5萬日圓200日圓200日圓400日圓5萬日圓以上500日圓500日圓1000日圓<br>京都：2026年3月1日起向遊客上調住宿稅，詳情如下： 京都徵收遊客住宿稅表<br>住宿費用（每人每晚）住宿稅6000日圓以下200日圓6000至2萬日圓400日圓2萬至5萬日圓1000日圓5萬至10萬日圓4000日圓10萬日圓以上1萬日圓<br>●新退稅制度「先付後退」：日本於2026年11月1日起向遊客實施「先付後退」的新退稅制度，由以往購物時可同時在店舖退稅，改為購物時先付包括10%消費稅的金額，旅客須經店家提供的QR Code，在網上填寫退稅資訊，再在離境時於機場辦理退稅。<br>【詳情】<br>蘇格蘭<br>●7月24日起，蘇格蘭愛丁堡對過夜旅客徵收5%住宿稅，2027年將擴展至蘇格蘭其他城市<br>●港人出發前須申請ETIAS（2026年第四季）：ETIAS（European Travel Information and Authorisation System）即歐洲旅行信息授權系統，是歐盟推出的電子旅行授權系統，主要是要求來自免簽地區（包括香港、新加坡及台灣）的旅客出發到歐洲國家（如法國、德國、意大利等30國）前，需在網上申請並獲得授權才能入境，目的是加強邊境安全和管理，讓旅客出發前已進行安全審查。<br><br>Q：ETIAS何時實施？   A：預計2026年第四季起實施<br>Q：誰需要申請ETIAS？   A：來自香港、新加坡、日本及台灣等59個地區的人，若前往德國、意大利、葡萄牙等歐洲30個國家作短期旅遊（90至180日內），即使前往免簽證地區，亦要申請ETIAS，否則無法登機<br>Q：如何申請ETIAS？   A：透過歐盟旗下ETIAS網或ETIAS App網上申請，填妥資料後網上遞交，大部分申請可在數分鐘內獲批核，但亦有可能需要4至14個工作天，視乎申請人是否需要提供額外資料；若申請人被邀請進行面談，甚至需要30個工作天<br>Q：ETIAS費用？   A：20歐元（約183港元），18歲以下及70歲以上人士可獲豁免<br>Q：ETIAS有沒有期限？ A：3年或直至護照過期   【ETIAS詳情按此】<br>美國<br>●國家公園入場附加費：美國黃石、大峽谷等11國家公園，2026年起向外國遊客徵收100美元（約780港元）附加費【相關報道】<br>意大利 ●羅馬2026年2月起，向參觀「許願池」（Trevi Fountain）的遊客收取2歐元（約18港元）入場費<br>韓國●1月1日起，韓國入境淘汰「紙本入境申報」，並全面採用「電子入境申報」，旅客須在出發72小時前在官方網站填寫【官方網站】</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="許正宇：鞏固香港國際財資管理中心及離岸人民幣樞紐地位">
+        <header class="card-head">
+          <span class="index">14</span>
+          <div>
+            <h2>許正宇：鞏固香港國際財資管理中心及離岸人民幣樞紐地位</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767332769106/%e8%a8%b1%e6%ad%a3%e5%ae%87-%e9%9e%8f%e5%9b%ba%e9%a6%99%e6%b8%af%e5%9c%8b%e9%9a%9b%e8%b2%a1%e8%b3%87%e7%ae%a1%e7%90%86%e4%b8%ad%e5%bf%83%e5%8f%8a%e9%9b%a2%e5%b2%b8%e4%ba%ba%e6%b0%91%e5%b9%a3%e6%a8%9e%e7%b4%90%e5%9c%b0%e4%bd%8d&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 13:35</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">財經事務及庫務局局長許正宇在財庫局社交平台專頁發文，稱會進一步拓展離岸人民幣業務，鞏固香港作為全球最大離岸人民幣樞紐的地位；大力發展綠色及可持續金融，助力國家實現「雙碳」目標；積極推動金融科技應用，深化與內地市場的互聯互通機制；強化香港作為「超級聯繫人」及「超級增值人」的角色，吸引更多家族辦公室及資產管理機構落戶香港，進一步鞏固香港國際資產及財富管理中心的地位。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="著名動作指導袁祥仁辭世 曾演《功夫》神秘乞丐">
+        <header class="card-head">
+          <span class="index">15</span>
+          <div>
+            <h2>著名動作指導袁祥仁辭世 曾演《功夫》神秘乞丐</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://ol.mingpao.com/ldy/showbiz/latest/20260102/1767331785259/%e8%91%97%e5%90%8d%e5%8b%95%e4%bd%9c%e6%8c%87%e5%b0%8e%e8%a2%81%e7%a5%a5%e4%bb%81%e8%be%ad%e4%b8%96-%e6%9b%be%e6%bc%94%e3%80%8a%e5%8a%9f%e5%a4%ab%e3%80%8b%e7%a5%9e%e7%a7%98%e4%b9%9e%e4%b8%90&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 13:29</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">導演袁和平（八爺）胞弟、著名動作指導袁祥仁昨天（1日）在香港離世，其妻子向丈夫的好友公布噩耗。<br>袁祥仁出身於武術世家，為「袁家班」的核心成員；其父親為知名武術指導袁小田，兄長則是享譽國際、被譽為「天下第一武指」的香港著名武術指導兼導演袁和平。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="啟德零售館除夕單日人流12萬 首年出租率逾九成">
+        <header class="card-head">
+          <span class="index">16</span>
+          <div>
+            <h2>啟德零售館除夕單日人流12萬 首年出租率逾九成</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767331499309/%e5%95%9f%e5%be%b7%e9%9b%b6%e5%94%ae%e9%a4%a8%e9%99%a4%e5%a4%95%e5%96%ae%e6%97%a5%e4%ba%ba%e6%b5%8112%e8%90%ac-%e9%a6%96%e5%b9%b4%e5%87%ba%e7%a7%9f%e7%8e%87%e9%80%be%e4%b9%9d%e6%88%90&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 13:18</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">啟德體育園公布，位於體育園內的啟德零售館於剛過去的12月31日除夕，在周深跨年演唱會及節日氣氛帶動下，園區錄得單日12萬人次訪客的破紀錄高峰。<br>經過首年營運和持續調整，零售館整體出租率已超過九成。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="通訊局就Now TV牌照續期申請展開公眾諮詢">
+        <header class="card-head">
+          <span class="index">17</span>
+          <div>
+            <h2>通訊局就Now TV牌照續期申請展開公眾諮詢</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767330724183/%e9%80%9a%e8%a8%8a%e5%b1%80%e5%b0%b1now-tv%e7%89%8c%e7%85%a7%e7%ba%8c%e6%9c%9f%e7%94%b3%e8%ab%8b%e5%b1%95%e9%96%8b%e5%85%ac%e7%9c%be%e8%ab%ae%e8%a9%a2&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 13:10</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">通訊事務管理局今日就Now TV牌照的續期申請，展開為期一個月的公眾諮詢。<br>Now TV的收費電視牌照有效期將於2027年9月25日屆滿，Now TV已向通訊局提交牌照續期申請。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="佐敦谷住宅地暫收8標書 長實新地等入標">
+        <header class="card-head">
+          <span class="index">18</span>
+          <div>
+            <h2>佐敦谷住宅地暫收8標書 長實新地等入標</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767330365878/%e4%bd%90%e6%95%a6%e8%b0%b7%e4%bd%8f%e5%ae%85%e5%9c%b0%e6%9a%ab%e6%94%b68%e6%a8%99%e6%9b%b8-%e9%95%b7%e5%af%a6%e6%96%b0%e5%9c%b0%e7%ad%89%e5%85%a5%e6%a8%99&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:59</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">今年首幅住宅地皮剛截標，地皮位於佐敦谷彩興路，屬中小型住宅地，可建樓面約37萬方呎，就現場所見，暫有8間發展商或財團入標，包括入標常客長實（1113）、新地（0016）、恒地（0012）、嘉華（0173），另信置（0083）伙鷹君（0041）合資入標。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="叱咤｜姜濤車廂中見證六連霸破紀錄 感謝姜糖支持">
+        <header class="card-head">
+          <span class="index">19</span>
+          <div>
+            <h2>叱咤｜姜濤車廂中見證六連霸破紀錄 感謝姜糖支持</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://ol.mingpao.com/ldy/showbiz/latest/20260102/1767329950736/%e5%8f%b1%e5%92%a4-%e5%a7%9c%e6%bf%a4%e8%bb%8a%e5%bb%82%e4%b8%ad%e8%a6%8b%e8%ad%89%e5%85%ad%e9%80%a3%e9%9c%b8%e7%a0%b4%e7%b4%80%e9%8c%84-%e6%84%9f%e8%ac%9d%e5%a7%9c%e7%b3%96%e6%94%af%e6%8c%81&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:59</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">《2025年度叱咤樂壇流行榜頒獎典禮》昨晚（1日）圓滿落幕。<br>MIRROR因在澳門開騷而未能出席，但成員姜濤依然成為全場焦點，大批姜糖就「我最喜愛」獎項而入場投票支持他。<br>姜濤最終獲得「叱咤樂壇我最喜愛的男歌手」及「叱咤樂壇我最喜愛的歌曲大獎」，兩個獎分別是他第四度及第六度奪得，當中的「叱咤樂壇我最喜愛的歌曲大獎」更是六連霸，打破張學友及陳奕迅五度得獎的紀錄，締造新里程碑。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="短片：油蔴地警署光影之旅　真實舊警署沉浸式展覽">
+        <header class="card-head">
+          <span class="index">20</span>
+          <div>
+            <h2>短片：油蔴地警署光影之旅　真實舊警署沉浸式展覽</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1767244229111/%e7%9f%ad%e7%89%87-%e6%b2%b9%e8%94%b4%e5%9c%b0%e8%ad%a6%e7%bd%b2%e5%85%89%e5%bd%b1%e4%b9%8b%e6%97%85-%e7%9c%9f%e5%af%a6%e8%88%8a%e8%ad%a6%e7%bd%b2%e6%b2%89%e6%b5%b8%e5%bc%8f%e5%b1%95%e8%a6%bd">mingpao</span>
+              <span class="date recent">2026-01-02 12:54</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">舊油麻地警署新設展覽「油蔴地警署光影之旅」今日（2日）起開放予公眾參觀，首度以真實警署作為展覽空間，轉化為沉浸式電影展覽。<br><br>舊油麻地警署建於1922年，屬於英國愛德華時代建築風格，是香港現存少數戰前警署之一。<br>許多香港電影在此取景，使其成為香港警匪片的標誌。<br>文創產業發展處特別邀請香港電影專業人士，重新打造舊油麻地警署的部分場景，讓參觀者感受香港警匪電影特色。<br>展覽有「時光隧道」、「雜差房」和「羈留室」等展區。<br>（拍攝及剪接︰卓朗為）<br>展覽不設現場售票，須預先網上訂購門票方能進場。<br><br>油麻地警署光影之旅［詳情］日期︰2026年1月2日起（逢周一休館，公眾假期除外）<br>地址：舊油麻地警署（油麻地廣東道627號地面樓層）時間︰●1月2日至11日︰早上9時至晚上10時●1月12日起，周二至周六︰早上11時至晚上10時（下午5時至7時休息）；周日及公眾假期︰早上9時至晚上10時<br>油麻地警署光影之旅｜入場費／免費入場優惠［詳情］展覽不設現場售票，須預先網上訂購門票。<br>每25分鐘一節，逾時15分鐘以上將不獲安排參觀。<br>●正價門票：$30●特惠門票：$10（適用於全日制學生、60歲或以上長者、殘疾人士及綜合社會保障援助受助人）●免費入場優惠︰6歲或以下兒童（需由成年人陪同，並事前預訂門票）<br>更多熱點報料：hotpick@mingpao.com</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="台北隨機斬人案　警：疑犯成就不如預期　斷對外聯繫終「自我毁滅」">
+        <header class="card-head">
+          <span class="index">21</span>
+          <div>
+            <h2>台北隨機斬人案　警：疑犯成就不如預期　斷對外聯繫終「自我毁滅」</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e5%85%a9%e5%b2%b8/article/20260102/s00004/1767328637146/%e5%8f%b0%e5%8c%97%e9%9a%a8%e6%a9%9f%e6%96%ac%e4%ba%ba%e6%a1%88-%e8%ad%a6-%e7%96%91%e7%8a%af%e6%88%90%e5%b0%b1%e4%b8%8d%e5%a6%82%e9%a0%90%e6%9c%9f-%e6%96%b7%e5%b0%8d%e5%a4%96%e8%81%af%e7%b9%ab%e7%b5%82%e3%80%8c%e8%87%aa%e6%88%91%e6%af%81%e6%bb%85%e3%80%8d">mingpao</span>
+              <span class="date recent">2026-01-02 12:43</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">台北去年12月19日發生隨機斬人案，警方專案小組近期完成初步偵查報告，認定疑犯張文長期因自認成就不如預期，在自我認知受挫和自我壓力下疏離親友，斷絕對外聯繫成為「孤鳥」，最後「自我毁滅」。<br><br>專案小組針對張文金流及交友圈進行全面分析，並派遣警員訪談家人、虎尾科技大學同學、任職前保安公司等處，拼湊其從大學至犯案前生活軌迹。<br>警方發現，張文思路清晰，為了提前退伍，多次詢問單位長官如何才能「不受重大處分被汰除」；甚至自導自演「酒駕」，刻意通報單位，賠償數萬元新台幣後提前退役。<br>在保安公司工作期間表現平平，無重大疏失，僅與同事互動不多。<br><br>專案小組經過訪查結果，確認張文在就學、服役、工作期間完全未遭受霸凌，認為他在高知識水平的家庭中，以及家人期許下，造成心境轉折。<br>（風傳媒、中時新聞網）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="涉暪利益衝突助妻公司獲外判工程　東蓮覺苑工程經理准保釋候訊">
+        <header class="card-head">
+          <span class="index">22</span>
+          <div>
+            <h2>涉暪利益衝突助妻公司獲外判工程　東蓮覺苑工程經理准保釋候訊</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767327786536/%e6%b6%89%e6%9a%aa%e5%88%a9%e7%9b%8a%e8%a1%9d%e7%aa%81%e5%8a%a9%e5%a6%bb%e5%85%ac%e5%8f%b8%e7%8d%b2%e5%a4%96%e5%88%a4%e5%b7%a5%e7%a8%8b-%e6%9d%b1%e8%93%ae%e8%a6%ba%e8%8b%91%e5%b7%a5%e7%a8%8b%e7%b6%93%e7%90%86%e5%87%86%e4%bf%9d%e9%87%8b%e5%80%99%e8%a8%8a">mingpao</span>
+              <span class="date recent">2026-01-02 12:43</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">東蓮覺苑一名前工程經理涉嫌隱暪利益衝突，誘使寺院外判多項維修工程予其妻子的工程公司，涉及工程費用共逾50萬元。<br>涉案經理被控三項欺詐罪及一項企圖欺詐罪，案件今日（2日）在東區裁判法院提堂，他暫毋須答辯。<br>裁判官應控方要求，將案件押後至2月13日再訊，以待控方準備將案件轉介區域法院審理的文件，被告准以1萬元保釋外出，並且不得騷擾控方證人。<br><br>被告高宇星（36歲，報稱工程經理）被控於2023年8月15日至2024年2月23日期間藉作欺騙，即向東蓮覺苑隱瞞其妻子在欣雅專業工程設計有限公司的權益，意圖詐騙而誘使東蓮覺苑委聘欣雅專業工程進行21項維修工程，導致欣雅專業工程獲得利益或東蓮覺苑蒙受不利。<br><br>被告另被控於上述時段內藉作欺騙，即向東蓮覺苑的員工訛稱，有關18項維修工程的採購工作已按寺院的政策妥為進行，意圖詐騙而誘使或企圖誘使有關員工批准委聘欣雅專業工程及向其付款，導致欣雅專業工程獲得利益或東蓮覺苑蒙受不利。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="廉署拘21人揭觀塘區兩屋苑大維修涉貪　指有黑社會背景人士背後操縱　藉貪污手段收集授權票">
+        <header class="card-head">
+          <span class="index">23</span>
+          <div>
+            <h2>廉署拘21人揭觀塘區兩屋苑大維修涉貪　指有黑社會背景人士背後操縱　藉貪污手段收集授權票</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767328644770/%e5%bb%89%e7%bd%b2%e6%8b%9821%e4%ba%ba%e6%8f%ad%e8%a7%80%e5%a1%98%e5%8d%80%e5%85%a9%e5%b1%8b%e8%8b%91%e5%a4%a7%e7%b6%ad%e4%bf%ae%e6%b6%89%e8%b2%aa-%e6%8c%87%e6%9c%89%e9%bb%91%e7%a4%be%e6%9c%83%e8%83%8c%e6%99%af%e4%ba%ba%e5%a3%ab%e8%83%8c%e5%be%8c%e6%93%8d%e7%b8%b1-%e8%97%89%e8%b2%aa%e6%b1%a1%e6%89%8b%e6%ae%b5%e6%94%b6%e9%9b%86%e6%8e%88%e6%ac%8a%e7%a5%a8">mingpao</span>
+              <span class="date recent">2026-01-02 12:39</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">廉政公署先後拘捕共21人，涉及一個有黑社會背景人士操縱的樓宇維修貪污團夥，涉及觀塘區兩個屋苑的大維修工程，被捕人士包括該貪污團夥的骨幹成員。<br><br>被捕的15男6名年齡介乎30至81歲，包括中間人、工程顧問、工程承辦商及屋苑業主立案法團成員，部分人有黑社會背景。<br>行動涉及觀塘區兩個屋苑的大維修工程。<br>在其中一項工程，涉案工程承辦商涉嫌透過中間人行賄工程顧問及屋苑法團部分成員，以取得總值約3300萬元的工程合約。<br>另一項工程則仍在籌備階段，涉案中間人懷疑藉貪污手段收集業主的「委任代表文書」(俗稱授權票)，企圖操控屋苑法團以協助日後取得相關維修工程合約。<br><br>廉署在行動中搜查多個地點，包括涉案工程顧問及工程承辦商的辦公室，並檢走多項證物，包括相關的招標文件。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="研究生夫婦1.85萬租One Homantin一房 呎租50元">
+        <header class="card-head">
+          <span class="index">24</span>
+          <div>
+            <h2>研究生夫婦1.85萬租One Homantin一房 呎租50元</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767328709206/%e7%a0%94%e7%a9%b6%e7%94%9f%e5%a4%ab%e5%a9%a61-85%e8%90%ac%e7%a7%9fone-homantin%e4%b8%80%e6%88%bf-%e5%91%8e%e7%a7%9f50%e5%85%83&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:37</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">私宅租務市況活躍，香港置業首席高級營業經理吳聲凱表示，何文田One Homantin新錄租務成交，為第2座高層C室，實用面積372方呎一房間隔，業主以 約2.1萬元放租，議價後減2500元或12%，以1.85萬元租出，實用呎租約50元，新租客為都會大學研究生夫婦，睇樓兩次後決定承租。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="通訊局就Now TV收費電視牌照續期申請展開公眾諮詢">
+        <header class="card-head">
+          <span class="index">25</span>
+          <div>
+            <h2>通訊局就Now TV收費電視牌照續期申請展開公眾諮詢</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767329903726/%e9%80%9a%e8%a8%8a%e5%b1%80%e5%b0%b1now-tv%e6%94%b6%e8%b2%bb%e9%9b%bb%e8%a6%96%e7%89%8c%e7%85%a7%e7%ba%8c%e6%9c%9f%e7%94%b3%e8%ab%8b%e5%b1%95%e9%96%8b%e5%85%ac%e7%9c%be%e8%ab%ae%e8%a9%a2&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:31</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">通訊局公布，今日（2日）就Now TV牌照的續期申請，展開為期一個月的公眾諮詢。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="撥康視雲：基石投資者富策自願延長禁售期">
+        <header class="card-head">
+          <span class="index">26</span>
+          <div>
+            <h2>撥康視雲：基石投資者富策自願延長禁售期</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767328603768/%e6%92%a5%e5%ba%b7%e8%a6%96%e9%9b%b2-%e5%9f%ba%e7%9f%b3%e6%8a%95%e8%b3%87%e8%80%85%e5%af%8c%e7%ad%96%e8%87%aa%e9%a1%98%e5%bb%b6%e9%95%b7%e7%a6%81%e5%94%ae%e6%9c%9f&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:30</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">撥康視雲（2592）公布，基石投資者富策控股自願承諾延長禁售承諾，禁售期由原定2026年1月3日延至2026年7月2日。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="半日沽空金額減47% 百度增2倍">
+        <header class="card-head">
+          <span class="index">27</span>
+          <div>
+            <h2>半日沽空金額減47% 百度增2倍</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767328077993/%e5%8d%8a%e6%97%a5%e6%b2%bd%e7%a9%ba%e9%87%91%e9%a1%8d%e6%b8%9b47-%e7%99%be%e5%ba%a6%e5%a2%9e2%e5%80%8d&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:24</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">大市半日沽空金額90.61億元，較上日減少47.82%，沽空金額佔大市成交比率為11.78%。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="Now TV提交收費電視牌照續期申請　通訊局展開公眾諮詢">
+        <header class="card-head">
+          <span class="index">28</span>
+          <div>
+            <h2>Now TV提交收費電視牌照續期申請　通訊局展開公眾諮詢</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767326978587/now-tv%e6%8f%90%e4%ba%a4%e6%94%b6%e8%b2%bb%e9%9b%bb%e8%a6%96%e7%89%8c%e7%85%a7%e7%ba%8c%e6%9c%9f%e7%94%b3%e8%ab%8b-%e9%80%9a%e8%a8%8a%e5%b1%80%e5%b1%95%e9%96%8b%e5%85%ac%e7%9c%be%e8%ab%ae%e8%a9%a2">mingpao</span>
+              <span class="date recent">2026-01-02 12:12</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">Now TV Limited的收費電視牌照有效期將於2027年9月25日屆滿，Now TV已向通訊事務管理局提交牌照續期申請。<br>通訊局今日（2日）就續期申請展開為期一個月的公眾諮詢。<br>公眾人士可由即日至2月1日期間，以書面方式提交意見，或參加1月17日舉行的電視暨網上公眾諮詢會。<br><br>通訊局按照《廣播條例》（第562章）規定及程序，對持牌機構的過往表現作詳細評估，並透過不同方式收集公眾意見，包括進行為期一個月的公眾諮詢、問卷調查及電視暨網上公眾諮詢會。<br>通訊局表示，會考慮持牌機構的表現、其續牌計劃、業界和公眾的意見及市場的最新發展等因素，在2026年9月就收費電視牌照的續期申請，向行政長官會同行政會議提交建議。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="港股創逾兩個月最大升幅 恒指半日升559點 壁仞升72%">
+        <header class="card-head">
+          <span class="index">29</span>
+          <div>
+            <h2>港股創逾兩個月最大升幅 恒指半日升559點 壁仞升72%</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767327148580/%e6%b8%af%e8%82%a1%e5%89%b5%e9%80%be%e5%85%a9%e5%80%8b%e6%9c%88%e6%9c%80%e5%a4%a7%e5%8d%87%e5%b9%85-%e6%81%92%e6%8c%87%e5%8d%8a%e6%97%a5%e5%8d%87559%e9%bb%9e-%e5%a3%81%e4%bb%9e%e5%8d%8772&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 12:00</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">A股、日股休市，新一年，亞股普遍向上，科技股推升，恒指、國指升逾2%跑贏，台、韓股升逾1%，美期向上，納期升逾0.6%。<br>北水休市。<br>港股三大指數創逾兩個月最大升幅，及逾3周新高。<br>恒指10天線升穿20天線，指數同時升穿多條平均線，科指亦升穿50天線。<br>壁仞科技(6082)上市，收報33.88元，升72.86%。<br>百度(9888)升7.45%，收報141.3元，是升幅最大的藍籌。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="騎單車男子大埔「自炒」昏迷送院">
+        <header class="card-head">
+          <span class="index">30</span>
+          <div>
+            <h2>騎單車男子大埔「自炒」昏迷送院</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767326235520/%e9%a8%8e%e5%96%ae%e8%bb%8a%e7%94%b7%e5%ad%90%e5%a4%a7%e5%9f%94%e3%80%8c%e8%87%aa%e7%82%92%e3%80%8d%e6%98%8f%e8%bf%b7%e9%80%81%e9%99%a2">mingpao</span>
+              <span class="date recent">2026-01-02 11:59</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">今日（2日）上午10時許，一名男子騎單車至大埔太和路大埔警署對開林村河的單車徑時懷疑「自炒」，頭部受傷，倒地昏迷，救護員到場將傷者送往那打素醫院。<br>現場所見，警方圍封一段單車徑調查，旁邊樹叢留下一灘血迹，事主的單車翻側在草地上。<br><br>據現場消息，傷者當時與同事騎單車，準備到附近午飯，其間沿單車徑落斜失事，墮地時前額撼向石壆，當場昏迷，前行同事發現報警。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="新任法援署長陳澤銘承諾全力協助宏福苑災民申法援">
+        <header class="card-head">
+          <span class="index">31</span>
+          <div>
+            <h2>新任法援署長陳澤銘承諾全力協助宏福苑災民申法援</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767326193225/%e6%96%b0%e4%bb%bb%e6%b3%95%e6%8f%b4%e7%bd%b2%e9%95%b7%e9%99%b3%e6%be%a4%e9%8a%98%e6%89%bf%e8%ab%be%e5%85%a8%e5%8a%9b%e5%8d%94%e5%8a%a9%e5%ae%8f%e7%a6%8f%e8%8b%91%e7%81%bd%e6%b0%91%e7%94%b3%e6%b3%95%e6%8f%b4">mingpao</span>
+              <span class="date recent">2026-01-02 11:58</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">法律援助署署長陳澤銘昨日（1日）履新，他今早會見傳媒時表示，署方已就大埔宏福苑五級大火成立特別專責組，短期內推出一系列措施，全力協助災民及其他受影響人士申請法援，以便處理人身傷亡、財產損失的追討，以及僱員補償等訴訟及相關事宜。<br><br>陳澤銘強調，會確保法援署盡最大努力，向受影響而合資格人士提供一切必須法律援助。<br>他亦說，上任後會確保法援署能以專業、有效率及富同理心的方式，應對社會需要。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="蔚來李斌：將達成第100萬輛量產車下線里程碑 今年計劃推三款新車">
+        <header class="card-head">
+          <span class="index">32</span>
+          <div>
+            <h2>蔚來李斌：將達成第100萬輛量產車下線里程碑 今年計劃推三款新車</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767325107846/%e8%94%9a%e4%be%86%e6%9d%8e%e6%96%8c-%e5%b0%87%e9%81%94%e6%88%90%e7%ac%ac100%e8%90%ac%e8%bc%9b%e9%87%8f%e7%94%a2%e8%bb%8a%e4%b8%8b%e7%b7%9a%e9%87%8c%e7%a8%8b%e7%a2%91-%e4%bb%8a%e5%b9%b4%e8%a8%88%e5%8a%83%e6%8e%a8%e4%b8%89%e6%ac%be%e6%96%b0%e8%bb%8a&quot; target=&quot;blank">mingpao</span>
+              <span class="date recent">2026-01-02 11:38</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">蔚來（9866）創始人、董事長、CEO李斌發布全員信，並透露蔚來將在近日達成第100萬輛量產車下線里程碑。<br>2026年公司要持續加強銷售服務網路的建設，確保銷售與服務能力能應付更激烈的市場競爭。<br>他又透露，蔚來今年將有三款新車推向市場，預計將繼續提升蔚來在高端大車市場的份額。<br>據此前媒體報道，三款新車或是蔚來ES9、ES7，以及樂道L80。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="特朗普：手背瘀因服食阿士匹靈　會議瞌睡是合眼稍息">
+        <header class="card-head">
+          <span class="index">33</span>
+          <div>
+            <h2>特朗普：手背瘀因服食阿士匹靈　會議瞌睡是合眼稍息</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1767321654496/%e7%89%b9%e6%9c%97%e6%99%ae-%e6%89%8b%e8%83%8c%e7%98%80%e5%9b%a0%e6%9c%8d%e9%a3%9f%e9%98%bf%e5%a3%ab%e5%8c%b9%e9%9d%88-%e6%9c%83%e8%ad%b0%e7%9e%8c%e7%9d%a1%e6%98%af%e5%90%88%e7%9c%bc%e7%a8%8d%e6%81%af">mingpao</span>
+              <span class="date">2026-01-02 11:18</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">79歲的美國總統特朗普接受《華爾街日報》訪問時，為自己的健康問題辯護，稱每天服食比醫生建議劑量多的阿士匹靈，藉此幫助血液流通，又稱右手手背的瘀痕是因服食阿士匹靈造成，強調自己十分健康。<br><br>特朗普的專屬醫生Sean Barbabella向《華爾街日報》確認，特朗普每天服食325毫克的阿士匹靈，以防止心臟病。<br>路透社引述醫護診所Mayo Clinic指出，每天服食阿士匹靈有助60歲以上的人減低心臟病發或中風風險，一般低劑量阿士匹靈約為81毫克。<br>特朗普說：「他們說阿士匹靈有助稀釋血液，我不想濃稠的血液流經心臟，這不是很合理嗎？」<br>他亦稱，去年10月接受的檢查是電腦斷層掃描（CT Scan），而非白宮所說的磁力共振（MRI）。<br>他稱「當時不知道究竟是檢查什麼」，不過檢查結果良好。<br>Sean Barbabella確認那次是電腦斷層掃描檢查，是要確保特朗普沒有心血管問題。<br><br>特朗普也為上月初被指在白宮會議中疑似打瞌睡一事解釋，強調自己不是貪睡的人，當時他只是合起雙眼稍息。<br>（路透社/法新社）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="港元拆息全線向下 1個月HIBOR見6周低 貼現窗投放30億">
+        <header class="card-head">
+          <span class="index">34</span>
+          <div>
+            <h2>港元拆息全線向下 1個月HIBOR見6周低 貼現窗投放30億</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767324518130/%e6%b8%af%e5%85%83%e6%8b%86%e6%81%af%e5%85%a8%e7%b7%9a%e5%90%91%e4%b8%8b-1%e5%80%8b%e6%9c%88hibor%e8%a6%8b6%e5%91%a8%e4%bd%8e-%e8%b2%bc%e7%8f%be%e7%aa%97%e6%8a%95%e6%94%be30%e5%84%84&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 11:18</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">港元拆息全線向下。<br>與樓按相關的一個月HIBOR連跌3日，跌45.3點子至2.6225%，是2025年11月21日後最低，當日報2.495%。<br>對上一次連跌3日是2025年12月22日，當日拆息報3.1175%。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="投資基金公會委任葉森森為行政總裁 即日生效">
+        <header class="card-head">
+          <span class="index">35</span>
+          <div>
+            <h2>投資基金公會委任葉森森為行政總裁 即日生效</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767322930323/%e6%8a%95%e8%b3%87%e5%9f%ba%e9%87%91%e5%85%ac%e6%9c%83%e5%a7%94%e4%bb%bb%e8%91%89%e6%a3%ae%e6%a3%ae%e7%82%ba%e8%a1%8c%e6%94%bf%e7%b8%bd%e8%a3%81-%e5%8d%b3%e6%97%a5%e7%94%9f%e6%95%88&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 10:52</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">香港投資基金公會今日，宣布委任葉森森為行政總裁，任命即日生效。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="新任港鐵行政總裁楊美珍稱工作重點包括推進6個新鐵路項目　善用AI應對挑戰">
+        <header class="card-head">
+          <span class="index">36</span>
+          <div>
+            <h2>新任港鐵行政總裁楊美珍稱工作重點包括推進6個新鐵路項目　善用AI應對挑戰</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767321394120/%e6%96%b0%e4%bb%bb%e6%b8%af%e9%90%b5%e8%a1%8c%e6%94%bf%e7%b8%bd%e8%a3%81%e6%a5%8a%e7%be%8e%e7%8f%8d%e7%a8%b1%e5%b7%a5%e4%bd%9c%e9%87%8d%e9%bb%9e%e5%8c%85%e6%8b%ac%e6%8e%a8%e9%80%b26%e5%80%8b%e6%96%b0%e9%90%b5%e8%b7%af%e9%a0%85%e7%9b%ae-%e5%96%84%e7%94%a8ai%e6%87%89%e5%b0%8d%e6%8c%91%e6%88%b0">mingpao</span>
+              <span class="date">2026-01-02 10:40</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">港鐵新任行政總裁楊美珍昨履新，她今早（2日）於港鐵總部會見傳媒，稱上任後工作重點包括推進6個新鐵路項目，專注工程和財務管理及建設高峰期的現金流，亦會積極用好科技及人工智能去面對挑戰，同時發展開拓不同業務。<br>楊美珍又表示，著重與員工溝通，盼締造良好工作環境讓員工發揮所長。<br><br>楊美珍原是港鐵常務總監（香港客運服務），昨日起接替金澤培升任行政總裁。<br>她稱加入港鐵已26年，明白新崗位責任重大，會關心明白乘客需要並不斷提升鐵路服務，與時並進，同時鞏固鐵路資產、質素及韌性。<br><br>她又說，港鐵目前另一重任是推進6個涉及大嶼山、屯門及北都的鐵路新項目，未計及北環線部分的投資已涉1400億元，將在2027年至2034年帶來逾20個新車站，工程及財務管理將屬工作重點。<br>楊提到，港鐵去年有不同組合應付現金流需要，將持續利用相關做法，認為現時管理現金流方面做得不錯。<br><br>楊美珍續稱，港鐵鐵路服務是香港民生及經濟的重要基建設施，必須讓其能持續發展，面對乘客需求轉變、市場及環境變化等挑戰，會努力積極利用人工智能，以創新、提升服務和營運效率，同時保持競爭力，透露現正有不同AI方面的測試及實驗，目標是將更多相關計劃落實及擴大。<br><br>楊美珍亦表示，港鐵有優秀的團隊，想為員工締造良好工作平台，期望加強工作文化及溝通。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="男子葵涌貨櫃碼頭疑車內燒炭亡">
+        <header class="card-head">
+          <span class="index">37</span>
+          <div>
+            <h2>男子葵涌貨櫃碼頭疑車內燒炭亡</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767317491589/%e7%94%b7%e5%ad%90%e8%91%b5%e6%b6%8c%e8%b2%a8%e6%ab%83%e7%a2%bc%e9%a0%ad%e7%96%91%e8%bb%8a%e5%85%a7%e7%87%92%e7%82%ad%e4%ba%a1">mingpao</span>
+              <span class="date">2026-01-02 10:33</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">今晨（1月2日）8時許，一名年約40歲男子被人發現在葵涌貨櫃碼頭亞洲貨櫃物流中心A座停車場一輛私家車內昏迷，車廂有燒過的炭。<br>救援人員到場將男子救出，證實事主明顯死亡。<br>警方正調查事主身分。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="短片：瑞士滑雪勝地酒吧大火　民眾悼遇難者　目擊者稱如世界末日">
+        <header class="card-head">
+          <span class="index">38</span>
+          <div>
+            <h2>短片：瑞士滑雪勝地酒吧大火　民眾悼遇難者　目擊者稱如世界末日</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1767318761686/%e7%9f%ad%e7%89%87-%e7%91%9e%e5%a3%ab%e6%bb%91%e9%9b%aa%e5%8b%9d%e5%9c%b0%e9%85%92%e5%90%a7%e5%a4%a7%e7%81%ab-%e6%b0%91%e7%9c%be%e6%82%bc%e9%81%87%e9%9b%a3%e8%80%85-%e7%9b%ae%e6%93%8a%e8%80%85%e7%a8%b1%e5%a6%82%e4%b8%96%e7%95%8c%e6%9c%ab%e6%97%a5">mingpao</span>
+              <span class="date">2026-01-02 10:07</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">瑞士阿爾卑斯山滑雪勝地克朗－蒙大拿（Crans-Montana）一間酒吧，在元旦凌晨舉行新年慶祝派對期間大火，造成約40死、115傷。<br>事發後，民眾在場獻花及點起燭光悼念。<br>當地居民Mathys稱，常相約朋友到涉事酒吧聚會，憶述起火後他抵達現場時，「情況就像是戰場，我只能用『世界末日』來形容，太可怕了」。<br>（法新社）相關報道：跨年派對疑煙火肇禍 排除恐襲</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="古洞醞釀新盤大戰 3項目涉1800伙 分析：今年一手成交料2.2萬宗 增近一成">
+        <header class="card-head">
+          <span class="index">39</span>
+          <div>
+            <h2>古洞醞釀新盤大戰 3項目涉1800伙 分析：今年一手成交料2.2萬宗 增近一成</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantp/20260102/1767319334371/%e5%8f%a4%e6%b4%9e%e9%86%9e%e9%87%80%e6%96%b0%e7%9b%a4%e5%a4%a7%e6%88%b0-3%e9%a0%85%e7%9b%ae%e6%b6%891800%e4%bc%99-%e5%88%86%e6%9e%90-%e4%bb%8a%e5%b9%b4%e4%b8%80%e6%89%8b%e6%88%90%e4%ba%a4%e6%96%992-2%e8%90%ac%e5%ae%97-%e5%a2%9e%e8%bf%91%e4%b8%80%e6%88%90&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 10:02</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">2025年本港樓價不但呈回升勢頭，全年一手新盤成交更高約2.02萬宗，創自2004年後的21年新高。<br>據本報統計，2026年有機會登場的十大焦點新盤共涉8697伙，其中受惠北部都會區概念的古洞，預料將成三大發展商──會德豐地產、新地（0016）、恒地（0012）的角力戰場，旗下3個新盤共涉1781伙，預計第二季起陸續登場，意味「北都之戰」將成今年市場熱點。<br>業界分析指出，承接2025年旺勢，發展商推盤意欲旺盛，如配合低息環境持續，今年全年一手成交有望再升近一成至2.2萬宗。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="調查：港人平均 39 歲由百萬富翁晉升為千萬富翁  每13人就有1人擁千萬流動資產">
+        <header class="card-head">
+          <span class="index">40</span>
+          <div>
+            <h2>調查：港人平均 39 歲由百萬富翁晉升為千萬富翁  每13人就有1人擁千萬流動資產</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767319204434/%e8%aa%bf%e6%9f%a5-%e6%b8%af%e4%ba%ba%e5%b9%b3%e5%9d%87-39-%e6%ad%b2%e7%94%b1%e7%99%be%e8%90%ac%e5%af%8c%e7%bf%81%e6%99%89%e5%8d%87%e7%82%ba%e5%8d%83%e8%90%ac%e5%af%8c%e7%bf%81-%e6%af%8f13%e4%ba%ba%e5%b0%b1%e6%9c%891%e4%ba%ba%e6%93%81%e5%8d%83%e8%90%ac%e6%b5%81%e5%8b%95%e8%b3%87%e7%94%a2&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 09:59</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">匯豐公布富裕人士年度報告，香港百萬富翁通常在39歲前晉升為千萬富翁，平均僅需約八年便能將資產由100萬元提升至1,000萬元。<br>值得留意的是，受訪者中每13人即有1人持有至少1,000萬元流動資產，突顯香港高端客戶群的財富實力。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="恒指高開86點 新股壁仞科技升82%">
+        <header class="card-head">
+          <span class="index">41</span>
+          <div>
+            <h2>恒指高開86點 新股壁仞科技升82%</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767317600946/%e6%81%92%e6%8c%87%e9%ab%98%e9%96%8b86%e9%bb%9e-%e6%96%b0%e8%82%a1%e5%a3%81%e4%bb%9e%e7%a7%91%e6%8a%80%e5%8d%8782&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 09:26</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">恒指今早高開86點或0.34%，報25717點，大市成交金額22億元；國指今早高開36點或0.41%，報8949點。<br>恒生科技指數開市報5547點，升0.58%。<br>上升股份比例為6.8%，下跌為4.54%，無升跌為88.64%。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="美國務院稱大陸對台軍演加劇局勢緊張　促停施加軍事壓力">
+        <header class="card-head">
+          <span class="index">42</span>
+          <div>
+            <h2>美國務院稱大陸對台軍演加劇局勢緊張　促停施加軍事壓力</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e5%85%a9%e5%b2%b8/article/20260102/s00004/1767317256795/%e7%be%8e%e5%9c%8b%e5%8b%99%e9%99%a2%e7%a8%b1%e5%a4%a7%e9%99%b8%e5%b0%8d%e5%8f%b0%e8%bb%8d%e6%bc%94%e5%8a%a0%e5%8a%87%e5%b1%80%e5%8b%a2%e7%b7%8a%e5%bc%b5-%e4%bf%83%e5%81%9c%e6%96%bd%e5%8a%a0%e8%bb%8d%e4%ba%8b%e5%a3%93%e5%8a%9b">mingpao</span>
+              <span class="date">2026-01-02 09:24</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">解放軍東部戰區上月底進行環台軍演，美國國務院副發言人皮戈特（Tommy Pigott）周四（1日）發聲明表示，中國大陸針對台灣及區內其他地區的軍事活動和言論，不必要地加劇了局勢緊張，敦促北京保持克制，停止對台施加軍事壓力，改為進行有意義的對話。<br>他又稱，美國支持台海和平穩定，反對任何單方面企圖改變台海現狀的行徑，包括武力或脅迫手段。<br>（美國國務院網站）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="天文台：今早多區降至12°C以下　天文台錄12.8°C入冬以來最低">
+        <header class="card-head">
+          <span class="index">43</span>
+          <div>
+            <h2>天文台：今早多區降至12°C以下　天文台錄12.8°C入冬以來最低</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e6%b8%af%e8%81%9e/article/20260102/s00001/1767312670845/%e5%a4%a9%e6%96%87%e5%8f%b0-%e4%bb%8a%e6%97%a9%e5%a4%9a%e5%8d%80%e9%99%8d%e8%87%b312-c%e4%bb%a5%e4%b8%8b-%e5%a4%a9%e6%96%87%e5%8f%b0%e9%8c%8412-8-c%e5%85%a5%e5%86%ac%e4%bb%a5%e4%be%86%e6%9c%80%e4%bd%8e">mingpao</span>
+              <span class="date">2026-01-02 08:54</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">【08:54】天文台錄得最低氣溫12.8°C，是入冬以來的最低紀錄。<br><br>【08:08】冬季季候風正為廣東帶來寒冷及乾燥的天氣。<br>本港今早（2日）多處地區氣溫降至12°C或以下，較昨日（1日）低四至五°C。<br>截至上午7時30分，天文台錄得最低氣溫12.9°C，是入冬以來的最低紀錄。<br><br>本港地區今日天氣預測大致天晴及乾燥。<br>早上寒冷，日間最高氣溫約18°C。<br>吹和緩至清勁偏北風，離岸及高地間中吹強風。<br>展望明早（3日）仍然寒冷，日夜溫差較大。<br>下周初持續天晴乾燥，但早上天氣清涼。<br>（天文台）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="天氣｜天文台：今早多區降至12°C以下　天文台錄12.8°C入冬以來最低">
+        <header class="card-head">
+          <span class="index">44</span>
+          <div>
+            <h2>天氣｜天文台：今早多區降至12°C以下　天文台錄12.8°C入冬以來最低</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1767312564142/%e5%a4%a9%e6%b0%a3-%e5%a4%a9%e6%96%87%e5%8f%b0-%e4%bb%8a%e6%97%a9%e5%a4%9a%e5%8d%80%e9%99%8d%e8%87%b312-c%e4%bb%a5%e4%b8%8b-%e5%a4%a9%e6%96%87%e5%8f%b0%e9%8c%8412-8-c%e5%85%a5%e5%86%ac%e4%bb%a5%e4%be%86%e6%9c%80%e4%bd%8e">mingpao</span>
+              <span class="date">2026-01-02 08:54</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">【08:54】天文台錄得最低氣溫12.8°C，是入冬以來的最低紀錄。<br><br>【08:08】冬季季候風正為廣東帶來寒冷及乾燥的天氣。<br>本港今早（2日）多處地區氣溫降至12°C或以下，較昨日（1日）低四至五°C。<br>截至上午7時30分，天文台錄得最低氣溫12.9°C，是入冬以來的最低紀錄。<br><br>本港地區今日天氣預測大致天晴及乾燥。<br>早上寒冷，日間最高氣溫約18°C。<br>吹和緩至清勁偏北風，離岸及高地間中吹強風。<br>展望明早（3日）仍然寒冷，日夜溫差較大。<br>下周初持續天晴乾燥，但早上天氣清涼。<br>（天文台）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="瑞士滑雪勝地酒吧大火　約40死115傷【短片】">
+        <header class="card-head">
+          <span class="index">45</span>
+          <div>
+            <h2>瑞士滑雪勝地酒吧大火　約40死115傷【短片】</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e5%9c%8b%e9%9a%9b/article/20260102/s00005/1767314828787/%e7%91%9e%e5%a3%ab%e6%bb%91%e9%9b%aa%e5%8b%9d%e5%9c%b0%e9%85%92%e5%90%a7%e5%a4%a7%e7%81%ab-%e7%b4%8440%e6%ad%bb115%e5%82%b7%e3%80%90%e7%9f%ad%e7%89%87%e3%80%91">mingpao</span>
+              <span class="date">2026-01-02 08:51</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">瑞士阿爾卑斯山滑雪勝地克朗－蒙大拿（Crans-Montana）一間酒吧元旦舉行新年慶祝派對期間，突然發生大火，造成約40人喪生，另有115人受傷，其中多人傷勢嚴重。<br>瑞士聯邦主席Guy Parmelin向記者表示，這場火災是瑞士「最嚴重的悲劇之一」。<br>（BBC/CNN）</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="領展公布臨時領導架構">
+        <header class="card-head">
+          <span class="index">46</span>
+          <div>
+            <h2>領展公布臨時領導架構</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767315031536/%e9%a0%98%e5%b1%95%e5%85%ac%e5%b8%83%e8%87%a8%e6%99%82%e9%a0%98%e5%b0%8e%e6%9e%b6%e6%a7%8b&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 08:41</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">領展房託(0823)公布，其管理人領展資產管理有限公司（領展）已啟動公司的臨時領導架構及其策略方向。<br>首席投資總裁宋俊彥已獲委任為執行董事，作為臨時領導架構，宋俊彥與集團首席財務總裁黃國祥將領導領展，並向董事會主席歐敦勤及主席委員會匯報。<br>歐敦勤已同意根據新安排投放更多時間，監督下一任集團行政總裁的順利過渡。<br>董事會秉持其專注於亞太區商場資產的策略，同時發展其他增值型機遇。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="夜期高水249點 壁仞上市 北水續停">
+        <header class="card-head">
+          <span class="index">47</span>
+          <div>
+            <h2>夜期高水249點 壁仞上市 北水續停</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767314195351/%e5%a4%9c%e6%9c%9f%e9%ab%98%e6%b0%b4249%e9%bb%9e-%e5%a3%81%e4%bb%9e%e4%b8%8a%e5%b8%82-%e5%8c%97%e6%b0%b4%e7%ba%8c%e5%81%9c&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 08:32</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">美股向下，港股ADR跌33點或0.13%，報25597點，即月恒指夜期跌45點，報25880點，夜期高水249點。<br>內地休市，南北水續停。</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="天氣乾燥鼻癢咽痛？按3穴位潤燥緩解不適：迎香穴、合谷穴、太溪穴">
+        <header class="card-head">
+          <span class="index">48</span>
+          <div>
+            <h2>天氣乾燥鼻癢咽痛？按3穴位潤燥緩解不適：迎香穴、合谷穴、太溪穴</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://news.mingpao.com/ins/%e7%86%b1%e9%bb%9e/article/20260102/s00024/1766222229493/%e5%a4%a9%e6%b0%a3%e4%b9%be%e7%87%a5%e9%bc%bb%e7%99%a2%e5%92%bd%e7%97%9b-%e6%8c%893%e7%a9%b4%e4%bd%8d%e6%bd%a4%e7%87%a5%e7%b7%a9%e8%a7%a3%e4%b8%8d%e9%81%a9-%e8%bf%8e%e9%a6%99%e7%a9%b4-%e5%90%88%e8%b0%b7%e7%a9%b4-%e5%a4%aa%e6%ba%aa%e7%a9%b4">mingpao</span>
+              <span class="date">2026-01-02 08:23</span>
+            </div>
+          </div>
+        </header>
+        <img class='hero' src='images/aHR0cHM6Ly9mcy5taW5ncGFv.jpg' alt=''>
+        <div class="content">天氣乾燥，相對濕度低至50%，感到鼻癢、口乾、咽喉痛？註冊中醫師徐思濠表示，簡單按揉3個穴位（迎香穴、合谷穴、太溪穴），可潤燥或緩解因乾燥引致的不適。<br><br>迎香穴取穴方法：鼻翼外緣中點旁，鼻唇溝中按法：用食指指腹順時針按揉，每次1-2分鐘，力度以感到酸脹為宜。<br>益處：緩解因乾燥引起的鼻塞、鼻癢、口乾，能預防感冒。<br>注意事項：避免指甲劃傷皮膚；力度不可過大。<br><br>合谷穴取穴方法：手背第2掌骨中點處（約在虎口處，將拇指、食指併攏，肌肉最高點即是）做法：用拇指指腹垂直按壓，每次1分鐘，左右手交替。<br>益處：清熱潤燥，緩解因乾燥導致的咽喉腫痛、牙齦腫痛。<br>注意事項：孕婦忌用<br>太溪穴取穴方法：內踝尖與跟腱之間的凹陷處按法：用拇指指腹按揉，每次1-3分鐘，有酸脹感即可。<br>益處：滋陰潤燥，改善因乾燥引起的腰膝痠軟、口乾舌燥、皮膚乾癢。<br><br>註：上述按穴方法只供參考，各人體質不同，如有疑問或身體感到不適，應向註冊中醫師或醫生查詢及求醫。<br><br>雪耳潤燥湯水8食譜<br>防皮膚乾燥「爆拆」　醫生講解3類潤膚產品如何揀</div>
+      </article>
+            
+      <article class="card" data-source="mingpao" data-title="百度：分拆崑崙芯上市 並已向港交所申請">
+        <header class="card-head">
+          <span class="index">49</span>
+          <div>
+            <h2>百度：分拆崑崙芯上市 並已向港交所申請</h2>
+            <div class="meta-row">
+              <span class="tag" data-link="https://finance.mingpao.com/fin/instantf/20260102/1767313235245/%e7%99%be%e5%ba%a6-%e5%88%86%e6%8b%86%e5%b4%91%e5%b4%99%e8%8a%af%e4%b8%8a%e5%b8%82-%e4%b8%a6%e5%b7%b2%e5%90%91%e6%b8%af%e4%ba%a4%e6%89%80%e7%94%b3%e8%ab%8b&quot; target=&quot;blank">mingpao</span>
+              <span class="date">2026-01-02 08:17</span>
+            </div>
+          </div>
+        </header>
+        
+        <div class="content">百度(9888)公布，建議分拆崑崙芯於港交所上市，並已人以保密形式向香港聯交所提交上市申請表格（A1表格）。<br>有關建議分拆的詳情，包括全球發售的規模與結構、公司於崑崙芯持股百分比的減少幅度等，尚未落實。</div>
+      </article>
+            
+  </main>
+  <script>
+    const chips = document.querySelectorAll('.chip');
+    const cards = document.querySelectorAll('.card');
+    const search = document.getElementById('search');
+    let activeSource = 'all';
+
+    function applyFilter() {
+      const q = (search.value || '').trim().toLowerCase();
+      cards.forEach(card => {
+        const source = card.dataset.source;
+        const text = (card.dataset.title + ' ' + card.textContent).toLowerCase();
+        const sourceOk = activeSource === 'all' || source === activeSource;
+        const textOk = !q || text.includes(q);
+        card.style.display = sourceOk && textOk ? '' : 'none';
+      });
+    }
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        chips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeSource = chip.dataset.source;
+        applyFilter();
+      });
+    });
+
+    search.addEventListener('input', applyFilter);
+
+    document.querySelectorAll('.tag').forEach(tag => {
+      tag.addEventListener('click', () => {
+        const link = tag.dataset.link;
+        if (link) window.open(link, '_blank');
+      });
+    });
+  </script>
+</body>
+</html>
