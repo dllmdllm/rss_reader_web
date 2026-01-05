@@ -1555,7 +1555,6 @@ def build_html(
       <span class="chip" data-source="mingpao">Mingpao</span>
     </div>
     <div class="keywords">{keyword_html}</div>
-    <div class="submeta">RTHK/Mingpao 過去{int(lookback_hours)}小時｜cnbeta 最近{CNBETA_LIMIT}則｜最多出現既10個關鍵字</div>
   </div>
   <main id="list">
     {"".join(cards) if cards else '<div class="empty">近 12 小時內冇新項目。</div>'}
