@@ -946,6 +946,49 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
         "晚上",
         "凌晨",
         "本港",
+        "此外",
+        "另外",
+        "同時",
+        "因此",
+        "其後",
+        "其間",
+        "同樣",
+        "至於",
+        "不過",
+        "再者",
+    }
+    money_units = {
+        "萬元",
+        "億元",
+        "千元",
+        "百萬",
+        "平方呎",
+        "方呎",
+        "平方米",
+        "公里",
+        "米",
+        "公斤",
+        "克",
+        "度",
+        "°c",
+        "℃",
+        "美金",
+        "美元",
+        "港元",
+        "日圓",
+    }
+    phrases = {
+        "天文台",
+        "冷天氣警告",
+        "寒冷天氣警告",
+        "酷熱天氣警告",
+        "黑色暴雨警告",
+        "紅色暴雨警告",
+        "黃色暴雨警告",
+        "八號風球",
+        "三號風球",
+        "一號風球",
+        "強烈季候風信號",
     }
     entity_suffixes = {
         "局",
@@ -1012,8 +1055,16 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
     for title, body in items_texts:
         title_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", title or ""))
         body_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", body or ""))
+        text_blob = f"{title}\n{body}"
+        for ph in phrases:
+            if ph in text_blob:
+                counts[ph] = counts.get(ph, 0.0) + 4.0
         for token in title_tokens:
             if token in stopwords:
+                continue
+            if token in money_units:
+                continue
+            if re.search(r"\d", token):
                 continue
             if any(ch in weak_chars for ch in token) and len(token) <= 2:
                 continue
@@ -1027,6 +1078,10 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
             counts[token] = counts.get(token, 0.0) + score
         for token in body_tokens:
             if token in stopwords:
+                continue
+            if token in money_units:
+                continue
+            if re.search(r"\d", token):
                 continue
             if any(ch in weak_chars for ch in token) and len(token) <= 2:
                 continue
