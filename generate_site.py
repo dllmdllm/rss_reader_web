@@ -294,7 +294,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                     img.set("src", f"images/{local_name}")
         if "cnbeta.com.tw" in base_url:
             imgs = root.xpath(".//img")
-            if imgs:
+            if len(imgs) > 1:
                 imgs[0].drop_tag()
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
