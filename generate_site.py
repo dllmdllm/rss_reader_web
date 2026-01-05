@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import argparse
 import base64
+import hashlib
 import difflib
 import html
 import json
@@ -19,18 +20,27 @@ try:
     from zoneinfo import ZoneInfo
 except Exception:  # pragma: no cover
     from backports.zoneinfo import ZoneInfo
+try:
+    from opencc import OpenCC
+except Exception:
+    OpenCC = None
 
 
 DEFAULT_URLS = ",".join(
     [
-        "https://news.rthk.hk/rthk/news/rss/c_expressnews_clocal.xml",
+        "https://rthk9.rthk.hk/rthk/news/rss/c_expressnews_clocal.xml",
         "https://news.mingpao.com/rss/ins/all.xml",
+        "https://news.mingpao.com/rss/ins/s00004.xml",
+        "https://news.mingpao.com/rss/ins/s00005.xml",
+        "https://rss.cnbeta.com.tw/",
     ]
 )
 DEFAULT_LOOKBACK_HOURS = 12
 DEFAULT_REFRESH_SECONDS = 600
 DEFAULT_MAX_ITEMS = 200
 DEFAULT_THREADS = 4
+CNBETA_LIMIT = 50
+MIXED_MODE = True
 
 PROJECT_ROOT = os.path.dirname(__file__)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -39,9 +49,14 @@ IMAGES_DIR = os.path.join(SITE_DIR, "images")
 FEED_CACHE_PATH = os.path.join(DATA_DIR, "feed_cache.json")
 FULLTEXT_CACHE_PATH = os.path.join(DATA_DIR, "fulltext_cache.json")
 IMAGE_CACHE_PATH = os.path.join(DATA_DIR, "image_cache.json")
+FULLHTML_CACHE_PATH = os.path.join(DATA_DIR, "fullhtml_cache.json")
+SEEN_CACHE_PATH = os.path.join(DATA_DIR, "seen_cache.json")
 
 FULLTEXT_CACHE_TTL = 6 * 60 * 60
 IMAGE_CACHE_TTL = 24 * 60 * 60
+FULLHTML_CACHE_TTL = 6 * 60 * 60
+CACHE_GC_TTL = 7 * 24 * 60 * 60
+SEEN_CACHE_TTL = 30 * 24 * 60 * 60
 
 
 @dataclass
@@ -71,6 +86,64 @@ def load_json(path: str) -> dict:
         return {}
 
 
+def gc_cache(cache: dict, ttl_seconds: int) -> dict:
+    now = time.time()
+    cleaned = {}
+    for key, value in (cache or {}).items():
+        try:
+            ts = float(value.get("timestamp", 0) or 0)
+        except Exception:
+            ts = 0
+        if not ts or now - ts <= ttl_seconds:
+            cleaned[key] = value
+    return cleaned
+
+
+def mark_seen(seen_cache: dict, items: list["Item"]) -> dict:
+    now = time.time()
+    for item in items:
+        if item.link:
+            seen_cache[item.link] = {"timestamp": now}
+    return seen_cache
+
+
+def get_trad_converter():
+    if OpenCC is None:
+        return None
+    try:
+        return OpenCC("s2hk")
+    except Exception:
+        return None
+
+
+TRAD_CONVERTER = get_trad_converter()
+
+
+def to_trad(text: str) -> str:
+    if not text:
+        return text
+    if TRAD_CONVERTER is None:
+        return text
+    try:
+        converted = TRAD_CONVERTER.convert(text)
+        replacements = {
+            "髮布": "發布",
+            "發佈": "發布",
+        }
+        for src, dst in replacements.items():
+            converted = converted.replace(src, dst)
+        return converted
+    except Exception:
+        return text
+
+
+def to_trad_if_cnbeta(source_or_url: str, text: str) -> str:
+    if not text:
+        return text
+    if "cnbeta" in (source_or_url or ""):
+        return to_trad(text)
+    return text
+
 def save_json(path: str, payload: dict) -> None:
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as handle:
@@ -87,6 +160,20 @@ def fetch_with_cache(url: str, cache: dict) -> tuple[bytes, dict]:
         headers["If-Modified-Since"] = entry["last_modified"]
     req = urllib.request.Request(url, headers=headers)
     try:
+        if "rss.cnbeta.com.tw" in url:
+            import ssl
+
+            ctx = ssl.create_default_context()
+            ctx.check_hostname = False
+            ctx.verify_mode = ssl.CERT_NONE
+            with urllib.request.urlopen(req, timeout=20, context=ctx) as resp:
+                payload = resp.read()
+                meta = {
+                    "etag": resp.headers.get("ETag") or "",
+                    "last_modified": resp.headers.get("Last-Modified") or "",
+                    "timestamp": time.time(),
+                }
+                return payload, meta
         with urllib.request.urlopen(req, timeout=20) as resp:
             payload = resp.read()
             meta = {
@@ -141,7 +228,12 @@ def clean_content_text(text: str) -> str:
         line = raw.strip()
         if not line:
             continue
-        if "相關字詞" in line or "編輯推介" in line or "熱門HOTPICK" in line:
+        if (
+            "相關字詞" in line
+            or "編輯推介" in line
+            or "熱門HOTPICK" in line
+            or "報道詳情" in line
+        ):
             continue
         if css_block_start.match(line):
             in_css_block = True
@@ -154,6 +246,72 @@ def clean_content_text(text: str) -> str:
             continue
         lines.append(line)
     return "\n".join(lines).strip()
+
+
+def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None = None) -> str:
+    if not fragment:
+        return ""
+    try:
+        from lxml import html as lxml_html
+    except Exception:
+        return fragment
+    try:
+        root = lxml_html.fragment_fromstring(fragment, create_parent="div")
+        for node in root.xpath(".//script | .//style | .//noscript"):
+            node.getparent().remove(node)
+        if "mingpao.com" not in base_url:
+            for node in root.xpath(
+                ".//*[contains(@class,'related') or contains(@class,'keyword') "
+                "or contains(@class,'share') or contains(@class,'social') "
+                "or contains(@class,'breadcrumb')]"
+            ):
+                node.getparent().remove(node)
+        else:
+            for node in root.xpath(".//*[contains(text(),'相關字詞') or contains(text(),'報道詳情') or contains(text(),'編輯推介') or contains(text(),'熱門HOTPICK')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+        for img in root.xpath(".//img"):
+            src = img.get("src")
+            if not src:
+                srcset = img.get("srcset") or img.get("data-srcset")
+                if srcset:
+                    src = srcset.split(",")[0].strip().split(" ")[0]
+            if not src:
+                src = img.get("data-src") or img.get("data-original")
+            if src:
+                normalized = normalize_image_url(base_url, src)
+                img.set("src", normalized)
+        if image_cache is not None:
+            for img in root.xpath(".//img[@src]"):
+                src = img.get("src")
+                if not src:
+                    continue
+                local_name = download_image(src, image_cache, base_url)
+                if local_name:
+                    img.set("src", f"images/{local_name}")
+        if "cnbeta.com.tw" in base_url:
+            imgs = root.xpath(".//img")
+            if imgs:
+                imgs[0].drop_tag()
+        for link in root.xpath(".//a[@href]"):
+            href = normalize_image_url(base_url, link.get("href"))
+            if not re.match(r"^https?://", href):
+                link.drop_tag()
+                continue
+            link.set("href", href)
+            link.set("target", "_blank")
+            link.set("rel", "noopener")
+        if "cnbeta" in base_url:
+            for node in root.iter():
+                if node.text:
+                    node.text = to_trad(node.text)
+                if node.tail:
+                    node.tail = to_trad(node.tail)
+        html_text = "".join(lxml_html.tostring(child, encoding="unicode") for child in root)
+        return html_text.strip()
+    except Exception:
+        return fragment
 
 
 def should_use_fulltext(summary: str, fulltext: str) -> bool:
@@ -200,7 +358,7 @@ def guess_image_ext(url: str, content_type: str) -> str:
     return ".jpg"
 
 
-def download_image(url: str, cache: dict) -> str:
+def download_image(url: str, cache: dict, referer: str | None = None) -> str:
     if not url:
         return ""
     now = time.time()
@@ -208,15 +366,20 @@ def download_image(url: str, cache: dict) -> str:
     cached_path = entry.get("path", "")
     cached_ts = float(entry.get("timestamp", 0) or 0)
     if cached_path and (now - cached_ts) <= IMAGE_CACHE_TTL:
-        return cached_path
+        if os.path.exists(os.path.join(IMAGES_DIR, cached_path)):
+            return cached_path
+        cache.pop(url, None)
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        headers = {"User-Agent": "Mozilla/5.0"}
+        if referer:
+            headers["Referer"] = referer
+        req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = resp.read()
             content_type = resp.headers.get("Content-Type", "")
-        name = base64.urlsafe_b64encode(url.encode("utf-8")).decode("ascii").rstrip("=")
+        name = hashlib.sha1(url.encode("utf-8")).hexdigest()
         ext = guess_image_ext(url, content_type)
-        filename = f"{name[:24]}{ext}"
+        filename = f"{name[:16]}{ext}"
         path = os.path.join(IMAGES_DIR, filename)
         with open(path, "wb") as handle:
             handle.write(data)
@@ -230,16 +393,20 @@ def get_rss_image(item: ET.Element, base_url: str) -> str:
     for child in item:
         tag = child.tag.lower()
         if tag.endswith("enclosure"):
-            return normalize_image_url(base_url, child.attrib.get("url", "") or "")
+            url = normalize_image_url(base_url, child.attrib.get("url", "") or "")
+            return "" if is_generic_image(url) else url
         if "media" in tag and tag.endswith("content"):
-            return normalize_image_url(base_url, child.attrib.get("url", "") or "")
+            url = normalize_image_url(base_url, child.attrib.get("url", "") or "")
+            return "" if is_generic_image(url) else url
     desc = find_text(item, "description") or ""
     match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
     if match:
-        return normalize_image_url(base_url, match.group(1))
+        url = normalize_image_url(base_url, match.group(1))
+        return "" if is_generic_image(url) else url
     match = re.search(r'<img[^>]+data-src=["\']([^"\']+)["\']', desc)
     if match:
-        return normalize_image_url(base_url, match.group(1))
+        url = normalize_image_url(base_url, match.group(1))
+        return "" if is_generic_image(url) else url
     return ""
 
 
@@ -248,10 +415,12 @@ def get_rss_image_from_desc(desc: str, base_url: str) -> str:
         return ""
     match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
     if match:
-        return normalize_image_url(base_url, match.group(1))
+        url = normalize_image_url(base_url, match.group(1))
+        return "" if is_generic_image(url) else url
     match = re.search(r'<img[^>]+data-src=["\']([^"\']+)["\']', desc)
     if match:
-        return normalize_image_url(base_url, match.group(1))
+        url = normalize_image_url(base_url, match.group(1))
+        return "" if is_generic_image(url) else url
     return ""
 
 
@@ -269,6 +438,8 @@ def is_generic_image(url: str) -> bool:
             "share",
             "social",
             "/seo/",
+            "image/seo",
+            "/res/v3/image/seo",
         )
     )
 
@@ -305,11 +476,15 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
         root_full = lxml_html.fromstring(raw)
         og_image = root_full.xpath("//meta[@property='og:image']/@content")
         if og_image:
-            image_url = og_image[0].strip()
+            candidate = og_image[0].strip()
+            if not is_generic_image(candidate):
+                image_url = candidate
         if not image_url:
             twitter_image = root_full.xpath("//meta[@name='twitter:image']/@content")
             if twitter_image:
-                image_url = twitter_image[0].strip()
+                candidate = twitter_image[0].strip()
+                if not is_generic_image(candidate):
+                    image_url = candidate
         if not image_url:
             if "news.rthk.hk" in url:
                 img = root_full.xpath(
@@ -347,7 +522,9 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
     text = ""
     try:
         root = lxml_html.fromstring(raw)
-        if "news.rthk.hk" in url:
+        if "cnbeta.com.tw" in url:
+            nodes = []
+        elif "news.rthk.hk" in url:
             nodes = root.xpath("//div[contains(@class,'itemFullText')]")
         elif "mingpao.com" in url:
             nodes = root.xpath(
@@ -411,6 +588,87 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
     return cached_text, cached_image
 
 
+def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) -> str:
+    if not url:
+        return ""
+    now = time.time()
+    entry = cache.get(url, {})
+    cached_html = entry.get("html", "")
+    cached_ts = float(entry.get("timestamp", 0) or 0)
+    if cached_html and (now - cached_ts) <= FULLHTML_CACHE_TTL:
+        if "cnbeta.com.tw" in url and "<img" not in cached_html:
+            cached_html = ""
+        else:
+            if "cnbeta.com.tw" in url and TRAD_CONVERTER is not None:
+                converted = clean_html_fragment(cached_html, url, image_cache)
+                if converted and converted != cached_html:
+                    cache[url] = {"html": converted, "timestamp": now}
+                    return converted
+            return cached_html
+    try:
+        from lxml import html as lxml_html
+    except Exception:
+        return ""
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            raw = resp.read().decode("utf-8", errors="ignore")
+    except Exception:
+        return cached_html
+    try:
+        root = lxml_html.fromstring(raw)
+        if "news.rthk.hk" in url:
+            nodes = root.xpath("//div[contains(@class,'itemFullText')]")
+        elif "mingpao.com" in url:
+            nodes = root.xpath(
+                "//div[@id='blockcontent']//article[contains(@class,'txt4')] | "
+                "//article[contains(@class,'txt4')] | "
+                "//div[@id='upper'] | "
+                "//div[@id='articleContent'] | "
+                "//div[contains(@class,'articleContent')] | "
+                "//div[contains(@class,'articlecontent')] | "
+                "//div[contains(@class,'articleDetail')] | "
+                "//div[contains(@class,'article')]"
+            )
+        else:
+            nodes = root.xpath("//article")
+        best_node = None
+        best_len = 0
+        for node in nodes:
+            text = node.text_content() or ""
+            if "ol.mingpao.com" in url:
+                time_count = len(re.findall(r"\(\d{1,2}:\d{2}\)", text))
+                if time_count >= 3:
+                    continue
+            length = len(text)
+            if length > best_len:
+                best_node = node
+                best_len = length
+        if best_node is not None and best_len >= 200:
+            fragment = lxml_html.tostring(best_node, encoding="unicode")
+            fragment = clean_html_fragment(fragment, url, image_cache)
+            if fragment:
+                if "cnbeta.com.tw" in url and "<img" not in fragment:
+                    fragment = ""
+                else:
+                    cache[url] = {"html": fragment, "timestamp": now}
+                    return fragment
+        # fallback to readability if selected node is too short or missing
+        try:
+            from readability import Document
+
+            doc = Document(raw)
+            summary_html = doc.summary(html_partial=True)
+            fragment = clean_html_fragment(summary_html, url, image_cache)
+            if fragment:
+                cache[url] = {"html": fragment, "timestamp": now}
+            return fragment
+        except Exception:
+            return ""
+    except Exception:
+        return cached_html
+
+
 def parse_items(payload: bytes | str, source: str) -> list[Item]:
     items: list[Item] = []
     if isinstance(payload, bytes):
@@ -429,12 +687,12 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
             rss_image = get_rss_image(item, link)
             items.append(
                 Item(
-                    title=strip_html(title),
+                    title=to_trad_if_cnbeta(source, strip_html(title)),
                     link=link,
                     pub_dt=pub_dt,
                     pub_text=pub_text,
                     source=source,
-                    summary=strip_html(summary),
+                    summary=to_trad_if_cnbeta(source, strip_html(summary)),
                     rss_image=rss_image,
                 )
             )
@@ -462,12 +720,12 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                 rss_image = get_rss_image_from_desc(desc_raw, link)
                 items.append(
                     Item(
-                        title=strip_html(title),
+                        title=to_trad_if_cnbeta(source, strip_html(title)),
                         link=link,
                         pub_dt=pub_dt,
                         pub_text=pub_text,
                         source=source,
-                        summary=strip_html(summary),
+                        summary=to_trad_if_cnbeta(source, strip_html(summary)),
                         rss_image=rss_image,
                     )
                 )
@@ -524,6 +782,107 @@ def filter_recent(items: list[Item], lookback_hours: float) -> list[Item]:
     return filtered
 
 
+def apply_mixed_mode(items: list[Item], lookback_hours: float) -> list[Item]:
+    if not MIXED_MODE:
+        return filter_recent(items, lookback_hours)
+    grouped: dict[str, list[Item]] = {}
+    for item in items:
+        grouped.setdefault(item.source, []).append(item)
+    result: list[Item] = []
+    for source, rows in grouped.items():
+        if source == "cnbeta":
+            rows.sort(
+                key=lambda x: (
+                    0 if x.pub_dt is not None else 1,
+                    -(x.pub_dt.timestamp()) if x.pub_dt is not None else 0,
+                )
+            )
+            result.extend(rows[:CNBETA_LIMIT])
+        else:
+            result.extend(filter_recent(rows, lookback_hours))
+    return result
+
+
+def extract_keywords(texts: list[str], limit: int = 10) -> list[str]:
+    stopwords = {
+        "香港",
+        "今日",
+        "昨天",
+        "今天",
+        "明天",
+        "本港",
+        "消息",
+        "最新",
+        "新聞",
+        "現場",
+        "報道",
+        "表示",
+        "指出",
+        "認為",
+        "相關",
+        "詳情",
+        "內容",
+        "活動",
+        "工作",
+        "公司",
+        "宣布",
+        "公布",
+        "不過",
+        "因此",
+        "所以",
+        "如果",
+        "以及",
+        "另外",
+        "目前",
+        "其中",
+        "仍然",
+        "已經",
+        "正在",
+        "將會",
+        "可能",
+        "希望",
+        "需要",
+        "可以",
+        "沒有",
+        "沒有",
+        "一個",
+        "一起",
+        "一起",
+        "同時",
+        "因為",
+        "今日",
+        "近日",
+        "昨日",
+        "今年",
+        "明年",
+        "去年",
+        "方面",
+        "情況",
+        "方面",
+        "持續",
+        "這次",
+        "這些",
+        "這個",
+        "那個",
+        "大家",
+    }
+    counts: dict[str, int] = {}
+    for text in texts:
+        for token in re.findall(r"[\u4e00-\u9fff]{2,4}", text):
+            if token in stopwords:
+                continue
+            counts[token] = counts.get(token, 0) + 1
+    sorted_tokens = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+    return [t for t, _ in sorted_tokens[:limit]]
+
+def get_category(source: str) -> str:
+    if source == "cnbeta":
+        return "tech"
+    if source == "mingpao" or source == "RTHK":
+        return "news"
+    return "ent"
+
+
 def build_html(
     items: list[Item],
     output_path: str,
@@ -531,22 +890,35 @@ def build_html(
     refresh_seconds: int,
     image_cache: dict,
     fulltext_cache: dict,
+    fullhtml_cache: dict,
+    seen_cache: dict,
 ) -> None:
+    build_id = str(int(time.time()))
     now_hkt = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M")
     latest_pub = ""
     cards = []
+    keyword_texts: list[str] = []
+    now_dt = datetime.now(ZoneInfo("Asia/Hong_Kong"))
     for idx, item in enumerate(items, start=1):
         content = item.summary
+        content_html = ""
         image_url = item.rss_image
         if item.link:
             fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
             if fulltext:
                 content = fulltext
             if og_image and not is_generic_image(og_image):
-                image_url = og_image
-        content = clean_content_text(strip_html(content))
+                if (not image_url) or is_generic_image(image_url):
+                    image_url = og_image
+            full_html = extract_full_html(item.link, fullhtml_cache, image_cache)
+            if full_html:
+                content_html = full_html
+        content = clean_content_text(to_trad_if_cnbeta(item.source, strip_html(content)))
         content = re.sub(r"。(」)", r"。\1\n", content)
         content = re.sub(r"。(?!」)", "。\n", content)
+        keyword_texts.append(f"{item.title}\n{content}")
+        if not content_html:
+            content_html = "<br>".join(html.escape(content).splitlines())
         if item.pub_dt:
             pub_text = item.pub_dt.astimezone(ZoneInfo("Asia/Hong_Kong")).strftime(
                 "%Y-%m-%d %H:%M HKT"
@@ -561,26 +933,47 @@ def build_html(
                 datetime.now(ZoneInfo("Asia/Hong_Kong")) - item.pub_dt
             ).total_seconds() <= 4 * 60 * 60
         date_class = "date recent" if is_recent else "date"
+        category = get_category(item.source)
+        if idx == 1:
+            age_class = "age-fresh"
+        elif item.pub_dt:
+            age_hours = (now_dt - item.pub_dt).total_seconds() / 3600
+            if age_hours < 4:
+                age_class = "age-4"
+            elif age_hours < 8:
+                age_class = "age-8"
+            else:
+                age_class = "age-old"
+        else:
+            age_class = "age-old"
         hero_html = ""
+        hero_caption = ""
         if image_url:
             image_url = normalize_image_url(item.link, image_url)
-            local_name = download_image(image_url, image_cache)
+            local_name = download_image(image_url, image_cache, item.link)
             if local_name:
-                hero_html = f"<img class='hero' src='images/{html.escape(local_name)}' alt=''>"
+                hero_url = f"images/{local_name}?v={build_id}"
+            else:
+                hero_url = f"{image_url}?v={build_id}"
+            if item.source != "cnbeta":
+                hero_html = f"<img class='hero' src='{html.escape(hero_url)}' alt=''>"
+        seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
-      <article class="card" data-source="{source}" data-title="{title}">
+      <article class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}">
         <header class="card-head">
           <span class="index">{idx:02d}</span>
           <div>
             <h2>{title}</h2>
             <div class="meta-row">
               <span class="tag" data-link="{link}">{source}</span>
+              <span class="cat cat-{category}">{category_label}</span>
               <span class="{date_class}">{pub}</span>
             </div>
           </div>
         </header>
         {hero}
+        {hero_note}
         <div class="content">{content}</div>
       </article>
             """.format(
@@ -591,13 +984,32 @@ def build_html(
                 pub=html.escape(pub_text.replace(" HKT", "")),
                 date_class=date_class,
                 hero=hero_html,
-                content="<br>".join(html.escape(content).splitlines()),
+                hero_note=hero_caption,
+                content=content_html,
+                seen_class=seen_class,
+                category=category,
+                category_label="新聞" if category == "news" else ("科技" if category == "tech" else "娛樂"),
+                age_class=age_class,
             )
         )
 
-    meta_line = (
-        f"過去{int(lookback_hours)}小時共{len(items)}則｜更新時間 {now_hkt}"
-        + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
+    build_ts = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M:%S")
+    if MIXED_MODE:
+        meta_line = (
+            f"RTHK/Mingpao 過去{int(lookback_hours)}小時｜"
+            f"cnbeta 最近{CNBETA_LIMIT}則｜更新時間 {now_hkt}"
+            + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
+        )
+    else:
+        meta_line = (
+            f"過去{int(lookback_hours)}小時共{len(items)}則｜更新時間 {now_hkt}"
+            + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
+        )
+
+    keywords = extract_keywords(keyword_texts, 10)
+    keyword_html = "".join(
+        f"<span class=\"kw\" data-kw=\"{html.escape(k)}\">{html.escape(k)}</span>"
+        for k in keywords
     )
 
     html_text = f"""<!doctype html>
@@ -666,6 +1078,30 @@ def build_html(
       flex-wrap: wrap;
       justify-content: center;
     }}
+    .submeta {{
+      width: 100%;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }}
+    .keywords {{
+      width: 100%;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }}
+    .kw {{
+      border: 1px dashed var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      background: #fff7ee;
+    }}
+    .kw:hover {{
+      border-color: var(--accent);
+    }}
     .chip {{
       border: 1px solid var(--border);
       border-radius: 999px;
@@ -680,6 +1116,28 @@ def build_html(
       color: #fff;
       border-color: transparent;
     }}
+    .cat {{
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 11px;
+      border: 1px solid var(--border);
+      background: #fff;
+    }}
+    .cat-news {{
+      border-color: #c9ddff;
+      color: #1c4e9a;
+      background: #eef5ff;
+    }}
+    .cat-tech {{
+      border-color: #cfead6;
+      color: #1f6b3a;
+      background: #eefaf2;
+    }}
+    .cat-ent {{
+      border-color: #f5c6cd;
+      color: #8d2b3c;
+      background: #fff1f2;
+    }}
     main {{
       max-width: 920px;
       margin: 0 auto;
@@ -693,6 +1151,36 @@ def build_html(
       padding: 16px;
       box-shadow: 0 10px 24px var(--shadow);
       border: 1px solid var(--border);
+    }}
+    .card.seen {{
+      filter: saturate(0.95);
+    }}
+    .category-news {{
+      --cat-bg: #eef5ff;
+      --cat-bg-2: #e3efff;
+      --cat-bg-3: #d7e8ff;
+    }}
+    .category-tech {{
+      --cat-bg: #eefaf2;
+      --cat-bg-2: #e1f5e8;
+      --cat-bg-3: #d2efdd;
+    }}
+    .category-ent {{
+      --cat-bg: #fff1f2;
+      --cat-bg-2: #ffe3e6;
+      --cat-bg-3: #ffd4da;
+    }}
+    .age-fresh {{
+      background: #ffffff;
+    }}
+    .age-4 {{
+      background: var(--cat-bg, #ffffff);
+    }}
+    .age-8 {{
+      background: var(--cat-bg-2, #f3f3f3);
+    }}
+    .age-old {{
+      background: var(--cat-bg-3, #eeeeee);
     }}
     .card-head {{
       display: grid;
@@ -753,10 +1241,108 @@ def build_html(
       color: #262626;
       white-space: normal;
     }}
+    .content img {{
+      max-width: 100%;
+      border-radius: 12px;
+      margin: 8px 0;
+      height: auto;
+    }}
+    .content a {{
+      color: var(--accent);
+    }}
+    .content table {{
+      width: 100%;
+      border-collapse: collapse;
+      margin: 8px 0;
+      font-size: 14px;
+    }}
+    .content th, .content td {{
+      border: 1px solid #e0e0e0;
+      padding: 6px;
+      text-align: left;
+    }}
+    .img-note {{
+      font-size: 12px;
+      color: var(--muted);
+      margin: -2px 0 8px;
+      word-break: break-all;
+    }}
     .empty {{
       text-align: center;
       color: var(--muted);
       padding: 40px 16px;
+    }}
+    .site-footer {{
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      padding: 18px 16px 28px;
+    }}
+    .modal {{
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      padding: 16px;
+    }}
+    .modal.active {{
+      display: flex;
+    }}
+    .modal-card {{
+      background: #fff;
+      border-radius: 16px;
+      width: min(1100px, 100%);
+      height: min(80vh, 900px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.2);
+    }}
+    .modal-head {{
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid var(--border);
+    }}
+    .modal-head .title {{
+      font-size: 14px;
+      color: var(--muted);
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }}
+    .modal-head button {{
+      border: 0;
+      background: #111;
+      color: #fff;
+      padding: 6px 12px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 12px;
+    }}
+    .modal-body {{
+      flex: 1;
+      background: #f7f7f7;
+    }}
+    .modal-body iframe {{
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: #fff;
+    }}
+    .open-link {{
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      background: #fff;
+      cursor: pointer;
     }}
     @media (max-width: 640px) {{
       header.site h1 {{
@@ -785,11 +1371,15 @@ def build_html(
       <span class="chip active" data-source="all">全部</span>
       <span class="chip" data-source="RTHK">RTHK</span>
       <span class="chip" data-source="mingpao">Mingpao</span>
+      <span class="chip" data-source="cnbeta">cnbeta</span>
     </div>
+    <div class="submeta">RTHK/Mingpao 過去{int(lookback_hours)}小時｜cnbeta 最近{CNBETA_LIMIT}則｜最多出現既10個關鍵字</div>
+    <div class="keywords">{keyword_html}</div>
   </div>
   <main id="list">
     {"".join(cards) if cards else '<div class="empty">近 12 小時內冇新項目。</div>'}
   </main>
+  <footer class="site-footer">生成時間 {build_ts} HKT</footer>
   <script>
     const chips = document.querySelectorAll('.chip');
     const cards = document.querySelectorAll('.card');
@@ -817,6 +1407,16 @@ def build_html(
     }});
 
     search.addEventListener('input', applyFilter);
+    document.querySelectorAll('.kw').forEach(kw => {{
+      kw.addEventListener('click', () => {{
+        const word = kw.dataset.kw || '';
+        if (!word) return;
+        search.value = word;
+        applyFilter();
+        const first = Array.from(cards).find(c => c.style.display !== 'none');
+        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+      }});
+    }});
 
     document.querySelectorAll('.tag').forEach(tag => {{
       tag.addEventListener('click', () => {{
@@ -846,7 +1446,12 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
                 entry["last_modified"] = meta.get("last_modified")
             entry["timestamp"] = meta.get("timestamp", time.time())
             feed_cache[url] = entry
-        source = "RTHK" if "rthk" in url else "mingpao"
+        if "rthk" in url:
+            source = "RTHK"
+        elif "cnbeta" in url:
+            source = "cnbeta"
+        else:
+            source = "mingpao"
         try:
             items.extend(parse_items(payload, source))
         except Exception as exc:
@@ -868,12 +1473,18 @@ def main() -> int:
     feed_cache = load_json(FEED_CACHE_PATH)
     image_cache = load_json(IMAGE_CACHE_PATH)
     fulltext_cache = load_json(FULLTEXT_CACHE_PATH)
+    fullhtml_cache = load_json(FULLHTML_CACHE_PATH)
+    seen_cache = load_json(SEEN_CACHE_PATH)
+    feed_cache = gc_cache(feed_cache, CACHE_GC_TTL)
+    image_cache = gc_cache(image_cache, CACHE_GC_TTL)
+    fulltext_cache = gc_cache(fulltext_cache, CACHE_GC_TTL)
+    fullhtml_cache = gc_cache(fullhtml_cache, CACHE_GC_TTL)
+    seen_cache = gc_cache(seen_cache, SEEN_CACHE_TTL)
 
     urls = [u.strip() for u in args.url.split(",") if u.strip()]
     items = fetch_all(urls, feed_cache)
 
-    if args.lookback_hours > 0:
-        items = filter_recent(items, args.lookback_hours)
+    items = apply_mixed_mode(items, args.lookback_hours)
     items = dedupe_items(items)
     items.sort(
         key=lambda x: (
@@ -891,11 +1502,15 @@ def main() -> int:
         args.refresh_seconds,
         image_cache,
         fulltext_cache,
+        fullhtml_cache,
+        seen_cache,
     )
 
     save_json(FEED_CACHE_PATH, feed_cache)
     save_json(FULLTEXT_CACHE_PATH, fulltext_cache)
     save_json(IMAGE_CACHE_PATH, image_cache)
+    save_json(FULLHTML_CACHE_PATH, fullhtml_cache)
+    save_json(SEEN_CACHE_PATH, mark_seen(seen_cache, items))
     return 0
 
 
