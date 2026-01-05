@@ -461,7 +461,8 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
         )
         if not (is_mingpao and len(cached_text) < 400):
             if len(cached_text) >= 200:
-                return cached_text, cached_image
+                if not (is_mingpao and not cached_image):
+                    return cached_text, cached_image
     try:
         from lxml import html as lxml_html
     except Exception:
