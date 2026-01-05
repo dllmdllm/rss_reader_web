@@ -32,6 +32,7 @@ DEFAULT_URLS = ",".join(
         "https://news.mingpao.com/rss/ins/all.xml",
         "https://news.mingpao.com/rss/ins/s00004.xml",
         "https://news.mingpao.com/rss/ins/s00005.xml",
+        "https://news.mingpao.com/rss/ins/s00007.xml",
         "https://rss.cnbeta.com.tw/",
     ]
 )
@@ -66,6 +67,7 @@ class Item:
     pub_dt: datetime | None
     pub_text: str
     source: str
+    category: str
     summary: str
     rss_image: str
 
@@ -669,7 +671,7 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
         return cached_html
 
 
-def parse_items(payload: bytes | str, source: str) -> list[Item]:
+def parse_items(payload: bytes | str, source: str, category: str = "") -> list[Item]:
     items: list[Item] = []
     if isinstance(payload, bytes):
         text = payload.decode("utf-8", errors="ignore")
@@ -692,6 +694,7 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                     pub_dt=pub_dt,
                     pub_text=pub_text,
                     source=source,
+                    category=category,
                     summary=to_trad_if_cnbeta(source, strip_html(summary)),
                     rss_image=rss_image,
                 )
@@ -725,6 +728,7 @@ def parse_items(payload: bytes | str, source: str) -> list[Item]:
                         pub_dt=pub_dt,
                         pub_text=pub_text,
                         source=source,
+                        category=category,
                         summary=to_trad_if_cnbeta(source, strip_html(summary)),
                         rss_image=rss_image,
                     )
@@ -875,7 +879,9 @@ def extract_keywords(texts: list[str], limit: int = 10) -> list[str]:
     sorted_tokens = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
     return [t for t, _ in sorted_tokens[:limit]]
 
-def get_category(source: str) -> str:
+def get_category(source: str, category: str = "") -> str:
+    if category:
+        return category
     if source == "cnbeta":
         return "tech"
     if source == "mingpao" or source == "RTHK":
@@ -933,7 +939,7 @@ def build_html(
                 datetime.now(ZoneInfo("Asia/Hong_Kong")) - item.pub_dt
             ).total_seconds() <= 4 * 60 * 60
         date_class = "date recent" if is_recent else "date"
-        category = get_category(item.source)
+        category = get_category(item.source, item.category)
         if idx == 1:
             age_class = "age-fresh"
         elif item.pub_dt:
@@ -1448,12 +1454,18 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
             feed_cache[url] = entry
         if "rthk" in url:
             source = "RTHK"
+            category = "news"
         elif "cnbeta" in url:
             source = "cnbeta"
+            category = "tech"
+        elif "s00007.xml" in url:
+            source = "mingpao"
+            category = "ent"
         else:
             source = "mingpao"
+            category = "news"
         try:
-            items.extend(parse_items(payload, source))
+            items.extend(parse_items(payload, source, category))
         except Exception as exc:
             print(f"Parse failed ({url}): {exc}")
             continue
