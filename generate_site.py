@@ -1085,6 +1085,9 @@ def build_html(
       flex-wrap: wrap;
       justify-content: center;
     }}
+    .filters.secondary {{
+      display: none;
+    }}
     .submeta {{
       width: 100%;
       text-align: center;
@@ -1095,8 +1098,11 @@ def build_html(
       width: 100%;
       display: flex;
       gap: 8px;
-      flex-wrap: wrap;
+      flex-wrap: nowrap;
       justify-content: center;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: thin;
     }}
     .kw {{
       border: 1px dashed var(--border);
@@ -1375,40 +1381,67 @@ def build_html(
   <div class="toolbar">
     <input id="search" type="search" placeholder="搜尋標題或內容…">
     <div class="filters">
+      <span class="chip active" data-category="all">全部</span>
+      <span class="chip" data-category="news">新聞</span>
+      <span class="chip" data-category="ent">娛樂</span>
+      <span class="chip" data-category="tech">科技</span>
+    </div>
+    <div class="filters secondary" id="news-sources">
       <span class="chip active" data-source="all">全部</span>
       <span class="chip" data-source="RTHK">RTHK</span>
       <span class="chip" data-source="mingpao">Mingpao</span>
-      <span class="chip" data-source="cnbeta">cnbeta</span>
     </div>
-    <div class="submeta">RTHK/Mingpao 過去{int(lookback_hours)}小時｜cnbeta 最近{CNBETA_LIMIT}則｜最多出現既10個關鍵字</div>
     <div class="keywords">{keyword_html}</div>
+    <div class="submeta">RTHK/Mingpao 過去{int(lookback_hours)}小時｜cnbeta 最近{CNBETA_LIMIT}則｜最多出現既10個關鍵字</div>
   </div>
   <main id="list">
     {"".join(cards) if cards else '<div class="empty">近 12 小時內冇新項目。</div>'}
   </main>
   <footer class="site-footer">生成時間 {build_ts} HKT</footer>
   <script>
-    const chips = document.querySelectorAll('.chip');
+    const categoryChips = document.querySelectorAll('.filters:not(.secondary) .chip');
+    const sourceChips = document.querySelectorAll('.filters.secondary .chip');
     const cards = document.querySelectorAll('.card');
     const search = document.getElementById('search');
+    const newsSources = document.getElementById('news-sources');
+    let activeCategory = 'all';
     let activeSource = 'all';
 
     function applyFilter() {{
       const q = (search.value || '').trim().toLowerCase();
       cards.forEach(card => {{
         const source = card.dataset.source;
+        const category = card.dataset.category;
         const text = (card.dataset.title + ' ' + card.textContent).toLowerCase();
+        const categoryOk = activeCategory === 'all' || category === activeCategory;
         const sourceOk = activeSource === 'all' || source === activeSource;
         const textOk = !q || text.includes(q);
-        card.style.display = sourceOk && textOk ? '' : 'none';
+        card.style.display = categoryOk && sourceOk && textOk ? '' : 'none';
       }});
     }}
 
-    chips.forEach(chip => {{
+    categoryChips.forEach(chip => {{
       chip.addEventListener('click', () => {{
-        chips.forEach(c => c.classList.remove('active'));
+        categoryChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
-        activeSource = chip.dataset.source;
+        activeCategory = chip.dataset.category || 'all';
+        if (activeCategory === 'news') {{
+          newsSources.style.display = 'flex';
+        }} else {{
+          newsSources.style.display = 'none';
+          activeSource = 'all';
+          sourceChips.forEach(c => c.classList.remove('active'));
+          sourceChips[0].classList.add('active');
+        }}
+        applyFilter();
+      }});
+    }});
+
+    sourceChips.forEach(chip => {{
+      chip.addEventListener('click', () => {{
+        sourceChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        activeSource = chip.dataset.source || 'all';
         applyFilter();
       }});
     }});
