@@ -371,18 +371,36 @@ def download_image(url: str, cache: dict, referer: str | None = None) -> str:
         if os.path.exists(os.path.join(IMAGES_DIR, cached_path)):
             return cached_path
         cache.pop(url, None)
+    headers = {"User-Agent": "Mozilla/5.0"}
+    if referer:
+        headers["Referer"] = referer
     try:
-        headers = {"User-Agent": "Mozilla/5.0"}
-        if referer:
-            headers["Referer"] = referer
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=20) as resp:
             data = resp.read()
             content_type = resp.headers.get("Content-Type", "")
-        name = hashlib.sha1(url.encode("utf-8")).hexdigest()
-        ext = guess_image_ext(url, content_type)
-        filename = f"{name[:16]}{ext}"
-        path = os.path.join(IMAGES_DIR, filename)
+    except Exception:
+        if "cnbeta.com.tw" in url:
+            try:
+                headers = {
+                    "User-Agent": "Mozilla/5.0",
+                    "Referer": "https://www.cnbeta.com.tw/",
+                    "Origin": "https://www.cnbeta.com.tw",
+                    "Accept": "image/avif,image/webp,image/*,*/*;q=0.8",
+                }
+                req = urllib.request.Request(url, headers=headers)
+                with urllib.request.urlopen(req, timeout=30) as resp:
+                    data = resp.read()
+                    content_type = resp.headers.get("Content-Type", "")
+            except Exception:
+                return ""
+        else:
+            return ""
+    name = hashlib.sha1(url.encode("utf-8")).hexdigest()
+    ext = guess_image_ext(url, content_type)
+    filename = f"{name[:16]}{ext}"
+    path = os.path.join(IMAGES_DIR, filename)
+    try:
         with open(path, "wb") as handle:
             handle.write(data)
         cache[url] = {"path": filename, "timestamp": now}
