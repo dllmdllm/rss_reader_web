@@ -1395,13 +1395,17 @@ def build_html(
       color: var(--recent);
       font-weight: 600;
     }}
-    .info-link {{
+    .refresh-btn {{
+      border: 1px solid var(--border);
+      background: #fff;
       color: var(--accent);
-      text-decoration: none;
-      font-weight: 600;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 14px;
+      cursor: pointer;
     }}
-    .info-link:hover {{
-      text-decoration: underline;
+    .refresh-btn:hover {{
+      border-color: var(--accent);
     }}
     .hero {{
       width: 100%;
@@ -1539,7 +1543,7 @@ def build_html(
 <body>
   <header class="site">
     <h1>即時焦點</h1>
-    <div class="meta">{meta_line}｜<a class="info-link" href="info.html">說明</a></div>
+    <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button></div>
   </header>
   <div class="toolbar">
     <input id="search" type="search" placeholder="搜尋標題或內容…">
@@ -1565,6 +1569,7 @@ def build_html(
     const sourceChips = document.querySelectorAll('.filters.secondary .chip');
     const cards = document.querySelectorAll('.card');
     const search = document.getElementById('search');
+    const refreshBtn = document.getElementById('refresh');
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
@@ -1607,6 +1612,11 @@ def build_html(
         applyFilter();
       }});
     }});
+    if (refreshBtn) {{
+      refreshBtn.addEventListener('click', () => {{
+        window.location.reload();
+      }});
+    }}
 
     search.addEventListener('input', applyFilter);
     document.querySelectorAll('.kw').forEach(kw => {{
