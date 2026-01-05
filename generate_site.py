@@ -617,9 +617,14 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
     cached_html = entry.get("html", "")
     cached_ts = float(entry.get("timestamp", 0) or 0)
     if cached_html and (now - cached_ts) <= FULLHTML_CACHE_TTL:
-        if "cnbeta.com.tw" in url and "<img" not in cached_html:
-            cached_html = ""
-        else:
+        if "cnbeta.com.tw" in url:
+            if "<img" not in cached_html:
+                cached_html = ""
+            else:
+                img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', cached_html)
+                if img_srcs and all("cnbeta.com.tw/articles/" in s for s in img_srcs):
+                    cached_html = ""
+        if cached_html:
             if "cnbeta.com.tw" in url and TRAD_CONVERTER is not None:
                 converted = clean_html_fragment(cached_html, url, image_cache)
                 if converted and converted != cached_html:
