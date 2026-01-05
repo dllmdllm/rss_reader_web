@@ -1391,9 +1391,13 @@ def build_html(
       white-space: normal;
     }}
     .content img {{
+      display: block;
+      margin-left: auto;
+      margin-right: auto;
       max-width: 100%;
       border-radius: 12px;
-      margin: 8px 0;
+      margin-top: 8px;
+      margin-bottom: 8px;
       height: auto;
     }}
     .content a {{
