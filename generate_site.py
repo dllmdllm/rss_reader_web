@@ -808,7 +808,7 @@ def apply_mixed_mode(items: list[Item], lookback_hours: float) -> list[Item]:
     return result
 
 
-def extract_keywords(texts: list[str], limit: int = 10) -> list[str]:
+def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> list[str]:
     stopwords = {
         "香港",
         "今日",
@@ -870,13 +870,149 @@ def extract_keywords(texts: list[str], limit: int = 10) -> list[str]:
         "這個",
         "那個",
         "大家",
+        "記者",
+        "消息稱",
+        "消息指",
+        "消息人士",
+        "網民",
+        "網上",
+        "社交平台",
+        "影片",
+        "圖片",
+        "發布",
+        "公布",
+        "宣佈",
+        "發表",
+        "表示",
+        "指出",
+        "透露",
+        "重申",
+        "強調",
+        "回應",
+        "稱",
+        "即時",
+        "最新",
+        "消息",
+        "內容",
+        "詳情",
+        "報道詳情",
+        "相關字詞",
+        "編輯推介",
+        "熱門",
+        "活動",
+        "計劃",
+        "方案",
+        "措施",
+        "情況",
+        "安排",
+        "結果",
+        "影響",
+        "開始",
+        "結束",
+        "之後",
+        "之前",
+        "目前",
+        "昨日",
+        "近日",
+        "今早",
+        "今晚",
+        "今天",
+        "今日",
+        "上午",
+        "下午",
+        "晚上",
+        "凌晨",
+        "本港",
     }
-    counts: dict[str, int] = {}
-    for text in texts:
-        for token in re.findall(r"[\u4e00-\u9fff]{2,4}", text):
+    entity_suffixes = {
+        "局",
+        "署",
+        "處",
+        "會",
+        "院",
+        "廳",
+        "部",
+        "辦",
+        "政府",
+        "法院",
+        "委員會",
+        "集團",
+        "公司",
+        "大學",
+        "學校",
+        "醫院",
+        "銀行",
+        "警方",
+        "警察",
+        "消防",
+        "海關",
+        "醫管局",
+        "天文台",
+        "港鐵",
+        "機場",
+        "警方",
+        "法庭",
+        "總統",
+        "主席",
+        "司長",
+        "部長",
+        "校長",
+        "教授",
+        "醫生",
+        "議員",
+        "球會",
+        "影業",
+        "電台",
+        "電視台",
+    }
+    place_suffixes = {
+        "市",
+        "區",
+        "鎮",
+        "縣",
+        "省",
+        "國",
+        "島",
+        "灣",
+        "海",
+        "路",
+        "街",
+        "道",
+        "村",
+        "山",
+        "河",
+        "湖",
+        "港",
+    }
+    weak_chars = set("的了著及與和就於在是有將未可其對於以並及")
+    counts: dict[str, float] = {}
+    for title, body in items_texts:
+        title_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", title or ""))
+        body_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", body or ""))
+        for token in title_tokens:
             if token in stopwords:
                 continue
-            counts[token] = counts.get(token, 0) + 1
+            if any(ch in weak_chars for ch in token) and len(token) <= 2:
+                continue
+            score = 3.0
+            if any(token.endswith(s) for s in entity_suffixes):
+                score += 2.0
+            if any(token.endswith(s) for s in place_suffixes):
+                score += 1.5
+            if len(token) >= 4:
+                score += 0.5
+            counts[token] = counts.get(token, 0.0) + score
+        for token in body_tokens:
+            if token in stopwords:
+                continue
+            if any(ch in weak_chars for ch in token) and len(token) <= 2:
+                continue
+            score = 1.0
+            if any(token.endswith(s) for s in entity_suffixes):
+                score += 1.5
+            if any(token.endswith(s) for s in place_suffixes):
+                score += 1.0
+            counts[token] = counts.get(token, 0.0) + score
     sorted_tokens = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
     return [t for t, _ in sorted_tokens[:limit]]
 
@@ -904,7 +1040,7 @@ def build_html(
     now_hkt = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M")
     latest_pub = ""
     cards = []
-    keyword_texts: list[str] = []
+    keyword_texts: list[tuple[str, str]] = []
     now_dt = datetime.now(ZoneInfo("Asia/Hong_Kong"))
     for idx, item in enumerate(items, start=1):
         content = item.summary
@@ -923,7 +1059,7 @@ def build_html(
         content = clean_content_text(to_trad_if_cnbeta(item.source, strip_html(content)))
         content = re.sub(r"。(」)", r"。\1\n", content)
         content = re.sub(r"。(?!」)", "。\n", content)
-        keyword_texts.append(f"{item.title}\n{content}")
+        keyword_texts.append((item.title, content))
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
         if item.pub_dt:
