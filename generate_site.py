@@ -396,19 +396,19 @@ def get_rss_image(item: ET.Element, base_url: str) -> str:
         tag = child.tag.lower()
         if tag.endswith("enclosure"):
             url = normalize_image_url(base_url, child.attrib.get("url", "") or "")
-            return "" if is_generic_image(url) else url
+            return "" if is_generic_image(url, base_url) else url
         if "media" in tag and tag.endswith("content"):
             url = normalize_image_url(base_url, child.attrib.get("url", "") or "")
-            return "" if is_generic_image(url) else url
+            return "" if is_generic_image(url, base_url) else url
     desc = find_text(item, "description") or ""
     match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
     if match:
         url = normalize_image_url(base_url, match.group(1))
-        return "" if is_generic_image(url) else url
+        return "" if is_generic_image(url, base_url) else url
     match = re.search(r'<img[^>]+data-src=["\']([^"\']+)["\']', desc)
     if match:
         url = normalize_image_url(base_url, match.group(1))
-        return "" if is_generic_image(url) else url
+        return "" if is_generic_image(url, base_url) else url
     return ""
 
 
@@ -418,32 +418,32 @@ def get_rss_image_from_desc(desc: str, base_url: str) -> str:
     match = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', desc)
     if match:
         url = normalize_image_url(base_url, match.group(1))
-        return "" if is_generic_image(url) else url
+        return "" if is_generic_image(url, base_url) else url
     match = re.search(r'<img[^>]+data-src=["\']([^"\']+)["\']', desc)
     if match:
         url = normalize_image_url(base_url, match.group(1))
-        return "" if is_generic_image(url) else url
+        return "" if is_generic_image(url, base_url) else url
     return ""
 
 
-def is_generic_image(url: str) -> bool:
+def is_generic_image(url: str, source_url: str | None = None) -> bool:
     if not url:
         return True
     lowered = url.lower()
-    return any(
-        key in lowered
-        for key in (
-            "logo",
-            "default",
-            "placeholder",
-            "site-logo",
-            "share",
-            "social",
-            "/seo/",
-            "image/seo",
-            "/res/v3/image/seo",
-        )
-    )
+    keys = [
+        "logo",
+        "default",
+        "placeholder",
+        "site-logo",
+        "share",
+        "social",
+        "/seo/",
+        "image/seo",
+        "/res/v3/image/seo",
+    ]
+    if source_url and "mingpao.com" in source_url:
+        keys = [k for k in keys if k not in ("image/seo", "/res/v3/image/seo")]
+    return any(key in lowered for key in keys)
 
 
 def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
@@ -479,13 +479,13 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
         og_image = root_full.xpath("//meta[@property='og:image']/@content")
         if og_image:
             candidate = og_image[0].strip()
-            if not is_generic_image(candidate):
+            if not is_generic_image(candidate, url):
                 image_url = candidate
         if not image_url:
             twitter_image = root_full.xpath("//meta[@name='twitter:image']/@content")
             if twitter_image:
                 candidate = twitter_image[0].strip()
-                if not is_generic_image(candidate):
+                if not is_generic_image(candidate, url):
                     image_url = candidate
         if not image_url:
             if "news.rthk.hk" in url:
@@ -913,8 +913,8 @@ def build_html(
             fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
             if fulltext:
                 content = fulltext
-            if og_image and not is_generic_image(og_image):
-                if (not image_url) or is_generic_image(image_url):
+            if og_image and not is_generic_image(og_image, item.link):
+                if (not image_url) or is_generic_image(image_url, item.link):
                     image_url = og_image
             full_html = extract_full_html(item.link, fullhtml_cache, image_cache)
             if full_html:
