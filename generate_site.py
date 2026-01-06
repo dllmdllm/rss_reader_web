@@ -238,6 +238,9 @@ def clean_content_text(text: str) -> str:
             or "編輯推介" in line
             or "熱門HOTPICK" in line
             or "報道詳情" in line
+            or "相關文章" in line
+            or "立即下載星島頭條App" in line
+            or "星島頭條App" in line
         ):
             continue
         if css_block_start.match(line):
