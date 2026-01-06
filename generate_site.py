@@ -241,6 +241,7 @@ def clean_content_text(text: str) -> str:
             or "相關文章" in line
             or "立即下載星島頭條App" in line
             or "星島頭條App" in line
+            or "即睇減息部署" in line
         ):
             continue
         if css_block_start.match(line):
@@ -265,7 +266,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
         return fragment
     try:
         root = lxml_html.fragment_fromstring(fragment, create_parent="div")
-        for node in root.xpath(".//script | .//style | .//noscript"):
+        for node in root.xpath(".//script | .//style | .//noscript | .//video | .//iframe"):
             node.getparent().remove(node)
         if "mingpao.com" not in base_url:
             for node in root.xpath(
@@ -302,6 +303,13 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
             imgs = root.xpath(".//img")
             if len(imgs) > 1:
                 imgs[0].drop_tag()
+        if "stheadline.com" in base_url:
+            imgs = root.xpath(".//img")
+            if len(imgs) >= 2:
+                first_src = imgs[0].get("src") or ""
+                second_src = imgs[1].get("src") or ""
+                if first_src and second_src and first_src == second_src:
+                    imgs[0].drop_tag()
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
             if not re.match(r"^https?://", href):
