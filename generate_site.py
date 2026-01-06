@@ -993,6 +993,8 @@ def apply_mixed_mode(items: list[Item], lookback_hours: float) -> list[Item]:
                 )
             )
             result.extend(rows[:CNBETA_LIMIT])
+        elif source == "singtao":
+            result.extend(filter_recent(rows, 2))
         else:
             result.extend(filter_recent(rows, lookback_hours))
     return result
@@ -1630,8 +1632,11 @@ def build_html(
     }}
     .hero {{
       width: 100%;
+      max-height: 360px;
+      object-fit: cover;
       border-radius: 12px;
-      margin: 10px 0;
+      margin: 10px auto;
+      display: block;
     }}
     .content {{
       font-size: 15px;
@@ -1642,7 +1647,9 @@ def build_html(
       display: block;
       margin-left: auto;
       margin-right: auto;
-      max-width: 100%;
+      max-width: 80%;
+      max-height: 360px;
+      object-fit: contain;
       border-radius: 12px;
       margin-top: 8px;
       margin-bottom: 8px;
