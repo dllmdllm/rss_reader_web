@@ -1002,13 +1002,15 @@ def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
     m = re.search(r'__NEXT_DATA__\" type=\"application/json\">(.*?)</script>', html_text, re.S)
-    if not m:
-        return items
-    try:
-        data = json.loads(m.group(1))
-        paths = list(dict.fromkeys(re.findall(r"/article/\\d+", json.dumps(data))))
-    except Exception:
-        return items
+    paths: list[str] = []
+    if m:
+        try:
+            data = json.loads(m.group(1))
+            paths = list(dict.fromkeys(re.findall(r"/article/\\d+", json.dumps(data))))
+        except Exception:
+            paths = []
+    if not paths:
+        paths = list(dict.fromkeys(re.findall(r"/article/\\d+", html_text)))
     for path in paths[:HK01_LIMIT]:
         link = urljoin(url, path)
         try:
@@ -1991,7 +1993,11 @@ def build_html(
     const refreshMs = {max(60, int(refresh_seconds))} * 1000;
     let lastAuto = Date.now();
     const contents = Array.from(document.querySelectorAll('.content'));
+    const titles = Array.from(document.querySelectorAll('.card h2'));
     contents.forEach(el => {{
+      if (!el.dataset.original) el.dataset.original = el.innerHTML;
+    }});
+    titles.forEach(el => {{
       if (!el.dataset.original) el.dataset.original = el.innerHTML;
     }});
     const newsSources = document.getElementById('news-sources');
@@ -2045,6 +2051,9 @@ def build_html(
       contents.forEach(el => {{
         if (el.dataset.original) el.innerHTML = el.dataset.original;
       }});
+      titles.forEach(el => {{
+        if (el.dataset.original) el.innerHTML = el.dataset.original;
+      }});
     }}
     function highlightTerm(term) {{
       if (!term) return;
@@ -2077,6 +2086,29 @@ def build_html(
           if (post) frag.appendChild(document.createTextNode(post));
           node.parentNode.replaceChild(frag, node);
         }});
+      }});
+      titles.forEach(el => {{
+        const card = el.closest('.card');
+        if (card && card.style.display === 'none') return;
+        const txt = el.textContent || '';
+        if (!re.test(txt)) return;
+        re.lastIndex = 0;
+        const frag = document.createDocumentFragment();
+        let last = 0;
+        let m;
+        while ((m = re.exec(txt)) !== null) {{
+          const pre = txt.slice(last, m.index);
+          if (pre) frag.appendChild(document.createTextNode(pre));
+          const span = document.createElement('span');
+          span.className = 'hl';
+          span.textContent = m[0];
+          frag.appendChild(span);
+          last = m.index + m[0].length;
+        }}
+        const post = txt.slice(last);
+        if (post) frag.appendChild(document.createTextNode(post));
+        el.innerHTML = '';
+        el.appendChild(frag);
       }});
     }}
     setInterval(() => {{
