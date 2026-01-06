@@ -1238,7 +1238,7 @@ def build_html(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="refresh" content="{max(60, int(refresh_seconds))}">
+  <meta http-equiv="refresh" content="0">
   <title>即時焦點</title>
   <style>
     :root {{
@@ -1625,6 +1625,8 @@ def build_html(
     const cards = document.querySelectorAll('.card');
     const search = document.getElementById('search');
     const refreshBtn = document.getElementById('refresh');
+    const refreshMs = {max(60, int(refresh_seconds))} * 1000;
+    let lastAuto = Date.now();
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
@@ -1672,6 +1674,11 @@ def build_html(
         window.location.reload();
       }});
     }}
+    setInterval(() => {{
+      if (window.scrollY <= 5 && (Date.now() - lastAuto) >= refreshMs) {{
+        window.location.reload();
+      }}
+    }}, 1000);
 
     search.addEventListener('input', applyFilter);
     document.querySelectorAll('.kw').forEach(kw => {{
