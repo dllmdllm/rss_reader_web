@@ -913,10 +913,11 @@ def extract_oncc_content_and_image(raw_html: str) -> tuple[str, str]:
     return extract_oncc_content(raw_html), image_url
 
 
-def extract_hk01_article(raw_html: str) -> tuple[str, str, str]:
+def extract_hk01_article(raw_html: str) -> tuple[str, str, str, datetime | None]:
     title = ""
     content = ""
     image_url = ""
+    pub_dt = None
     try:
         from lxml import html as lxml_html
         root = lxml_html.fromstring(raw_html)
@@ -936,7 +937,6 @@ def extract_hk01_article(raw_html: str) -> tuple[str, str, str]:
                         data = entry
                         break
             if isinstance(data, dict):
-                content = data.get("articleBody", "") or content
                 image = data.get("image") or ""
                 if isinstance(image, list) and image:
                     image_url = image[0]
@@ -944,11 +944,45 @@ def extract_hk01_article(raw_html: str) -> tuple[str, str, str]:
                     image_url = image
                 if not title:
                     title = data.get("headline", "") or title
-                break
+            break
+        m = re.search(r'__NEXT_DATA__\" type=\"application/json\">(.*?)</script>', raw_html, re.S)
+        if m:
+            try:
+                obj = json.loads(m.group(1))
+                article = (
+                    obj.get("props", {})
+                    .get("initialProps", {})
+                    .get("pageProps", {})
+                    .get("article", {})
+                )
+                if not title:
+                    title = article.get("title", "") or title
+                if not image_url:
+                    main = article.get("mainImage") or article.get("originalImage") or {}
+                    if isinstance(main, dict):
+                        image_url = main.get("cdnUrl") or image_url
+                ts = article.get("publishTime")
+                if isinstance(ts, (int, float)) and ts > 0:
+                    pub_dt = datetime.fromtimestamp(ts, ZoneInfo("Asia/Hong_Kong"))
+                blocks = article.get("blocks") or []
+                parts: list[str] = []
+                for b in blocks:
+                    if not isinstance(b, dict):
+                        continue
+                    for tok in b.get("htmlTokens") or []:
+                        if not isinstance(tok, list):
+                            continue
+                        for t in tok:
+                            if isinstance(t, dict) and t.get("content"):
+                                parts.append(str(t.get("content")))
+                if parts:
+                    content = "\n".join(parts)
+            except Exception:
+                pass
     except Exception:
         pass
     content = clean_content_text(strip_html(content))
-    return title, content, image_url
+    return title, content, image_url, pub_dt
 
 
 def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
@@ -982,15 +1016,15 @@ def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
             raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", errors="ignore")
         except Exception:
             continue
-        title, content, image_url = extract_hk01_article(raw)
+        title, content, image_url, pub_dt = extract_hk01_article(raw)
         if not content:
             continue
         items.append(
             Item(
                 title=title,
                 link=link,
-                pub_dt=None,
-                pub_text="",
+                pub_dt=pub_dt,
+                pub_text=pub_dt.strftime("%Y-%m-%d %H:%M HKT") if pub_dt else "",
                 source="hk01",
                 category="news",
                 summary=content,
