@@ -333,12 +333,14 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
             if imgs:
                 first_src = imgs[0].get("src") or ""
                 if first_src:
-                    seen_src.add(first_src)
+                    norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", first_src)
+                    norm = norm.split("?")[0]
+                    seen_src.add(norm)
                 imgs[0].drop_tag()
             for img in imgs[1:]:
                 src = img.get("src") or ""
                 if src:
-                    norm = re.sub(r"/f/\\d+p0/0x0/100/none/", "/", src)
+                    norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", src)
                     norm = norm.split("?")[0]
                     if norm in seen_src:
                         img.drop_tag()
@@ -1334,6 +1336,13 @@ def build_html(
         keyword_texts.append((item.title, content))
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
+        if item.source == "singtao" and image_url:
+            m = re.search(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html)
+            if m:
+                hero_norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", image_url).split("?")[0]
+                body_norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", m.group(1)).split("?")[0]
+                if hero_norm == body_norm:
+                    image_url = ""
         if item.pub_dt:
             pub_text = item.pub_dt.astimezone(ZoneInfo("Asia/Hong_Kong")).strftime(
                 "%Y-%m-%d %H:%M HKT"
