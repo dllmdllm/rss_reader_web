@@ -35,6 +35,7 @@ DEFAULT_URLS = ",".join(
         "https://news.mingpao.com/rss/ins/s00007.xml",
         "https://rss.cnbeta.com.tw/",
         "https://hk.on.cc/hk/news/index.html",
+        "https://www.stheadline.com/rss",
     ]
 )
 DEFAULT_LOOKBACK_HOURS = 12
@@ -1220,7 +1221,7 @@ def get_category(source: str, category: str = "") -> str:
         return category
     if source == "cnbeta":
         return "tech"
-    if source == "mingpao" or source == "RTHK":
+    if source in ("mingpao", "RTHK", "singtao", "oncc"):
         return "news"
     return "ent"
 
@@ -1733,6 +1734,7 @@ def build_html(
       <span class="chip" data-source="RTHK">RTHK</span>
       <span class="chip" data-source="mingpao">Mingpao</span>
       <span class="chip" data-source="oncc">ON.cc</span>
+      <span class="chip" data-source="singtao">Singtao</span>
     </div>
     <div class="keywords">{keyword_html}</div>
   </div>
@@ -1850,6 +1852,9 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
         elif "cnbeta" in url:
             source = "cnbeta"
             category = "tech"
+        elif "stheadline.com" in url:
+            source = "singtao"
+            category = "news"
         elif "s00007.xml" in url:
             source = "mingpao"
             category = "ent"
