@@ -34,6 +34,7 @@ DEFAULT_URLS = ",".join(
         "https://news.mingpao.com/rss/ins/s00005.xml",
         "https://news.mingpao.com/rss/ins/s00007.xml",
         "https://rss.cnbeta.com.tw/",
+        "https://hk.on.cc/hk/news/index.html",
     ]
 )
 DEFAULT_LOOKBACK_HOURS = 12
@@ -42,6 +43,7 @@ DEFAULT_MAX_ITEMS = 200
 DEFAULT_THREADS = 4
 CNBETA_LIMIT = 50
 MIXED_MODE = True
+ONCC_LIMIT = 20
 
 PROJECT_ROOT = os.path.dirname(__file__)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -492,6 +494,12 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
     except Exception:
         return cached_text, cached_image
 
+    if "on.cc" in url:
+        text, image_url = extract_oncc_content_and_image(raw)
+        if text:
+            cache[url] = {"text": text, "image": image_url, "timestamp": now}
+            return text, image_url
+
     image_url = ""
     try:
         root_full = lxml_html.fromstring(raw)
@@ -641,6 +649,12 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
             raw = resp.read().decode("utf-8", errors="ignore")
     except Exception:
         return cached_html
+    if "on.cc" in url:
+        text, _ = extract_oncc_content_and_image(raw)
+        if text:
+            html_text = "<br>".join(html.escape(text).splitlines())
+            cache[url] = {"html": html_text, "timestamp": now}
+            return html_text
     try:
         root = lxml_html.fromstring(raw)
         if "news.rthk.hk" in url:
@@ -760,6 +774,115 @@ def parse_items(payload: bytes | str, source: str, category: str = "") -> list[I
             return items
         except Exception:
             raise
+
+
+def parse_oncc_datetime(text: str) -> datetime | None:
+    if not text:
+        return None
+    m = re.search(r"(\\d{4})年(\\d{2})月(\\d{2})日\\s+(\\d{2}):(\\d{2})", text)
+    if not m:
+        return None
+    year, month, day, hour, minute = map(int, m.groups())
+    return datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Asia/Hong_Kong"))
+
+
+def extract_oncc_content_and_image(raw_html: str) -> tuple[str, str]:
+    text = ""
+    image_url = ""
+    try:
+        root = None
+        try:
+            from lxml import html as lxml_html
+            root = lxml_html.fromstring(raw_html)
+        except Exception:
+            root = None
+        if root is not None:
+            ld = root.xpath('//script[@type="application/ld+json"]/text()')
+            if ld:
+                try:
+                    data = json.loads(ld[0])
+                    image = data.get("image") or ""
+                    if isinstance(image, list) and image:
+                        image_url = image[0]
+                    elif isinstance(image, str):
+                        image_url = image
+                except Exception:
+                    pass
+        m = re.search(r'\"content\"\\s*:\\s*\"(.*?)\"\\s*,\\s*\"', raw_html, re.S)
+        if m:
+            esc = m.group(1)
+            data = json.loads('{\"content\":\"' + esc + '\"}')
+            text = data.get("content", "")
+        if text:
+            text = html.unescape(text)
+            text = text.replace("<br/>", "\n").replace("<br />", "\n").replace("<br>", "\n")
+            text = strip_html(text)
+            text = clean_content_text(text)
+    except Exception:
+        return "", image_url
+    return text.strip(), image_url
+
+
+def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
+    items: list[Item] = []
+    payload, meta = fetch_with_cache(url, feed_cache)
+    if meta:
+        entry = feed_cache.get(url, {})
+        if payload:
+            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+        if meta.get("etag"):
+            entry["etag"] = meta.get("etag")
+        if meta.get("last_modified"):
+            entry["last_modified"] = meta.get("last_modified")
+        entry["timestamp"] = meta.get("timestamp", time.time())
+        feed_cache[url] = entry
+    if not payload:
+        return items
+    html_text = payload.decode("utf-8", errors="ignore")
+    links = re.findall(r'href=\"(/hk/bkn/cnt/news/\\d{8}/[^\"]+\\.html)\"', html_text)
+    seen: set[str] = set()
+    urls: list[str] = []
+    for link in links:
+        if link in seen:
+            continue
+        seen.add(link)
+        urls.append(urljoin(url, link))
+    for link in urls[:ONCC_LIMIT]:
+        try:
+            req = urllib.request.Request(link, headers={"User-Agent": "Mozilla/5.0"})
+            raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", errors="ignore")
+        except Exception:
+            continue
+        title = ""
+        pub_dt = None
+        pub_text = ""
+        try:
+            from lxml import html as lxml_html
+            root = lxml_html.fromstring(raw)
+            title = root.xpath('string(//h1)') or root.xpath('string(//title)')
+            title = (title or "").strip()
+            time_text = root.xpath('string(//span[contains(@class,\"date\")] | //span[contains(@class,\"time\")])')
+            pub_dt = parse_oncc_datetime(time_text)
+            if pub_dt:
+                pub_text = pub_dt.strftime("%Y-%m-%d %H:%M HKT")
+        except Exception:
+            title = ""
+        text, image_url = extract_oncc_content_and_image(raw)
+        if not text:
+            continue
+        items.append(
+            Item(
+                title=title,
+                link=link,
+                pub_dt=pub_dt,
+                pub_text=pub_text,
+                source="oncc",
+                category="news",
+                summary=text,
+                rss_image=image_url,
+            )
+        )
+    return items
 
 
 def normalize_title(title: str) -> str:
@@ -1124,7 +1247,7 @@ def build_html(
         content = item.summary
         content_html = ""
         image_url = item.rss_image
-        if item.link:
+        if item.link and item.source != "oncc":
             fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
             if fulltext:
                 content = fulltext
@@ -1708,6 +1831,9 @@ def build_html(
 def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
     items: list[Item] = []
     for url in urls:
+        if "on.cc" in url:
+            items.extend(fetch_oncc_list(url, feed_cache))
+            continue
         payload, meta = fetch_with_cache(url, feed_cache)
         if meta:
             entry = feed_cache.get(url, {})
