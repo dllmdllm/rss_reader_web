@@ -233,6 +233,7 @@ def clean_content_text(text: str) -> str:
         line = raw.strip()
         if not line:
             continue
+        normalized = re.sub(r"[↓▼\s]+", "", line)
         if (
             "相關字詞" in line
             or "編輯推介" in line
@@ -246,6 +247,13 @@ def clean_content_text(text: str) -> str:
             or ("下載" in line and "星島" in line and "App" in line)
             or ("即睇" in line and "部署" in line)
             or re.search(r"[↓▼].+?[↓▼]", line)
+            or "立即下載星島頭條App" in normalized
+            or "即睇減息部署" in normalized
+            or (
+                re.search(r"\\bEmail\\b", line, re.I)
+                and ("驗樓" in line or "新盤" in line or "裝修" in line)
+            )
+            or (("@" in line) and ("驗樓" in line or "新盤" in line or "裝修" in line))
         ):
             continue
         if css_block_start.match(line):
@@ -314,11 +322,8 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 imgs[0].drop_tag()
         if "stheadline.com" in base_url:
             imgs = root.xpath(".//img")
-            if len(imgs) >= 2:
-                first_src = imgs[0].get("src") or ""
-                second_src = imgs[1].get("src") or ""
-                if first_src and second_src and first_src == second_src:
-                    imgs[0].drop_tag()
+            if imgs:
+                imgs[0].drop_tag()
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
             if not re.match(r"^https?://", href):
