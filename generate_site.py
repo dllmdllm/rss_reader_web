@@ -243,6 +243,8 @@ def clean_content_text(text: str) -> str:
             or "報道詳情" in line
             or "相關文章" in line
             or "相關新聞" in line
+            or "相關閱讀" in line
+            or "延伸閱讀" in line
             or "立即下載星島頭條App" in line
             or "星島頭條App" in line
             or "即睇減息部署" in line
@@ -298,11 +300,11 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 if parent is not None:
                     parent.remove(node)
         if "stheadline.com" in base_url:
-            for node in root.xpath(".//*[contains(text(),'同場加映') or contains(text(),'星島頭條App') or contains(text(),'即睇減息部署') or contains(text(),'立即下載')]"):
+            for node in root.xpath(".//*[contains(text(),'同場加映') or contains(text(),'星島頭條App') or contains(text(),'即睇減息部署') or contains(text(),'立即下載') or contains(text(),'相關閱讀') or contains(text(),'延伸閱讀')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
-            for node in root.xpath(".//*[contains(text(),'相關新聞')]"):
+            for node in root.xpath(".//*[contains(text(),'相關新聞') or contains(text(),'相關閱讀') or contains(text(),'延伸閱讀')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
