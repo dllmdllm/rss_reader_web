@@ -1570,8 +1570,7 @@ def build_html(
     build_ts = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M:%S")
     if MIXED_MODE:
         meta_line = (
-            f"RTHK/Mingpao 過去{int(lookback_hours)}小時｜"
-            f"cnbeta 最近{CNBETA_LIMIT}則｜更新時間 {now_hkt}"
+            f"更新時間 {now_hkt}"
             + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
         )
     else:
@@ -1629,7 +1628,7 @@ def build_html(
       z-index: 10;
       background: rgba(246, 242, 234, 0.95);
       backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
+      border-bottom: none;
       padding: 12px 16px;
       display: flex;
       gap: 12px;
@@ -1730,6 +1729,11 @@ def build_html(
       padding: 16px;
       box-shadow: 0 10px 24px var(--shadow);
       border: 1px solid var(--border);
+      scroll-snap-align: start;
+      scroll-margin-top: 12px;
+    }}
+    body {{
+      scroll-snap-type: y proximity;
     }}
     .card.seen {{
       filter: saturate(0.95);
