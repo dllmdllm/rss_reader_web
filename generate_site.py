@@ -1837,6 +1837,11 @@ def build_html(
       margin-bottom: 8px;
       height: auto;
     }}
+    .hl {{
+      background: #fff3a6;
+      padding: 0 2px;
+      border-radius: 2px;
+    }}
     .content a {{
       color: var(--accent);
     }}
@@ -1985,6 +1990,10 @@ def build_html(
     const refreshBtn = document.getElementById('refresh');
     const refreshMs = {max(60, int(refresh_seconds))} * 1000;
     let lastAuto = Date.now();
+    const contents = Array.from(document.querySelectorAll('.content'));
+    contents.forEach(el => {{
+      if (!el.dataset.original) el.dataset.original = el.innerHTML;
+    }});
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
@@ -2032,6 +2041,44 @@ def build_html(
         window.location.reload();
       }});
     }}
+    function clearHighlights() {{
+      contents.forEach(el => {{
+        if (el.dataset.original) el.innerHTML = el.dataset.original;
+      }});
+    }}
+    function highlightTerm(term) {{
+      if (!term) return;
+      clearHighlights();
+      const esc = term.replace(/[.*+?^${{}}()|[\\]\\\\]/g, '\\\\$&');
+      const re = new RegExp(esc, 'gi');
+      contents.forEach(el => {{
+        const card = el.closest('.card');
+        if (card && card.style.display === 'none') return;
+        const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null);
+        const nodes = [];
+        while (walker.nextNode()) nodes.push(walker.currentNode);
+        nodes.forEach(node => {{
+          const txt = node.nodeValue;
+          if (!txt || !re.test(txt)) return;
+          re.lastIndex = 0;
+          const frag = document.createDocumentFragment();
+          let last = 0;
+          let m;
+          while ((m = re.exec(txt)) !== null) {{
+            const pre = txt.slice(last, m.index);
+            if (pre) frag.appendChild(document.createTextNode(pre));
+            const span = document.createElement('span');
+            span.className = 'hl';
+            span.textContent = m[0];
+            frag.appendChild(span);
+            last = m.index + m[0].length;
+          }}
+          const post = txt.slice(last);
+          if (post) frag.appendChild(document.createTextNode(post));
+          node.parentNode.replaceChild(frag, node);
+        }});
+      }});
+    }}
     setInterval(() => {{
       if (window.scrollY <= 5 && (Date.now() - lastAuto) >= refreshMs) {{
         window.location.reload();
@@ -2045,9 +2092,13 @@ def build_html(
         if (!word) return;
         search.value = word;
         applyFilter();
+        highlightTerm(word);
         const first = Array.from(cards).find(c => c.style.display !== 'none');
-        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
       }});
+    }});
+    search.addEventListener('input', () => {{
+      if (!search.value) clearHighlights();
     }});
 
     document.querySelectorAll('.tag').forEach(tag => {{
