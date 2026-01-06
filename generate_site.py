@@ -240,6 +240,7 @@ def clean_content_text(text: str) -> str:
             or "熱門HOTPICK" in line
             or "報道詳情" in line
             or "相關文章" in line
+            or "相關新聞" in line
             or "立即下載星島頭條App" in line
             or "星島頭條App" in line
             or "即睇減息部署" in line
@@ -280,6 +281,8 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
         root = lxml_html.fragment_fromstring(fragment, create_parent="div")
         for node in root.xpath(".//script | .//style | .//noscript | .//video | .//iframe"):
             node.getparent().remove(node)
+        for node in root.xpath(".//ad | .//*[starts-with(name(),'gallery-')]"):
+            node.getparent().remove(node)
         if "mingpao.com" not in base_url:
             for node in root.xpath(
                 ".//*[contains(@class,'related') or contains(@class,'keyword') "
@@ -294,6 +297,10 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                     parent.remove(node)
         if "stheadline.com" in base_url:
             for node in root.xpath(".//*[contains(text(),'同場加映') or contains(text(),'星島頭條App') or contains(text(),'即睇減息部署')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(".//*[contains(text(),'相關新聞')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
@@ -330,11 +337,13 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 imgs[0].drop_tag()
             for img in imgs[1:]:
                 src = img.get("src") or ""
-                if src and src in seen_src:
-                    img.drop_tag()
-                    continue
                 if src:
-                    seen_src.add(src)
+                    norm = re.sub(r"/f/\\d+p0/0x0/100/none/", "/", src)
+                    norm = norm.split("?")[0]
+                    if norm in seen_src:
+                        img.drop_tag()
+                        continue
+                    seen_src.add(norm)
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
             if not re.match(r"^https?://", href):
