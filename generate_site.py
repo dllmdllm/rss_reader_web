@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Any
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, quote
 
 try:
     from zoneinfo import ZoneInfo
@@ -346,6 +346,19 @@ def normalize_image_url(base_url: str, raw_url: str) -> str:
     return urljoin(base_url, raw_url)
 
 
+def safe_fetch_url(url: str) -> str:
+    if not url:
+        return url
+    try:
+        url.encode("ascii")
+        return url
+    except Exception:
+        parts = urlsplit(url)
+        path = quote(parts.path)
+        query = quote(parts.query, safe="=&%")
+        return urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
+
+
 def guess_image_ext(url: str, content_type: str) -> str:
     if content_type:
         if "png" in content_type:
@@ -488,8 +501,9 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
         from lxml import html as lxml_html
     except Exception:
         return "", ""
+    fetch_url = safe_fetch_url(url)
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(fetch_url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as resp:
             raw = resp.read().decode("utf-8", errors="ignore")
     except Exception:
@@ -529,6 +543,12 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
                     "//div[contains(@class,'article')]//img/@data-original | "
                     "//div[contains(@class,'article')]//img/@src"
                 )
+            elif "stheadline.com" in url:
+                img = root_full.xpath(
+                    '//*[@itemprop="articleBody"]//img/@src | '
+                    '//*[@itemprop="articleBody"]//img/@data-src | '
+                    '//*[@itemprop="articleBody"]//img/@data-original'
+                )
             else:
                 img = root_full.xpath(
                     "//article//img/@src | "
@@ -567,6 +587,10 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
                 "//div[contains(@class,'articleDetail')] | "
                 "//div[contains(@class,'article')]"
             )
+        elif "stheadline.com" in url:
+            nodes = root.xpath('//*[@itemprop="articleBody"]')
+        elif "stheadline.com" in url:
+            nodes = root.xpath('//*[@itemprop="articleBody"]')
         else:
             nodes = root.xpath("//article")
         if nodes:
@@ -644,8 +668,9 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
         from lxml import html as lxml_html
     except Exception:
         return ""
+    fetch_url = safe_fetch_url(url)
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        req = urllib.request.Request(fetch_url, headers={"User-Agent": "Mozilla/5.0"})
         with urllib.request.urlopen(req, timeout=20) as resp:
             raw = resp.read().decode("utf-8", errors="ignore")
     except Exception:
