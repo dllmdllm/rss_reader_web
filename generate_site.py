@@ -45,7 +45,7 @@ DEFAULT_MAX_ITEMS = 200
 DEFAULT_THREADS = 4
 CNBETA_LIMIT = 50
 MIXED_MODE = True
-ONCC_LIMIT = 20
+ONCC_LIMIT = 50
 HK01_LIMIT = 20
 
 PROJECT_ROOT = os.path.dirname(__file__)
@@ -298,11 +298,15 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 if parent is not None:
                     parent.remove(node)
         if "stheadline.com" in base_url:
-            for node in root.xpath(".//*[contains(text(),'同場加映') or contains(text(),'星島頭條App') or contains(text(),'即睇減息部署')]"):
+            for node in root.xpath(".//*[contains(text(),'同場加映') or contains(text(),'星島頭條App') or contains(text(),'即睇減息部署') or contains(text(),'立即下載')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
             for node in root.xpath(".//*[contains(text(),'相關新聞')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(".//*[contains(text(),'下載') and contains(text(),'App')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
@@ -336,14 +340,14 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 first_src = imgs[0].get("src") or ""
                 if first_src:
                     norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", first_src)
-                    norm = norm.split("?")[0]
+                    norm = norm.split("?")[0].split("/")[-1]
                     seen_src.add(norm)
                 imgs[0].drop_tag()
             for img in imgs[1:]:
                 src = img.get("src") or ""
                 if src:
                     norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", src)
-                    norm = norm.split("?")[0]
+                    norm = norm.split("?")[0].split("/")[-1]
                     if norm in seen_src:
                         img.drop_tag()
                         continue
@@ -861,6 +865,17 @@ def parse_oncc_datetime(text: str) -> datetime | None:
     return datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Asia/Hong_Kong"))
 
 
+def parse_oncc_datetime_iso(text: str) -> datetime | None:
+    if not text:
+        return None
+    try:
+        return datetime.fromisoformat(text.replace("Z", "+00:00")).astimezone(
+            ZoneInfo("Asia/Hong_Kong")
+        )
+    except Exception:
+        return None
+
+
 def extract_oncc_content(raw_html: str) -> str:
     m = re.search(r'"content"\s*:\s*"(.*?)"\s*,\s*"', raw_html, re.S)
     if not m:
@@ -1022,6 +1037,15 @@ def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
             title = (title or "").strip()
             time_text = root.xpath('string(//span[contains(@class,\"date\")] | //span[contains(@class,\"time\")])')
             pub_dt = parse_oncc_datetime(time_text)
+            if not pub_dt:
+                ld = root.xpath('//script[@type=\"application/ld+json\"]/text()')
+                if ld:
+                    try:
+                        data = json.loads(ld[0])
+                        if isinstance(data, dict):
+                            pub_dt = parse_oncc_datetime_iso(data.get("datePublished", ""))
+                    except Exception:
+                        pass
             if pub_dt:
                 pub_text = pub_dt.strftime("%Y-%m-%d %H:%M HKT")
         except Exception:
