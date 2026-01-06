@@ -1732,6 +1732,7 @@ def build_html(
       <span class="chip active" data-source="all">全部</span>
       <span class="chip" data-source="RTHK">RTHK</span>
       <span class="chip" data-source="mingpao">Mingpao</span>
+      <span class="chip" data-source="oncc">ON.cc</span>
     </div>
     <div class="keywords">{keyword_html}</div>
   </div>
