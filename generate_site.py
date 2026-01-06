@@ -321,9 +321,20 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
             if len(imgs) > 1:
                 imgs[0].drop_tag()
         if "stheadline.com" in base_url:
-            imgs = root.xpath(".//img")
+            imgs = list(root.xpath(".//img"))
+            seen_src: set[str] = set()
             if imgs:
+                first_src = imgs[0].get("src") or ""
+                if first_src:
+                    seen_src.add(first_src)
                 imgs[0].drop_tag()
+            for img in imgs[1:]:
+                src = img.get("src") or ""
+                if src and src in seen_src:
+                    img.drop_tag()
+                    continue
+                if src:
+                    seen_src.add(src)
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
             if not re.match(r"^https?://", href):
