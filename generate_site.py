@@ -36,6 +36,7 @@ DEFAULT_URLS = ",".join(
         "https://rss.cnbeta.com.tw/",
         "https://hk.on.cc/hk/news/index.html",
         "https://www.stheadline.com/rss",
+        "https://www.hk01.com",
     ]
 )
 DEFAULT_LOOKBACK_HOURS = 6
@@ -45,6 +46,7 @@ DEFAULT_THREADS = 4
 CNBETA_LIMIT = 50
 MIXED_MODE = True
 ONCC_LIMIT = 20
+HK01_LIMIT = 20
 
 PROJECT_ROOT = os.path.dirname(__file__)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -894,6 +896,92 @@ def extract_oncc_content_and_image(raw_html: str) -> tuple[str, str]:
     return extract_oncc_content(raw_html), image_url
 
 
+def extract_hk01_article(raw_html: str) -> tuple[str, str, str]:
+    title = ""
+    content = ""
+    image_url = ""
+    try:
+        from lxml import html as lxml_html
+        root = lxml_html.fromstring(raw_html)
+        title = root.xpath("string(//h1)") or ""
+        title = title.strip()
+        ld = root.xpath('//script[@type="application/ld+json"]/text()')
+        for blob in ld:
+            if "NewsArticle" not in blob:
+                continue
+            try:
+                data = json.loads(blob)
+            except Exception:
+                continue
+            if isinstance(data, list):
+                for entry in data:
+                    if isinstance(entry, dict) and entry.get("@type") == "NewsArticle":
+                        data = entry
+                        break
+            if isinstance(data, dict):
+                content = data.get("articleBody", "") or content
+                image = data.get("image") or ""
+                if isinstance(image, list) and image:
+                    image_url = image[0]
+                elif isinstance(image, str):
+                    image_url = image
+                if not title:
+                    title = data.get("headline", "") or title
+                break
+    except Exception:
+        pass
+    content = clean_content_text(strip_html(content))
+    return title, content, image_url
+
+
+def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
+    items: list[Item] = []
+    payload, meta = fetch_with_cache(url, feed_cache)
+    if meta:
+        entry = feed_cache.get(url, {})
+        if payload:
+            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+        if meta.get("etag"):
+            entry["etag"] = meta.get("etag")
+        if meta.get("last_modified"):
+            entry["last_modified"] = meta.get("last_modified")
+        entry["timestamp"] = meta.get("timestamp", time.time())
+        feed_cache[url] = entry
+    if not payload:
+        return items
+    html_text = payload.decode("utf-8", errors="ignore")
+    m = re.search(r'__NEXT_DATA__\" type=\"application/json\">(.*?)</script>', html_text, re.S)
+    if not m:
+        return items
+    try:
+        data = json.loads(m.group(1))
+        paths = list(dict.fromkeys(re.findall(r"/article/\\d+", json.dumps(data))))
+    except Exception:
+        return items
+    for path in paths[:HK01_LIMIT]:
+        link = urljoin(url, path)
+        try:
+            req = urllib.request.Request(link, headers={"User-Agent": "Mozilla/5.0"})
+            raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", errors="ignore")
+        except Exception:
+            continue
+        title, content, image_url = extract_hk01_article(raw)
+        if not content:
+            continue
+        items.append(
+            Item(
+                title=title,
+                link=link,
+                pub_dt=None,
+                pub_text="",
+                source="hk01",
+                category="news",
+                summary=content,
+                rss_image=image_url,
+            )
+        )
+    return items
+
 def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
@@ -1295,7 +1383,7 @@ def get_category(source: str, category: str = "") -> str:
         return category
     if source == "cnbeta":
         return "tech"
-    if source in ("mingpao", "RTHK", "singtao", "oncc"):
+    if source in ("mingpao", "RTHK", "singtao", "oncc", "hk01"):
         return "news"
     return "ent"
 
@@ -1320,7 +1408,7 @@ def build_html(
         content = item.summary
         content_html = ""
         image_url = item.rss_image
-        if item.link and item.source != "oncc":
+        if item.link and item.source not in ("oncc", "hk01"):
             fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
             if fulltext:
                 content = fulltext
@@ -1821,6 +1909,7 @@ def build_html(
       <span class="chip" data-source="mingpao">Mingpao</span>
       <span class="chip" data-source="oncc">ON.cc</span>
       <span class="chip" data-source="singtao">Singtao</span>
+      <span class="chip" data-source="hk01">HK01</span>
     </div>
     <div class="keywords">{keyword_html}</div>
   </div>
@@ -1921,6 +2010,9 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
         if "on.cc" in url:
             items.extend(fetch_oncc_list(url, feed_cache))
             continue
+        if "hk01.com" in url:
+            items.extend(fetch_hk01_list(url, feed_cache))
+            continue
         payload, meta = fetch_with_cache(url, feed_cache)
         if meta:
             entry = feed_cache.get(url, {})
@@ -1940,6 +2032,9 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
             category = "tech"
         elif "stheadline.com" in url:
             source = "singtao"
+            category = "news"
+        elif "hk01.com" in url:
+            source = "hk01"
             category = "news"
         elif "s00007.xml" in url:
             source = "mingpao"
