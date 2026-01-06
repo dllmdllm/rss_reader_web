@@ -786,41 +786,39 @@ def parse_oncc_datetime(text: str) -> datetime | None:
     return datetime(year, month, day, hour, minute, tzinfo=ZoneInfo("Asia/Hong_Kong"))
 
 
+def extract_oncc_content(raw_html: str) -> str:
+    m = re.search(r'"content"\s*:\s*"(.*?)"\s*,\s*"', raw_html, re.S)
+    if not m:
+        return ""
+    text = m.group(1)
+    text = text.replace("\\n", "\n").replace("\\r", "\n").replace("\\t", " ")
+    text = text.replace("\\/", "/")
+    text = html.unescape(text)
+    text = text.replace("<br/>", "\n").replace("<br />", "\n").replace("<br>", "\n")
+    text = strip_html(text)
+    text = clean_content_text(text)
+    return text.strip()
+
+
 def extract_oncc_content_and_image(raw_html: str) -> tuple[str, str]:
-    text = ""
     image_url = ""
     try:
-        root = None
-        try:
-            from lxml import html as lxml_html
-            root = lxml_html.fromstring(raw_html)
-        except Exception:
-            root = None
-        if root is not None:
-            ld = root.xpath('//script[@type="application/ld+json"]/text()')
-            if ld:
-                try:
-                    data = json.loads(ld[0])
-                    image = data.get("image") or ""
-                    if isinstance(image, list) and image:
-                        image_url = image[0]
-                    elif isinstance(image, str):
-                        image_url = image
-                except Exception:
-                    pass
-        m = re.search(r'\"content\"\\s*:\\s*\"(.*?)\"\\s*,\\s*\"', raw_html, re.S)
-        if m:
-            esc = m.group(1)
-            data = json.loads('{\"content\":\"' + esc + '\"}')
-            text = data.get("content", "")
-        if text:
-            text = html.unescape(text)
-            text = text.replace("<br/>", "\n").replace("<br />", "\n").replace("<br>", "\n")
-            text = strip_html(text)
-            text = clean_content_text(text)
+        from lxml import html as lxml_html
+        root = lxml_html.fromstring(raw_html)
+        ld = root.xpath('//script[@type="application/ld+json"]/text()')
+        if ld:
+            try:
+                data = json.loads(ld[0])
+                image = data.get("image") or ""
+                if isinstance(image, list) and image:
+                    image_url = image[0]
+                elif isinstance(image, str):
+                    image_url = image
+            except Exception:
+                pass
     except Exception:
-        return "", image_url
-    return text.strip(), image_url
+        image_url = ""
+    return extract_oncc_content(raw_html), image_url
 
 
 def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
@@ -839,7 +837,7 @@ def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
-    links = re.findall(r'href=\"(/hk/bkn/cnt/news/\\d{8}/[^\"]+\\.html)\"', html_text)
+    links = re.findall(r'href=\"(/hk/bkn/cnt/news/\d{8}/[^\"]+\.html)\"', html_text)
     seen: set[str] = set()
     urls: list[str] = []
     for link in links:
