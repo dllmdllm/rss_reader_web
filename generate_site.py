@@ -2446,11 +2446,6 @@ def build_html(
     .card.collapsed .img-note {{
       display: none;
     }}
-    body.title-only .card.collapsed .content,
-    body.title-only .card.collapsed .hero,
-    body.title-only .card.collapsed .img-note {{
-      display: none;
-    }}
     .content img {{
       display: block;
       margin-left: auto;
@@ -2623,7 +2618,7 @@ def build_html(
 <body>
   <header class="site">
     <h1 class="marquee"><span class="marquee-track">{marquee_safe}</span></h1>
-    <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button> <button class="view-btn" id="view-toggle" title="切換顯示">只睇標題</button> <button class="font-btn" id="font-sm" title="內文縮細">A-</button> <button class="font-btn" id="font-lg" title="內文放大">A+</button></div>
+    <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button> <button class="font-btn" id="font-sm" title="內文縮細">A-</button> <button class="font-btn" id="font-lg" title="內文放大">A+</button></div>
   </header>
   <div class="toolbar">
     <div class="toolbar-row">
@@ -2669,7 +2664,6 @@ def build_html(
     const refreshBtn = document.getElementById('refresh');
     const fontSm = document.getElementById('font-sm');
     const fontLg = document.getElementById('font-lg');
-    const viewToggle = document.getElementById('view-toggle');
     const topBtn = document.getElementById('top-btn');
     const headerEl = document.querySelector('header.site');
     const toolbarEl = document.querySelector('.toolbar');
@@ -2714,27 +2708,21 @@ def build_html(
     let activeCategory = 'all';
     let activeSource = 'all';
     let fontSize = parseInt(localStorage.getItem('contentFont') || '15', 10);
-    let titleOnly = (localStorage.getItem('titleOnly') || 'true') === 'true';
     if (!Number.isFinite(fontSize) || fontSize < 12 || fontSize > 22) {{
       fontSize = 15;
     }}
     document.documentElement.style.setProperty('--content-font', fontSize + 'px');
-    document.body.classList.toggle('title-only', titleOnly);
-    if (viewToggle) viewToggle.textContent = titleOnly ? '只睇標題' : '顯示全文';
+    let titleOnly = false;
 
 
     function applyCollapseByCategory() {{
       cards.forEach(card => {{
         const cat = card.dataset.category || '';
         const isAll = activeCategory === 'all';
-        if (titleOnly) {{
+        if (isAll || cat === activeCategory) {{
           card.classList.add('collapsed');
           const btn = card.querySelector('.toggle');
           if (btn) btn.classList.remove('open');
-          return;
-        }}
-        if (isAll || cat === activeCategory) {{
-          card.classList.remove('collapsed');
         }}
       }});
     }}
@@ -2794,7 +2782,8 @@ def build_html(
     }});
     if (refreshBtn) {{
       refreshBtn.addEventListener('click', () => {{
-        window.location.reload();
+        const base = location.origin + location.pathname + location.search;
+        location.replace(base);
       }});
     }}
     if (fontSm) {{
@@ -2809,15 +2798,6 @@ def build_html(
         fontSize = Math.min(22, fontSize + 1);
         document.documentElement.style.setProperty('--content-font', fontSize + 'px');
         localStorage.setItem('contentFont', fontSize);
-      }});
-    }}
-    if (viewToggle) {{
-      viewToggle.addEventListener('click', () => {{
-        titleOnly = !titleOnly;
-        document.body.classList.toggle('title-only', titleOnly);
-        localStorage.setItem('titleOnly', titleOnly);
-        viewToggle.textContent = titleOnly ? '只睇標題' : '顯示全文';
-        applyCollapseByCategory();
       }});
     }}
     function clearHighlights() {{
@@ -2953,19 +2933,12 @@ def build_html(
         switchToAll();
         const target = document.getElementById(id);
         if (target) {{
-          if (titleOnly) {{
-            titleOnly = false;
-            document.body.classList.remove('title-only');
-            localStorage.setItem('titleOnly', titleOnly);
-            if (viewToggle) viewToggle.textContent = '顯示全文';
-          }}
           target.classList.remove('collapsed');
           document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
           target.classList.add('hi');
           const btn = target.querySelector('.toggle');
           if (btn) btn.classList.add('open');
           scrollToCard(target);
-          history.replaceState(null, '', '#' + id);
         }}
       }});
     }});
@@ -3010,6 +2983,16 @@ def build_html(
         if (best && best.target !== lastFocus) {{
           if (lastFocus) lastFocus.classList.remove('focus');
           best.target.classList.add('focus');
+          cards.forEach(c => {{
+            if (c !== best.target) {{
+              c.classList.add('collapsed');
+              const b = c.querySelector('.toggle');
+              if (b) b.classList.remove('open');
+            }}
+          }});
+          best.target.classList.remove('collapsed');
+          const btn = best.target.querySelector('.toggle');
+          if (btn) btn.classList.add('open');
           lastFocus = best.target;
         }}
       }}, {{ threshold: [0.25, 0.5, 0.75] }});
