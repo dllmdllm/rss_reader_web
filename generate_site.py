@@ -1944,9 +1944,12 @@ def build_html(
         seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}">
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-imgcount="{imgcount}">
         <header class="card-head">
-          <span class="index">{idx:02d}</span>
+          <div class="index-col">
+            <span class="index">{idx:02d}</span>
+            <div class="thumb-spinner">⟳</div>
+          </div>
           <div>
             <h2>{title}</h2>
             <div class="meta-row">
@@ -1981,7 +1984,8 @@ def build_html(
                     else ("科技" if category == "tech" else ("娛樂" if category == "ent" else "國際"))
                 ),
                 age_class=age_class,
-                img_count=(f"<span class='img-count'>🖼️{image_count}</span>" if image_count > 0 else ""),
+                img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
+                imgcount=image_count,
             )
         )
 
@@ -2055,7 +2059,7 @@ def build_html(
     }}
     .marquee-track {{
       display: inline-block;
-      animation: marquee 900s linear infinite;
+      animation: marquee 1170s linear infinite;
       will-change: transform;
     }}
     .marquee-item {{
@@ -2082,6 +2086,9 @@ def build_html(
     @keyframes marquee {{
       0% {{ transform: translateX(calc(var(--marquee-offset, 0px) + 0px)); }}
       100% {{ transform: translateX(calc(var(--marquee-offset, 0px) - 100%)); }}
+    }}
+    @keyframes spin {{
+      to {{ transform: rotate(360deg); }}
     }}
     @media (min-width: 900px) {{
       .marquee {{
@@ -2245,6 +2252,31 @@ def build_html(
     .card.show {{
       opacity: 1;
       transform: translateY(0);
+    }}
+    .index-col {{
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      min-width: 38px;
+    }}
+    .thumb-spinner {{
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 0, 0, 0.12);
+      border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+      opacity: 0;
+    }}
+    .card.collapsed .thumb-spinner {{
+      opacity: 1;
+    }}
+    .card[data-imgcount="0"] .thumb-spinner {{
+      opacity: 0;
+    }}
+    .card.img-loaded .thumb-spinner {{
+      opacity: 0;
     }}
     .card.hi {{
       outline: 3px solid rgba(255, 184, 0, 0.75);
@@ -2461,6 +2493,27 @@ def build_html(
       opacity: 0;
       transform: translateY(8px);
       transition: opacity 0.5s ease, transform 0.5s ease;
+    }}
+    .img-wrap {{
+      position: relative;
+      display: block;
+    }}
+    .img-spinner {{
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      margin: -13px 0 0 -13px;
+      border-radius: 50%;
+      border: 3px solid rgba(0, 0, 0, 0.12);
+      border-top-color: var(--accent);
+      animation: spin 0.9s linear infinite;
+      pointer-events: none;
+    }}
+    .img-spinner.hide {{
+      opacity: 0;
+      transition: opacity 0.2s ease;
     }}
     .content img.show {{
       opacity: 1;
@@ -2696,14 +2749,36 @@ def build_html(
     cards.forEach((card, i) => {{
       setTimeout(() => card.classList.add('show'), 20 + i * 20);
     }});
-    // animate images when loaded
-    document.querySelectorAll('.content img, .hero').forEach(img => {{
-      if (img.complete) {{
+    // wrap images with spinner while loading (only when expanded)
+    function attachSpinner(img) {{
+      if (img.closest('.img-wrap')) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'img-wrap';
+      const spinner = document.createElement('div');
+      spinner.className = 'img-spinner';
+      img.parentNode.insertBefore(wrap, img);
+      wrap.appendChild(img);
+      wrap.appendChild(spinner);
+      const done = () => {{
         img.classList.add('show');
+        spinner.classList.add('hide');
+        setTimeout(() => spinner.remove(), 250);
+        const card = img.closest('.card');
+        if (card) card.classList.add('img-loaded');
+      }};
+      if (img.complete) {{
+        done();
       }} else {{
-        img.addEventListener('load', () => img.classList.add('show'), {{ once: true }});
+        img.addEventListener('load', done, {{ once: true }});
+        img.addEventListener('error', done, {{ once: true }});
       }}
-    }});
+    }}
+    function ensureImageSpinners(card) {{
+      if (!card) return;
+      if (card.classList.contains('collapsed')) return;
+      card.querySelectorAll('.content img, .hero').forEach(img => attachSpinner(img));
+    }}
+    cards.forEach(card => ensureImageSpinners(card));
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
@@ -2938,6 +3013,7 @@ def build_html(
           target.classList.add('hi');
           const btn = target.querySelector('.toggle');
           if (btn) btn.classList.add('open');
+          ensureImageSpinners(target);
           scrollToCard(target);
         }}
       }});
@@ -2967,6 +3043,7 @@ def build_html(
         if (!card) return;
         card.classList.toggle('collapsed');
         btn.classList.toggle('open');
+        ensureImageSpinners(card);
         e.stopPropagation();
       }});
     }});
@@ -2983,16 +3060,6 @@ def build_html(
         if (best && best.target !== lastFocus) {{
           if (lastFocus) lastFocus.classList.remove('focus');
           best.target.classList.add('focus');
-          cards.forEach(c => {{
-            if (c !== best.target) {{
-              c.classList.add('collapsed');
-              const b = c.querySelector('.toggle');
-              if (b) b.classList.remove('open');
-            }}
-          }});
-          best.target.classList.remove('collapsed');
-          const btn = best.target.querySelector('.toggle');
-          if (btn) btn.classList.add('open');
           lastFocus = best.target;
         }}
       }}, {{ threshold: [0.25, 0.5, 0.75] }});

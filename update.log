@@ -28385,3 +28385,434 @@ After doing this, you may fix the identity used for this commit with:
  create mode 100644 images/ff0085d88a676e21.jpg
 To https://github.com/dllmdllm/rss_reader_web.git
    74971d3..d92f574  main -> main
+image-compress: before=142845657 after=142845657 saved=0 (0.00%)
+[main e72d8b6] Update site 2026-01-08 10:51
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 725 insertions(+), 639 deletions(-)
+To https://github.com/dllmdllm/rss_reader_web.git
+   f77b9f5..e72d8b6  main -> main
+image-compress: before=143819039 after=143819039 saved=0 (0.00%)
+[main cd57222] Update site 2026-01-08 11:01
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 565 insertions(+), 565 deletions(-)
+ create mode 100644 images/536ffd272f4b5321.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   d49a66b..cd57222  main -> main
+image-compress: before=151783367 after=151783367 saved=0 (0.00%)
+[main 2509f11] Update site 2026-01-08 11:12
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 1708 insertions(+), 1437 deletions(-)
+ create mode 100644 images/64e938a85d0e7f40.jpg
+ create mode 100644 images/7499f82b1bc54aa3.jpg
+ create mode 100644 images/87641fa4dc0cfa66.jpg
+ create mode 100644 images/9fddb5036e7e6520.jpg
+ create mode 100644 images/f0df93b54e6308cf.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   7207f82..2509f11  main -> main
+image-compress: before=152846555 after=152846555 saved=0 (0.00%)
+[main a2af93e] Update site 2026-01-08 11:21
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 2668 insertions(+), 3094 deletions(-)
+ create mode 100644 images/0efc3b5b6129b3f1.jpg
+ create mode 100644 images/300c9f3a486fba39.jpg
+ create mode 100644 images/37eed51380682c00.jpg
+ create mode 100644 images/6cd46eef921e8424.jpg
+ create mode 100644 images/6ebbe9eef89baa23.jpg
+ create mode 100644 images/9a214102494f9d06.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   2509f11..a2af93e  main -> main
+image-compress: before=154663867 after=154663867 saved=0 (0.00%)
+[main 0c31faf] Update site 2026-01-08 11:31
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 1457 insertions(+), 1372 deletions(-)
+ create mode 100644 images/9026ff5fc1c64857.jpg
+ create mode 100644 images/948b14d968ebab6b.jpg
+ create mode 100644 images/b19e6fd1a8243b93.jpg
+ create mode 100644 images/f8add1322fa917f5.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   a2af93e..0c31faf  main -> main
+image-compress: before=157247348 after=157247348 saved=0 (0.00%)
+[main 46289c2] Update site 2026-01-08 11:41
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 885 insertions(+), 939 deletions(-)
+ create mode 100644 images/0512e4d47612105f.jpg
+ create mode 100644 images/278a6fe4e90e694f.jpg
+ create mode 100644 images/5370e456dc2792c9.jpg
+ create mode 100644 images/79eda0a75e8b1c02.jpg
+ create mode 100644 images/de0dc36172cb932e.jpg
+ create mode 100644 images/fec031c04cd48f34.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   0c31faf..46289c2  main -> main
+image-compress: before=163586730 after=163586730 saved=0 (0.00%)
+[main 384ddc6] Update site 2026-01-08 11:51
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 22 files changed, 695 insertions(+), 955 deletions(-)
+ create mode 100644 images/0df8050188ae1eb3.jpg
+ create mode 100644 images/28d9e12a1ca0bc51.jpg
+ create mode 100644 images/2ae9778ed1a81e45.jpg
+ create mode 100644 images/2d02e088e0b14a41.jpg
+ create mode 100644 images/3d0066817f684bf8.jpg
+ create mode 100644 images/3f0b59077f2dc2c9.jpg
+ create mode 100644 images/5406d1450609493e.jpg
+ create mode 100644 images/5a31fd58ff4e9db2.jpg
+ create mode 100644 images/6a8556d181544330.jpg
+ create mode 100644 images/6c39bff1df343377.jpg
+ create mode 100644 images/7cf7d249442d3c41.jpg
+ create mode 100644 images/7e1eceb7c3e24dee.jpg
+ create mode 100644 images/7f5ade0c54eb1a36.jpg
+ create mode 100644 images/82967103739fa651.jpg
+ create mode 100644 images/8cb32eddb1c819cd.jpg
+ create mode 100644 images/ae9da3f88c13a4cd.jpg
+ create mode 100644 images/bea12fc8266fc2df.jpg
+ create mode 100644 images/cc357d253552565b.jpg
+ create mode 100644 images/d0d3844a519b12c8.jpg
+ create mode 100644 images/e4062de030d799b7.jpg
+ create mode 100644 images/fec2399ea1bf5f7a.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   46289c2..384ddc6  main -> main
+image-compress: before=171388175 after=171388175 saved=0 (0.00%)
+[main 9af8367] Update site 2026-01-08 12:02
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 21 files changed, 876 insertions(+), 1037 deletions(-)
+ create mode 100644 images/03a865a60a78ebae.jpg
+ create mode 100644 images/109b09c27910e5a4.png
+ create mode 100644 images/144d9307ce6d3e2d.jpg
+ create mode 100644 images/28cc52ea37e4cf5a.png
+ create mode 100644 images/31715d94548317c6.png
+ create mode 100644 images/489a146b3626000b.jpg
+ create mode 100644 images/54af70a4a5519f0a.jpg
+ create mode 100644 images/57b01587ac9e2627.jpg
+ create mode 100644 images/7a37249b22de2d58.webp
+ create mode 100644 images/826e4ea4dad96d16.jpg
+ create mode 100644 images/8536b51f46a91e90.png
+ create mode 100644 images/8b4b881e1cfa183a.jpg
+ create mode 100644 images/9c241d8c8dbcdb9f.jpg
+ create mode 100644 images/afeefd8e5525a4b8.jpg
+ create mode 100644 images/d1d923b7e4ab23bf.jpg
+ create mode 100644 images/e300df61b824296c.png
+ create mode 100644 images/e395e7432d54c8fd.png
+ create mode 100644 images/ed661b8952d45065.png
+ create mode 100644 images/f7c0893da9ed7957.jpg
+ create mode 100644 images/fa20e0b474a35ea3.webp
+To https://github.com/dllmdllm/rss_reader_web.git
+   384ddc6..9af8367  main -> main
+image-compress: before=171388175 after=171388175 saved=0 (0.00%)
+[main 032363a] Update site 2026-01-08 12:11
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 1 file changed, 924 insertions(+), 1344 deletions(-)
+To https://github.com/dllmdllm/rss_reader_web.git
+   9af8367..032363a  main -> main
+image-compress: before=183620745 after=183620745 saved=0 (0.00%)
+[main bc847cd] Update site 2026-01-08 12:21
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 13 files changed, 2026 insertions(+), 2025 deletions(-)
+ create mode 100644 images/0a32702feac2f90b.jpg
+ create mode 100644 images/0ebef1edcf1deaf7.jpg
+ create mode 100644 images/0fe392aa925ac763.jpg
+ create mode 100644 images/372ce0e0ab4c9ea0.jpg
+ create mode 100644 images/4b855efba7055806.jpg
+ create mode 100644 images/74d5e174e27c6768.jpg
+ create mode 100644 images/75d91d2b0aae9999.jpg
+ create mode 100644 images/945d52984f83bfef.jpg
+ create mode 100644 images/9edd3afaf026f7b4.jpg
+ create mode 100644 images/a1e4f1c05b3b35b2.jpg
+ create mode 100644 images/aa1874cb4d4432cf.jpg
+ create mode 100644 images/f983bdedd91a7f59.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   032363a..bc847cd  main -> main
+image-compress: before=184444022 after=184444022 saved=0 (0.00%)
+[main 4cbeae7] Update site 2026-01-08 12:31
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 657 insertions(+), 908 deletions(-)
+ create mode 100644 images/13c4a0fa1ad6c6ac.jpg
+ create mode 100644 images/20b03935bbfb5975.jpg
+ create mode 100644 images/2bc6ed26df0a21dc.jpg
+ create mode 100644 images/453ed816888373d3.jpg
+ create mode 100644 images/ba6fa17342e2c92e.jpg
+ create mode 100644 images/bfaa7d627ee22998.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   bc847cd..4cbeae7  main -> main
+image-compress: before=185958251 after=185958251 saved=0 (0.00%)
+[main 79580b4] Update site 2026-01-08 12:41
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 2008 insertions(+), 2078 deletions(-)
+ create mode 100644 images/52aafe7d2f57d13b.jpg
+ create mode 100644 images/c281f53c945a9ba3.jpg
+ create mode 100644 images/d9554f6c202032ad.jpg
+ create mode 100644 images/e6aaeb351ece0189.jpg
+ create mode 100644 images/f90e970ef6ef8879.jpg
+ create mode 100644 images/fe1877d5f36f5c36.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4cbeae7..79580b4  main -> main
+image-compress: before=186873698 after=186873698 saved=0 (0.00%)
+[main f25e9ce] Update site 2026-01-08 12:51
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 1476 insertions(+), 1562 deletions(-)
+ create mode 100644 images/226de7f7946b74fd.jpg
+ create mode 100644 images/39d7f75efc49a1f1.jpg
+ create mode 100644 images/6dbd186c6e1da5d2.jpg
+ create mode 100644 images/7959a72a0bf76620.jpg
+ create mode 100644 images/9374aa5b7820df5d.jpg
+ create mode 100644 images/a27c7c74250252dd.jpg
+ create mode 100644 images/c5693b138a4e6f7a.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   79580b4..f25e9ce  main -> main
+image-compress: before=187063292 after=187063292 saved=0 (0.00%)
+[main e515368] Update site 2026-01-08 13:01
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 716 insertions(+), 966 deletions(-)
+ create mode 100644 images/cacf408b5ad3f44d.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   f25e9ce..e515368  main -> main
+image-compress: before=187131920 after=187131920 saved=0 (0.00%)
+[main 50c65ae] Update site 2026-01-08 13:11
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 504 insertions(+), 671 deletions(-)
+ create mode 100644 images/813e47236aced965.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   e515368..50c65ae  main -> main
+image-compress: before=190739023 after=190739023 saved=0 (0.00%)
+[main 4015c98] Update site 2026-01-08 13:21
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 13 files changed, 1069 insertions(+), 1028 deletions(-)
+ create mode 100644 images/0337a5db57bb0ca0.jpg
+ create mode 100644 images/0e313a3be9db51ff.jpg
+ create mode 100644 images/1d41ba3ad469cabf.jpg
+ create mode 100644 images/2685f734ff825159.jpg
+ create mode 100644 images/4db29ad19ec2eaa3.jpg
+ create mode 100644 images/7920b5151528e051.jpg
+ create mode 100644 images/7af9cf3d841377f2.jpg
+ create mode 100644 images/7b9bd67d4c754609.jpg
+ create mode 100644 images/ad41c1ca68e58d18.jpg
+ create mode 100644 images/d033e8e20746175f.jpg
+ create mode 100644 images/ef9248d027be5b92.jpg
+ create mode 100644 images/fd812ddfccd22074.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   50c65ae..4015c98  main -> main
+image-compress: before=191851605 after=191851605 saved=0 (0.00%)
+[main fe09aca] Update site 2026-01-08 13:31
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 769 insertions(+), 684 deletions(-)
+ create mode 100644 images/3e90467ed337dc7c.jpg
+ create mode 100644 images/83ea488b86f69ddf.jpg
+ create mode 100644 images/ebd58c95779a0476.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4015c98..fe09aca  main -> main
+image-compress: before=193578342 after=194159375 saved=-581033 (-0.30%)
+[main f62e4fd] Update site 2026-01-08 13:44
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 15 files changed, 439 insertions(+), 518 deletions(-)
+ create mode 100644 images/11d472f8c74531ac.jpg
+ create mode 100644 images/1b26600e22774d90.jpg
+ create mode 100644 images/2a37d2569afc12d9.jpg
+ create mode 100644 images/3f5b05848b310e3b.jpg
+ create mode 100644 images/52aa9ac314076ddf.jpg
+ create mode 100644 images/728e4b38fa9c6f25.jpg
+ create mode 100644 images/8893cdae7954c9b8.jpg
+ create mode 100644 images/8e4cf260cf7f835d.jpg
+ create mode 100644 images/908e7078ffb4ecd8.jpg
+ create mode 100644 images/97ce375bec2e0f2d.jpg
+ create mode 100644 images/bd02fce38795080e.jpg
+ create mode 100644 images/bf1c4feb347c9a1a.jpg
+ create mode 100644 images/e65deaabd76d5e94.jpg
+ create mode 100644 images/e6dff61aa3e36a77.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   fe09aca..f62e4fd  main -> main
