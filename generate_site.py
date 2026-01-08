@@ -94,6 +94,8 @@ class Item:
     summary: str
     rss_image: str
     extra_images: list[str] = field(default_factory=list)
+    image_count: int = 0
+    image_count: int = 0
 
 
 def ensure_dirs() -> None:
@@ -212,7 +214,13 @@ def fetch_with_cache(url: str, cache: dict) -> tuple[bytes, dict]:
     except urllib.error.HTTPError as exc:
         if exc.code == 304 and entry.get("payload_b64"):
             return base64.b64decode(entry["payload_b64"]), entry
+        if entry.get("payload_b64"):
+            return base64.b64decode(entry["payload_b64"]), entry
         raise
+    except Exception:
+        if entry.get("payload_b64"):
+            return base64.b64decode(entry["payload_b64"]), entry
+        return b"", entry
 
 
 def parse_pub_date(text: str) -> datetime | None:
@@ -285,6 +293,8 @@ def clean_content_text(text: str) -> str:
             or "上車驗樓" in line
         ):
             continue
+        if line.startswith("相關文章") or line.startswith("相關閱讀") or line.startswith("相關新聞") or line.startswith("延伸閱讀"):
+            continue
         if css_block_start.match(line):
             in_css_block = True
             continue
@@ -333,6 +343,10 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 if parent is not None:
                     parent.remove(node)
             for node in root.xpath(".//*[contains(text(),'相關新聞') or contains(text(),'相關閱讀') or contains(text(),'延伸閱讀')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(".//*[contains(text(),'相關文章')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
@@ -416,6 +430,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                     norm = norm.split("?")[0].split("/")[-1]
                     seen_src.add(norm)
                 imgs[0].drop_tag()
+            kept = 0
             for img in imgs[1:]:
                 src = img.get("src") or ""
                 if src:
@@ -425,6 +440,10 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                         img.drop_tag()
                         continue
                     seen_src.add(norm)
+                    kept += 1
+                    if kept > 20:
+                        img.drop_tag()
+                        continue
         for link in root.xpath(".//a[@href]"):
             href = normalize_image_url(base_url, link.get("href"))
             if not re.match(r"^https?://", href):
@@ -1810,7 +1829,7 @@ def build_html(
     def pick_marquee_color() -> str:
         return random.choice(marquee_colors)
     first_link = True
-    for idx, item in enumerate(items[:50], start=1):
+    for idx, item in enumerate(items, start=1):
         if not item.title:
             continue
         if first_link:
@@ -1853,6 +1872,7 @@ def build_html(
         keyword_texts.append((item.title, content))
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
+        image_count = 0
         if item.source == "hk01" and item.extra_images:
             extra_html_parts: list[str] = []
             for img in item.extra_images:
@@ -1867,6 +1887,7 @@ def build_html(
                 )
             if extra_html_parts:
                 content_html = "<br>".join(extra_html_parts) + "<br>" + content_html
+                image_count += len(extra_html_parts)
         if item.source == "singtao" and image_url:
             m = re.search(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html)
             if m:
@@ -1912,6 +1933,14 @@ def build_html(
                 hero_url = f"{image_url}?v={build_id}"
             if item.source != "cnbeta":
                 hero_html = f"<img class='hero' src='{html.escape(hero_url)}' alt='' loading='lazy' decoding='async'>"
+                image_count += 1
+        if image_count == 0:
+            try:
+                from lxml import html as lxml_html
+                root = lxml_html.fromstring(f"<div>{content_html}</div>")
+                image_count = len(root.xpath(".//img")) + (1 if hero_html else 0)
+            except Exception:
+                image_count = (1 if hero_html else 0)
         seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
@@ -1925,6 +1954,7 @@ def build_html(
               <button class="share-btn" aria-label="分享">↗</button>
               <span class="cat cat-{category}">{category_label}</span>
               <span class="{date_class}">{pub}</span>
+              {img_count}
             </div>
           </div>
           <button class="toggle" aria-label="展開/收起">▾</button>
@@ -1951,6 +1981,7 @@ def build_html(
                     else ("科技" if category == "tech" else ("娛樂" if category == "ent" else "國際"))
                 ),
                 age_class=age_class,
+                img_count=(f"<span class='img-count'>🖼️{image_count}</span>" if image_count > 0 else ""),
             )
         )
 
@@ -2024,7 +2055,7 @@ def build_html(
     }}
     .marquee-track {{
       display: inline-block;
-      animation: marquee 600s linear infinite;
+      animation: marquee 900s linear infinite;
       will-change: transform;
     }}
     .marquee-item {{
@@ -2215,6 +2246,14 @@ def build_html(
       opacity: 1;
       transform: translateY(0);
     }}
+    .card.hi {{
+      outline: 3px solid rgba(255, 184, 0, 0.75);
+      box-shadow: 0 0 0 6px rgba(255, 184, 0, 0.18);
+    }}
+    .card.focus {{
+      outline: 3px solid rgba(52, 120, 255, 0.65);
+      box-shadow: 0 0 0 6px rgba(52, 120, 255, 0.15);
+    }}
     html, body {{
       scroll-snap-type: y proximity;
       scroll-padding-top: 12px;
@@ -2292,6 +2331,13 @@ def build_html(
     .date {{
       color: var(--accent);
       font-size: 12px;
+    }}
+    .img-count {{
+      color: var(--muted);
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }}
     .date.recent {{
       color: var(--recent);
@@ -2467,7 +2513,7 @@ def build_html(
     }}
     .top-btn {{
       position: fixed;
-      right: 14px;
+      right: max(12px, calc(50% - 460px + 8px));
       bottom: 16px;
       z-index: 20;
       border: 1px solid var(--border);
@@ -2914,6 +2960,8 @@ def build_html(
             if (viewToggle) viewToggle.textContent = '顯示全文';
           }}
           target.classList.remove('collapsed');
+          document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
+          target.classList.add('hi');
           const btn = target.querySelector('.toggle');
           if (btn) btn.classList.add('open');
           scrollToCard(target);
@@ -2949,6 +2997,24 @@ def build_html(
         e.stopPropagation();
       }});
     }});
+    if ('IntersectionObserver' in window) {{
+      let lastFocus = null;
+      const observer = new IntersectionObserver((entries) => {{
+        let best = null;
+        for (const entry of entries) {{
+          if (!entry.isIntersecting) continue;
+          if (!best || entry.intersectionRatio > best.intersectionRatio) {{
+            best = entry;
+          }}
+        }}
+        if (best && best.target !== lastFocus) {{
+          if (lastFocus) lastFocus.classList.remove('focus');
+          best.target.classList.add('focus');
+          lastFocus = best.target;
+        }}
+      }}, {{ threshold: [0.25, 0.5, 0.75] }});
+      cards.forEach(card => observer.observe(card));
+    }}
     document.querySelectorAll('.share-btn').forEach(btn => {{
       btn.addEventListener('click', async (e) => {{
         const card = btn.closest('.card');
