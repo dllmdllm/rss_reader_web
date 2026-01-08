@@ -6,11 +6,12 @@ import difflib
 import html
 import json
 import os
+import random
 import re
 import time
 import urllib.request
 import xml.etree.ElementTree as ET
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
 from typing import Any
@@ -24,6 +25,12 @@ try:
     from opencc import OpenCC
 except Exception:
     OpenCC = None
+try:
+    import stanza
+except Exception:
+    stanza = None
+
+STANZA_NLP = None
 
 
 DEFAULT_URLS = ",".join(
@@ -35,8 +42,16 @@ DEFAULT_URLS = ",".join(
         "https://news.mingpao.com/rss/ins/s00007.xml",
         "https://rss.cnbeta.com.tw/",
         "https://hk.on.cc/hk/news/index.html",
+        "https://hk.on.cc/hk/intnews/index.html",
+        "https://hk.on.cc/hk/entertainment/index.html",
         "https://www.stheadline.com/rss",
+        "https://www.stheadline.com/realtime-china/%E5%8D%B3%E6%99%82%E4%B8%AD%E5%9C%8B",
+        "https://www.stheadline.com/realtime-world/%E5%8D%B3%E6%99%82%E5%9C%8B%E9%9A%9B",
+        "https://www.stheadline.com/entertainment",
         "https://www.hk01.com",
+        "https://www.hk01.com/zone/2/%E5%A8%9B%E6%A8%82",
+        "https://www.hk01.com/channel/19/%E5%8D%B3%E6%99%82%E5%9C%8B%E9%9A%9B",
+        "https://www.hk01.com/zone/5/%E4%B8%AD%E5%9C%8B",
     ]
 )
 DEFAULT_LOOKBACK_HOURS = 6
@@ -47,6 +62,9 @@ CNBETA_LIMIT = 50
 MIXED_MODE = True
 ONCC_LIMIT = 50
 HK01_LIMIT = 20
+SINGTAO_ENT_LIMIT = 50
+HTTP_TIMEOUT = 18
+SINGTAO_TIMEOUT = 12
 
 PROJECT_ROOT = os.path.dirname(__file__)
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
@@ -75,6 +93,7 @@ class Item:
     category: str
     summary: str
     rss_image: str
+    extra_images: list[str] = field(default_factory=list)
 
 
 def ensure_dirs() -> None:
@@ -153,6 +172,7 @@ def to_trad_if_cnbeta(source_or_url: str, text: str) -> str:
 
 def save_json(path: str, payload: dict) -> None:
     tmp = path + ".tmp"
+    os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(tmp, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
     os.replace(tmp, path)
@@ -173,7 +193,7 @@ def fetch_with_cache(url: str, cache: dict) -> tuple[bytes, dict]:
             ctx = ssl.create_default_context()
             ctx.check_hostname = False
             ctx.verify_mode = ssl.CERT_NONE
-            with urllib.request.urlopen(req, timeout=20, context=ctx) as resp:
+            with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT, context=ctx) as resp:
                 payload = resp.read()
                 meta = {
                     "etag": resp.headers.get("ETag") or "",
@@ -181,7 +201,7 @@ def fetch_with_cache(url: str, cache: dict) -> tuple[bytes, dict]:
                     "timestamp": time.time(),
                 }
                 return payload, meta
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as resp:
             payload = resp.read()
             meta = {
                 "etag": resp.headers.get("ETag") or "",
@@ -242,6 +262,7 @@ def clean_content_text(text: str) -> str:
             or "熱門HOTPICK" in line
             or "報道詳情" in line
             or "相關文章" in line
+            or "相關文章︳" in line
             or "相關新聞" in line
             or "相關閱讀" in line
             or "延伸閱讀" in line
@@ -249,6 +270,8 @@ def clean_content_text(text: str) -> str:
             or "星島頭條App" in line
             or "即睇減息部署" in line
             or "同場加映" in line
+            or "[email protected]" in line
+            or "最Hit" in line
             or ("下載" in line and "星島" in line and "App" in line)
             or ("即睇" in line and "部署" in line)
             or re.search(r"[↓▼].+?[↓▼]", line)
@@ -259,6 +282,7 @@ def clean_content_text(text: str) -> str:
                 and ("驗樓" in line or "新盤" in line or "裝修" in line)
             )
             or (("@" in line) and ("驗樓" in line or "新盤" in line or "裝修" in line))
+            or "上車驗樓" in line
         ):
             continue
         if css_block_start.match(line):
@@ -285,8 +309,12 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
         root = lxml_html.fragment_fromstring(fragment, create_parent="div")
         for node in root.xpath(".//script | .//style | .//noscript | .//video | .//iframe"):
             node.getparent().remove(node)
-        for node in root.xpath(".//ad | .//*[starts-with(name(),'gallery-')]"):
-            node.getparent().remove(node)
+        if "stheadline.com" in base_url:
+            for node in root.xpath(".//ad"):
+                node.getparent().remove(node)
+        else:
+            for node in root.xpath(".//ad | .//*[starts-with(name(),'gallery-')]"):
+                node.getparent().remove(node)
         if "mingpao.com" not in base_url:
             for node in root.xpath(
                 ".//*[contains(@class,'related') or contains(@class,'keyword') "
@@ -308,10 +336,46 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
+            for node in root.xpath(".//*[contains(text(),'最Hit')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(".//*[contains(@class,'article-title')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(".//*[contains(@class,'time') or contains(text(),'更新時間') or contains(text(),'發佈時間')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
             for node in root.xpath(".//*[contains(text(),'下載') and contains(text(),'App')]"):
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
+            for node in root.xpath(".//*[contains(text(),'上車驗樓') or (contains(text(),'Email') and (contains(text(),'驗樓') or contains(text(),'新盤') or contains(text(),'裝修')))]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for node in root.xpath(
+                ".//*[contains(@class,'hit-articles') or contains(@class,'hit-block') or contains(@class,'hit-img') or contains(@class,'related') or contains(@class,'recommend')]"
+            ):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            for link in root.xpath(".//a"):
+                # keep images, but remove text links
+                if link.xpath(".//img"):
+                    link.drop_tag()
+                    continue
+                parent = link.getparent()
+                if parent is not None and parent.tag in ("p", "li", "div"):
+                    parent.remove(link)
+                    if (parent.text_content() or "").strip() == "":
+                        gp = parent.getparent()
+                        if gp is not None:
+                            gp.remove(parent)
+                else:
+                    link.drop_tag()
         for img in root.xpath(".//img"):
             src = img.get("src")
             if not src:
@@ -323,6 +387,11 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
             if src:
                 normalized = normalize_image_url(base_url, src)
                 img.set("src", normalized)
+        if "stheadline.com" in base_url:
+            for img in root.xpath(".//img[@src]"):
+                src = img.get("src") or ""
+                if "sthlstatic.com/sthl/assets/icons" in src or "sthlstatic.com/sthl/assets/images/logo" in src:
+                    img.drop_tag()
         if image_cache is not None:
             for img in root.xpath(".//img[@src]"):
                 src = img.get("src")
@@ -331,6 +400,8 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 local_name = download_image(src, image_cache, base_url)
                 if local_name:
                     img.set("src", f"images/{local_name}")
+                img.set("loading", "lazy")
+                img.set("decoding", "async")
         if "cnbeta.com.tw" in base_url:
             imgs = root.xpath(".//img")
             if len(imgs) > 1:
@@ -338,7 +409,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
         if "stheadline.com" in base_url:
             imgs = list(root.xpath(".//img"))
             seen_src: set[str] = set()
-            if imgs:
+            if len(imgs) > 1:
                 first_src = imgs[0].get("src") or ""
                 if first_src:
                     norm = re.sub(r"/f/\\d+p0/0x0/[^/]+/", "/", first_src)
@@ -362,6 +433,18 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
             link.set("href", href)
             link.set("target", "_blank")
             link.set("rel", "noopener")
+        if "hk01.com" in base_url:
+            for link in root.xpath(".//a"):
+                link.drop_tag()
+            for br in root.xpath(".//br"):
+                br.drop_tag()
+            for node in root.xpath(".//p | .//div | .//section | .//span"):
+                if node.xpath(".//img"):
+                    continue
+                if (node.text_content() or "").strip() == "":
+                    parent = node.getparent()
+                    if parent is not None:
+                        parent.remove(node)
         if "cnbeta" in base_url:
             for node in root.iter():
                 if node.text:
@@ -559,7 +642,8 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
     fetch_url = safe_fetch_url(url)
     try:
         req = urllib.request.Request(fetch_url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=20) as resp:
+        timeout = SINGTAO_TIMEOUT if "stheadline.com" in fetch_url else HTTP_TIMEOUT
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read().decode("utf-8", errors="ignore")
     except Exception:
         return cached_text, cached_image
@@ -751,17 +835,33 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
                 "//div[contains(@class,'articleDetail')] | "
                 "//div[contains(@class,'article')]"
             )
+        elif "stheadline.com" in url:
+            nodes = root.xpath(
+                "//div[contains(@class,'article-content')] | "
+                "//div[contains(@class,'main-body')] | "
+                "//div[contains(@class,'content-main')] | "
+                "//div[contains(@class,'article-details-content-container')]"
+            )
         else:
             nodes = root.xpath("//article")
         best_node = None
         best_len = 0
         for node in nodes:
             text = node.text_content() or ""
+            if "stheadline.com" in url:
+                cls = node.get("class") or ""
+                if "hit-articles" in cls or "related" in cls:
+                    continue
+                img_count = len(
+                    node.xpath(".//img[contains(@src,'image.hkhl.hk') or contains(@data-src,'image.hkhl.hk')]")
+                )
+                length = len(text) + img_count * 800
+            else:
+                length = len(text)
             if "ol.mingpao.com" in url:
                 time_count = len(re.findall(r"\(\d{1,2}:\d{2}\)", text))
                 if time_count >= 3:
                     continue
-            length = len(text)
             if length > best_len:
                 best_node = node
                 best_len = length
@@ -913,11 +1013,14 @@ def extract_oncc_content_and_image(raw_html: str) -> tuple[str, str]:
     return extract_oncc_content(raw_html), image_url
 
 
-def extract_hk01_article(raw_html: str) -> tuple[str, str, str, datetime | None]:
+def extract_hk01_article(
+    raw_html: str,
+) -> tuple[str, str, str, datetime | None, list[str]]:
     title = ""
     content = ""
     image_url = ""
     pub_dt = None
+    extra_images: list[str] = []
     try:
         from lxml import html as lxml_html
         root = lxml_html.fromstring(raw_html)
@@ -961,6 +1064,18 @@ def extract_hk01_article(raw_html: str) -> tuple[str, str, str, datetime | None]
                     main = article.get("mainImage") or article.get("originalImage") or {}
                     if isinstance(main, dict):
                         image_url = main.get("cdnUrl") or image_url
+                thumbs = article.get("thumbnails") or []
+                if isinstance(thumbs, list):
+                    for thumb in thumbs:
+                        if isinstance(thumb, dict):
+                            cdn = thumb.get("cdnUrl") or ""
+                            if cdn:
+                                extra_images.append(cdn)
+                original = article.get("originalImage") or {}
+                if isinstance(original, dict):
+                    cdn = original.get("cdnUrl") or ""
+                    if cdn:
+                        extra_images.append(cdn)
                 ts = article.get("publishTime")
                 if isinstance(ts, (int, float)) and ts > 0:
                     pub_dt = datetime.fromtimestamp(ts, ZoneInfo("Asia/Hong_Kong"))
@@ -982,10 +1097,26 @@ def extract_hk01_article(raw_html: str) -> tuple[str, str, str, datetime | None]
     except Exception:
         pass
     content = clean_content_text(strip_html(content))
-    return title, content, image_url, pub_dt
+    if image_url:
+        image_url = normalize_image_url("", image_url)
+    if extra_images:
+        seen: set[str] = set()
+        hero_norm = image_url.split("?")[0] if image_url else ""
+        cleaned: list[str] = []
+        for img in extra_images:
+            img = normalize_image_url("", img)
+            norm = img.split("?")[0]
+            if not norm or norm == hero_norm:
+                continue
+            if norm in seen:
+                continue
+            seen.add(norm)
+            cleaned.append(img)
+        extra_images = cleaned
+    return title, content, image_url, pub_dt, extra_images
 
 
-def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
+def fetch_hk01_list(url: str, feed_cache: dict, category: str = "news") -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
     if meta:
@@ -1001,24 +1132,24 @@ def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
+    ids: list[str] = []
     m = re.search(r'__NEXT_DATA__\" type=\"application/json\">(.*?)</script>', html_text, re.S)
-    paths: list[str] = []
     if m:
         try:
             data = json.loads(m.group(1))
-            paths = list(dict.fromkeys(re.findall(r"/article/\\d+", json.dumps(data))))
+            ids = list(dict.fromkeys(re.findall(r'"articleId"\s*:\s*(\d+)', json.dumps(data))))
         except Exception:
-            paths = []
-    if not paths:
-        paths = list(dict.fromkeys(re.findall(r"/article/\\d+", html_text)))
-    for path in paths[:HK01_LIMIT]:
-        link = urljoin(url, path)
+            ids = []
+    if not ids:
+        ids = list(dict.fromkeys(re.findall(r'"articleId"\s*:\s*(\d+)', html_text)))
+    for aid in ids[:HK01_LIMIT]:
+        link = f"https://www.hk01.com/article/{aid}"
         try:
             req = urllib.request.Request(link, headers={"User-Agent": "Mozilla/5.0"})
             raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", errors="ignore")
         except Exception:
             continue
-        title, content, image_url, pub_dt = extract_hk01_article(raw)
+        title, content, image_url, pub_dt, extra_images = extract_hk01_article(raw)
         if not content:
             continue
         items.append(
@@ -1028,14 +1159,15 @@ def fetch_hk01_list(url: str, feed_cache: dict) -> list[Item]:
                 pub_dt=pub_dt,
                 pub_text=pub_dt.strftime("%Y-%m-%d %H:%M HKT") if pub_dt else "",
                 source="hk01",
-                category="news",
+                category=category,
                 summary=content,
                 rss_image=image_url,
+                extra_images=extra_images,
             )
         )
     return items
 
-def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
+def fetch_oncc_list(url: str, feed_cache: dict, category: str = "news") -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
     if meta:
@@ -1051,7 +1183,10 @@ def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
-    links = re.findall(r'href=\"(/hk/bkn/cnt/news/\d{8}/[^\"]+\.html)\"', html_text)
+    links = re.findall(
+        r'href=\"(/hk/bkn/cnt/(?:news|entertainment)/\d{8}/[^\"]+\.html)\"',
+        html_text,
+    )
     seen: set[str] = set()
     urls: list[str] = []
     for link in links:
@@ -1098,8 +1233,73 @@ def fetch_oncc_list(url: str, feed_cache: dict) -> list[Item]:
                 pub_dt=pub_dt,
                 pub_text=pub_text,
                 source="oncc",
-                category="news",
+                category=category,
                 summary=text,
+                rss_image=image_url,
+            )
+        )
+    return items
+
+def fetch_stheadline_ent_list(url: str, feed_cache: dict) -> list[Item]:
+    items: list[Item] = []
+    payload, meta = fetch_with_cache(url, feed_cache)
+    if meta:
+        entry = feed_cache.get(url, {})
+        if payload:
+            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+        if meta.get("etag"):
+            entry["etag"] = meta.get("etag")
+        if meta.get("last_modified"):
+            entry["last_modified"] = meta.get("last_modified")
+        entry["timestamp"] = meta.get("timestamp", time.time())
+        feed_cache[url] = entry
+    if not payload:
+        return items
+    html_text = payload.decode("utf-8", errors="ignore")
+    m = re.search(r'token\s*=\s*"([^"]+)"', html_text)
+    if not m:
+        return items
+    token = m.group(1)
+    api_url = f"https://www.stheadline.com/loadnextzone/entertainment/?token={token}"
+    try:
+        req = urllib.request.Request(api_url, headers={"User-Agent": "Mozilla/5.0"})
+        raw = urllib.request.urlopen(req, timeout=20).read().decode("utf-8", errors="ignore")
+        data = json.loads(raw)
+    except Exception:
+        return items
+    rows = data.get("catslug", {}).get("data", [])
+    for row in rows[:SINGTAO_ENT_LIMIT]:
+        link = row.get("url") or row.get("redirect_url") or ""
+        if link:
+            link = urljoin("https://www.stheadline.com", link)
+        title = (row.get("title") or "").strip()
+        summary = (row.get("digest") or "").strip()
+        image_url = ""
+        key_image = row.get("key_image") or {}
+        if isinstance(key_image, dict):
+            image_url = key_image.get("src") or ""
+            if not image_url:
+                srcset = key_image.get("srcset") or ""
+                if srcset:
+                    image_url = srcset.split(",")[0].strip().split(" ")[0]
+        updated = row.get("updated_at")
+        pub_dt = None
+        if updated:
+            try:
+                pub_dt = datetime.fromtimestamp(int(updated), ZoneInfo("Asia/Hong_Kong"))
+            except Exception:
+                pub_dt = None
+        if not title or not link:
+            continue
+        items.append(
+            Item(
+                title=title,
+                link=link,
+                pub_dt=pub_dt,
+                pub_text=pub_dt.strftime("%Y-%m-%d %H:%M HKT") if pub_dt else "",
+                source="singtao",
+                category="ent",
+                summary=summary,
                 rss_image=image_url,
             )
         )
@@ -1171,7 +1371,10 @@ def apply_mixed_mode(items: list[Item], lookback_hours: float) -> list[Item]:
             )
             result.extend(rows[:CNBETA_LIMIT])
         elif source == "singtao":
-            result.extend(filter_recent(rows, 2))
+            ent_rows = [r for r in rows if r.category == "ent"]
+            news_rows = [r for r in rows if r.category != "ent"]
+            result.extend(filter_recent(ent_rows, lookback_hours))
+            result.extend(filter_recent(news_rows, 2))
         else:
             result.extend(filter_recent(rows, lookback_hours))
     return result
@@ -1303,11 +1506,26 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
         "不過",
         "再者",
     }
+    surname = set(
+        "陳林黃張李王吳劉梁葉蔡鄭曾何許郭謝鄧馮盧彭沈胡潘杜"
+        "蕭鍾曹唐傅汪田余姚鄒熊白孟秦邱蘇石方"
+    )
+    synonym_map = {
+        "特區政府": "政府",
+        "港府": "政府",
+        "政府當局": "政府",
+        "警隊": "警察",
+        "警方": "警察",
+        "立會": "立法會",
+        "寒冷天氣警告": "冷天氣警告",
+    }
     money_units = {
         "萬元",
         "億元",
         "千元",
         "百萬",
+        "十億",
+        "百億",
         "平方呎",
         "方呎",
         "平方米",
@@ -1322,6 +1540,11 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
         "美元",
         "港元",
         "日圓",
+        "人民幣",
+        "億美元",
+        "億港元",
+        "億日圓",
+        "億人民幣",
     }
     phrases = {
         "天文台",
@@ -1335,6 +1558,32 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
         "三號風球",
         "一號風球",
         "強烈季候風信號",
+    }
+    org_suffixes = {
+        "局",
+        "署",
+        "處",
+        "會",
+        "院",
+        "廳",
+        "部",
+        "辦",
+        "政府",
+        "法院",
+        "委員會",
+        "集團",
+        "公司",
+        "大學",
+        "學校",
+        "醫院",
+        "銀行",
+        "醫管局",
+        "天文台",
+        "港鐵",
+        "機場",
+        "法庭",
+        "電台",
+        "電視台",
     }
     entity_suffixes = {
         "局",
@@ -1398,6 +1647,82 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
     }
     weak_chars = set("的了著及與和就於在是有將未可其對於以並及")
     counts: dict[str, float] = {}
+    org_regex = re.compile(r"[\u4e00-\u9fff]{2,10}(?:局|署|處|會|院|廳|部|辦|政府|法院|委員會|集團|公司|大學|學校|醫院|銀行|醫管局|天文台|港鐵|機場|法庭|電台|電視台)")
+    place_regex = re.compile(r"[\u4e00-\u9fff]{2,10}(?:市|區|鎮|縣|省|國|島|灣|海|路|街|道|村|山|河|湖|港)")
+
+    def normalize(token: str) -> str:
+        return synonym_map.get(token, token)
+
+    def is_person(token: str) -> bool:
+        return 2 <= len(token) <= 3 and token[0] in surname and token not in stopwords
+
+    def is_org(token: str) -> bool:
+        if any(token.endswith(s) for s in org_suffixes):
+            return True
+        return bool(org_regex.fullmatch(token))
+
+    def is_place(token: str) -> bool:
+        if any(token.endswith(s) for s in place_suffixes):
+            return True
+        return bool(place_regex.fullmatch(token))
+
+    def valid_token(token: str) -> bool:
+        if token in stopwords or token in money_units:
+            return False
+        if re.search(r"(億|萬|千|百|十).*(美元|港元|日圓|人民幣|元)", token):
+            return False
+        if re.search(r"(美元|港元|日圓|人民幣|元)$", token):
+            return False
+        if re.search(r"\d", token):
+            return False
+        if any(ch in weak_chars for ch in token) and len(token) <= 2:
+            return False
+        return True
+
+    def get_stanza_nlp():
+        global STANZA_NLP
+        if STANZA_NLP is not None:
+            return STANZA_NLP or None
+        if stanza is None:
+            STANZA_NLP = False
+            return None
+        try:
+            STANZA_NLP = stanza.Pipeline(
+                "zh",
+                processors="tokenize,ner",
+                tokenize_no_ssplit=True,
+                use_gpu=False,
+                verbose=False,
+            )
+        except Exception:
+            STANZA_NLP = False
+        return STANZA_NLP or None
+
+    stanza_nlp = get_stanza_nlp()
+    if stanza_nlp:
+        for title, body in items_texts:
+            text_blob = f"{title}\n{body}".strip()
+            if not text_blob:
+                continue
+            text_blob = text_blob[:4000]
+            try:
+                doc = stanza_nlp(text_blob)
+            except Exception:
+                continue
+            for ent in getattr(doc, "ents", []):
+                if ent.type not in {"PERSON", "ORG", "GPE", "LOC"}:
+                    continue
+                token = normalize(re.sub(r"\s+", "", ent.text.strip()))
+                if len(token) < 2 or not valid_token(token):
+                    continue
+                score = 2.8 if ent.type in {"PERSON", "ORG"} else 2.4
+                if token and token in (title or ""):
+                    score += 2.0
+                counts[token] = counts.get(token, 0.0) + score
+        if counts:
+            sorted_tokens = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
+            return [t for t, _ in sorted_tokens[:limit]]
+
     for title, body in items_texts:
         title_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", title or ""))
         body_tokens = set(re.findall(r"[\u4e00-\u9fff]{2,6}", body or ""))
@@ -1405,37 +1730,41 @@ def extract_keywords(items_texts: list[tuple[str, str]], limit: int = 10) -> lis
         for ph in phrases:
             if ph in text_blob:
                 counts[ph] = counts.get(ph, 0.0) + 4.0
+        for m in org_regex.finditer(text_blob):
+            token = normalize(m.group(0))
+            if valid_token(token):
+                counts[token] = counts.get(token, 0.0) + 2.5
+        for m in place_regex.finditer(text_blob):
+            token = normalize(m.group(0))
+            if valid_token(token):
+                counts[token] = counts.get(token, 0.0) + 2.0
         for token in title_tokens:
-            if token in stopwords:
+            token = normalize(token)
+            if not valid_token(token):
                 continue
-            if token in money_units:
-                continue
-            if re.search(r"\d", token):
-                continue
-            if any(ch in weak_chars for ch in token) and len(token) <= 2:
-                continue
-            score = 3.0
-            if any(token.endswith(s) for s in entity_suffixes):
+            score = 3.5
+            if is_org(token):
+                score += 2.2
+            elif is_place(token):
                 score += 2.0
-            if any(token.endswith(s) for s in place_suffixes):
-                score += 1.5
-            if len(token) >= 4:
-                score += 0.5
+            elif is_person(token):
+                score += 2.0
+            else:
+                continue
             counts[token] = counts.get(token, 0.0) + score
         for token in body_tokens:
-            if token in stopwords:
+            token = normalize(token)
+            if not valid_token(token):
                 continue
-            if token in money_units:
-                continue
-            if re.search(r"\d", token):
-                continue
-            if any(ch in weak_chars for ch in token) and len(token) <= 2:
-                continue
-            score = 1.0
-            if any(token.endswith(s) for s in entity_suffixes):
+            score = 1.2
+            if is_org(token):
+                score += 1.8
+            elif is_place(token):
                 score += 1.5
-            if any(token.endswith(s) for s in place_suffixes):
-                score += 1.0
+            elif is_person(token):
+                score += 1.4
+            else:
+                continue
             counts[token] = counts.get(token, 0.0) + score
     sorted_tokens = sorted(counts.items(), key=lambda x: (-x[1], x[0]))
     return [t for t, _ in sorted_tokens[:limit]]
@@ -1464,28 +1793,80 @@ def build_html(
     now_hkt = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M")
     latest_pub = ""
     cards = []
+    marquee_items: list[str] = []
+    marquee_items.append(f"<span class='marquee-count'>總數 {len(items)}</span>")
+    marquee_colors = [
+        "#ffd166",
+        "#9bdeac",
+        "#7bdff2",
+        "#f4a261",
+        "#a0c4ff",
+        "#ffadad",
+        "#cdb4db",
+        "#b8f2e6",
+        "#ffb703",
+        "#90caf9",
+    ]
+    def pick_marquee_color() -> str:
+        return random.choice(marquee_colors)
+    first_link = True
+    for idx, item in enumerate(items[:50], start=1):
+        if not item.title:
+            continue
+        if first_link:
+            first_link = False
+        else:
+            color = pick_marquee_color()
+            marquee_items.append(f"<span class='marquee-sep' style='color:{color}'>⟡</span>")
+        marquee_items.append(
+            "<a class='marquee-link' href='#item-{idx:02d}'>{title}</a>".format(
+                idx=idx, title=html.escape(item.title)
+            )
+        )
+    if not marquee_items:
+        marquee_items.append("<span class='marquee-count'>即時焦點</span>")
+    marquee_safe = " ".join(marquee_items)
     keyword_texts: list[tuple[str, str]] = []
     now_dt = datetime.now(ZoneInfo("Asia/Hong_Kong"))
     for idx, item in enumerate(items, start=1):
         content = item.summary
         content_html = ""
         image_url = item.rss_image
-        if item.link and item.source not in ("oncc", "hk01"):
-            fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
-            if fulltext:
-                content = fulltext
-            if og_image and not is_generic_image(og_image, item.link):
-                if (not image_url) or is_generic_image(image_url, item.link):
-                    image_url = og_image
+        if item.link and item.source not in ("oncc",):
             full_html = extract_full_html(item.link, fullhtml_cache, image_cache)
             if full_html:
-                content_html = full_html
+                text_from_html = strip_html(full_html)
+                # only trust full_html when it contains real text
+                if len(text_from_html) >= 40:
+                    content_html = full_html
+                    content = text_from_html
+                else:
+                    full_html = ""
+            if not full_html:
+                fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
+                if fulltext:
+                    content = fulltext
+                if og_image and not is_generic_image(og_image, item.link):
+                    if (not image_url) or is_generic_image(image_url, item.link):
+                        image_url = og_image
         content = clean_content_text(to_trad_if_cnbeta(item.source, strip_html(content)))
-        content = re.sub(r"。(」)", r"。\1\n", content)
-        content = re.sub(r"。(?!」)", "。\n", content)
         keyword_texts.append((item.title, content))
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
+        if item.source == "hk01" and item.extra_images:
+            extra_html_parts: list[str] = []
+            for img in item.extra_images:
+                img = normalize_image_url(item.link, img)
+                local_name = download_image(img, image_cache, item.link)
+                if local_name:
+                    img_url = f"images/{local_name}?v={build_id}"
+                else:
+                    img_url = f"{img}?v={build_id}"
+                extra_html_parts.append(
+                    f"<img src='{html.escape(img_url)}' alt='' loading='lazy' decoding='async'>"
+                )
+            if extra_html_parts:
+                content_html = "<br>".join(extra_html_parts) + "<br>" + content_html
         if item.source == "singtao" and image_url:
             m = re.search(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html)
             if m:
@@ -1530,21 +1911,23 @@ def build_html(
             else:
                 hero_url = f"{image_url}?v={build_id}"
             if item.source != "cnbeta":
-                hero_html = f"<img class='hero' src='{html.escape(hero_url)}' alt=''>"
+                hero_html = f"<img class='hero' src='{html.escape(hero_url)}' alt='' loading='lazy' decoding='async'>"
         seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
-      <article class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}">
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}">
         <header class="card-head">
           <span class="index">{idx:02d}</span>
           <div>
             <h2>{title}</h2>
             <div class="meta-row">
               <span class="tag" data-link="{link}">{source}</span>
+              <button class="share-btn" aria-label="分享">↗</button>
               <span class="cat cat-{category}">{category_label}</span>
               <span class="{date_class}">{pub}</span>
             </div>
           </div>
+          <button class="toggle" aria-label="展開/收起">▾</button>
         </header>
         {hero}
         {hero_note}
@@ -1562,7 +1945,11 @@ def build_html(
                 content=content_html,
                 seen_class=seen_class,
                 category=category,
-                category_label="新聞" if category == "news" else ("科技" if category == "tech" else "娛樂"),
+                category_label=(
+                    "新聞"
+                    if category == "news"
+                    else ("科技" if category == "tech" else ("娛樂" if category == "ent" else "國際"))
+                ),
                 age_class=age_class,
             )
         )
@@ -1609,40 +1996,122 @@ def build_html(
       background: var(--bg);
       color: var(--fg);
       line-height: 1.7;
+      -webkit-text-size-adjust: 100%;
     }}
     header.site {{
-      padding: 24px 16px 8px;
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      padding: calc(24px + env(safe-area-inset-top)) 16px 8px;
       text-align: center;
+      background: var(--bg);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
     }}
     header.site h1 {{
-      font-size: 28px;
+      font-size: 14px;
       margin: 0 0 6px;
+      font-weight: 600;
+    }}
+    .marquee {{
+      position: relative;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 16px;
+      user-select: none;
+      touch-action: pan-y;
+    }}
+    .marquee-track {{
+      display: inline-block;
+      animation: marquee 600s linear infinite;
+      will-change: transform;
+    }}
+    .marquee-item {{
+      display: inline-block;
+      margin-right: 28px;
+    }}
+    .marquee-link {{
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 2px;
+    }}
+    .marquee-link:hover {{
+      opacity: 0.85;
+    }}
+    .marquee-count {{
+      font-weight: 600;
+      opacity: 0.9;
+    }}
+    .marquee-sep {{
+      padding: 0 10px;
+      font-weight: 600;
+    }}
+    @keyframes marquee {{
+      0% {{ transform: translateX(calc(var(--marquee-offset, 0px) + 0px)); }}
+      100% {{ transform: translateX(calc(var(--marquee-offset, 0px) - 100%)); }}
+    }}
+    @media (min-width: 900px) {{
+      .marquee {{
+        font-size: 18px;
+      }}
     }}
     header.site .meta {{
       color: var(--muted);
       font-size: 14px;
     }}
     .toolbar {{
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: rgba(246, 242, 234, 0.95);
-      backdrop-filter: blur(10px);
+      position: static;
+      background: transparent;
+      backdrop-filter: none;
       border-bottom: none;
       padding: 12px 16px;
       display: flex;
-      gap: 12px;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+    }}
+    .toolbar-row {{
+      width: 100%;
+      display: flex;
+      gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: center;
+    }}
+    .search-wrap {{
+      flex: 1 1 260px;
+      max-width: 560px;
+      display: flex;
+      align-items: center;
+      position: relative;
     }}
     .toolbar input {{
-      flex: 1 1 260px;
-      max-width: 360px;
-      padding: 10px 12px;
+      width: 100%;
+      padding: 10px 36px 10px 12px;
       border-radius: 999px;
       border: 1px solid var(--border);
       background: #fff;
       font-size: 14px;
+    }}
+    .clear-search {{
+      position: absolute;
+      right: 10px;
+      border: 0;
+      background: transparent;
+      font-size: 16px;
+      color: var(--muted);
+      cursor: pointer;
+      display: none;
+      padding: 0;
+      line-height: 1;
+    }}
+    .clear-search.visible {{
+      display: block;
     }}
     .filters {{
       display: flex;
@@ -1688,6 +2157,7 @@ def build_html(
       background: #fff;
       cursor: pointer;
       user-select: none;
+      touch-action: manipulation;
     }}
     .chip.active {{
       background: var(--accent);
@@ -1716,6 +2186,11 @@ def build_html(
       color: #8d2b3c;
       background: #fff1f2;
     }}
+    .cat-intl {{
+      border-color: #cfd7ff;
+      color: #2b3f8d;
+      background: #eef0ff;
+    }}
     main {{
       max-width: 920px;
       margin: 0 auto;
@@ -1730,10 +2205,20 @@ def build_html(
       box-shadow: 0 10px 24px var(--shadow);
       border: 1px solid var(--border);
       scroll-snap-align: start;
-      scroll-margin-top: 12px;
+      scroll-margin-top: 180px;
+      scroll-snap-stop: always;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
     }}
-    body {{
+    .card.show {{
+      opacity: 1;
+      transform: translateY(0);
+    }}
+    html, body {{
       scroll-snap-type: y proximity;
+      scroll-padding-top: 12px;
+      scroll-behavior: smooth;
     }}
     .card.seen {{
       filter: saturate(0.95);
@@ -1753,6 +2238,11 @@ def build_html(
       --cat-bg-2: #ffe3e6;
       --cat-bg-3: #ffd4da;
     }}
+    .category-intl {{
+      --cat-bg: #eef0ff;
+      --cat-bg-2: #e4e7ff;
+      --cat-bg-3: #d6dbff;
+    }}
     .age-fresh {{
       background: #ffffff;
     }}
@@ -1767,7 +2257,7 @@ def build_html(
     }}
     .card-head {{
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto 1fr auto;
       gap: 12px;
       align-items: start;
     }}
@@ -1781,7 +2271,7 @@ def build_html(
     }}
     h2 {{
       margin: 0 0 6px;
-      font-size: 20px;
+      font-size: 17px;
       line-height: 1.4;
       font-family: "Noto Serif TC", "PingFang TC", "Heiti TC", serif;
     }}
@@ -1795,8 +2285,9 @@ def build_html(
       padding: 2px 10px;
       border-radius: 999px;
       background: #eef2f7;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
+      touch-action: manipulation;
     }}
     .date {{
       color: var(--accent);
@@ -1814,34 +2305,129 @@ def build_html(
       padding: 2px 8px;
       font-size: 14px;
       cursor: pointer;
+      touch-action: manipulation;
+    }}
+    .font-btn {{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
     }}
     .refresh-btn:hover {{
       border-color: var(--accent);
     }}
+    .view-btn {{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }}
     .hero {{
-      width: 100%;
-      max-height: 360px;
-      object-fit: cover;
+      width: 100% !important;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
       border-radius: 12px;
       margin: 10px auto;
       display: block;
     }}
+    .card[data-source="singtao"] .hero {{
+      object-fit: contain;
+      background: #fff;
+    }}
     .content {{
-      font-size: 15px;
+      font-size: var(--content-font, 15px);
       color: #262626;
       white-space: normal;
+    }}
+    .content h1, .content h2, .content h3 {{
+      font-size: 16px;
+      line-height: 1.5;
+      margin: 8px 0;
+    }}
+    .share-btn {{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      width: 22px;
+      height: 22px;
+      line-height: 20px;
+      text-align: center;
+      font-size: 12px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }}
+    .toggle {{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      width: 28px;
+      height: 28px;
+      line-height: 26px;
+      text-align: center;
+      font-size: 14px;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }}
+    .toggle.open {{
+      transform: rotate(180deg);
+    }}
+    .card .content {{
+      transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
+    }}
+    .card.collapsed .content {{
+      opacity: 0;
+      transform: translateY(-6px);
+    }}
+    .card.collapsed.show .content {{
+      opacity: 0;
+      transform: translateY(-6px);
+    }}
+    .card.collapsed .content,
+    .card.collapsed .hero,
+    .card.collapsed .img-note {{
+      display: none;
+    }}
+    body.title-only .card.collapsed .content,
+    body.title-only .card.collapsed .hero,
+    body.title-only .card.collapsed .img-note {{
+      display: none;
     }}
     .content img {{
       display: block;
       margin-left: auto;
       margin-right: auto;
-      max-width: 80%;
-      max-height: 360px;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto;
+      max-height: 420px;
       object-fit: contain;
       border-radius: 12px;
       margin-top: 8px;
       margin-bottom: 8px;
-      height: auto;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }}
+    .content img.show {{
+      opacity: 1;
+      transform: translateY(0);
+    }}
+    .card[data-source="singtao"] .content img {{
+      max-height: 320px;
+      background: #fff;
     }}
     .hl {{
       background: #fff3a6;
@@ -1878,6 +2464,26 @@ def build_html(
       color: var(--muted);
       font-size: 12px;
       padding: 18px 16px 28px;
+    }}
+    .top-btn {{
+      position: fixed;
+      right: 14px;
+      bottom: 16px;
+      z-index: 20;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: none;
+      touch-action: manipulation;
+    }}
+    .top-btn.show {{
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }}
     .modal {{
       position: fixed;
@@ -1958,55 +2564,134 @@ def build_html(
       .toolbar {{
         padding: 10px 12px;
       }}
+      .search-wrap {{
+        flex: 1 1 100%;
+        max-width: none;
+      }}
+      .toolbar input {{
+        font-size: 16px;
+      }}
     }}
   </style>
 </head>
 <body>
   <header class="site">
-    <h1>即時焦點</h1>
-    <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button></div>
+    <h1 class="marquee"><span class="marquee-track">{marquee_safe}</span></h1>
+    <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button> <button class="view-btn" id="view-toggle" title="切換顯示">只睇標題</button> <button class="font-btn" id="font-sm" title="內文縮細">A-</button> <button class="font-btn" id="font-lg" title="內文放大">A+</button></div>
   </header>
   <div class="toolbar">
-    <input id="search" type="search" placeholder="搜尋標題或內容…">
-    <div class="filters">
-      <span class="chip active" data-category="all">全部</span>
-      <span class="chip" data-category="news">新聞</span>
-      <span class="chip" data-category="ent">娛樂</span>
-      <span class="chip" data-category="tech">科技</span>
+    <div class="toolbar-row">
+      <div class="search-wrap">
+        <input id="search" type="search" placeholder="搜尋標題或內容…">
+        <button class="clear-search" id="clear-search" title="清除">✕</button>
+      </div>
     </div>
-    <div class="filters secondary" id="news-sources">
-      <span class="chip active" data-source="all">全部</span>
-      <span class="chip" data-source="RTHK">RTHK</span>
-      <span class="chip" data-source="mingpao">Mingpao</span>
-      <span class="chip" data-source="oncc">ON.cc</span>
-      <span class="chip" data-source="singtao">Singtao</span>
-      <span class="chip" data-source="hk01">HK01</span>
+    <div class="toolbar-row">
+      <div class="filters">
+        <span class="chip active" data-category="all">全部(0)</span>
+        <span class="chip" data-category="news">新聞(0)</span>
+        <span class="chip" data-category="intl">國際(0)</span>
+        <span class="chip" data-category="ent">娛樂(0)</span>
+        <span class="chip" data-category="tech">科技(0)</span>
+      </div>
     </div>
-    <div class="keywords">{keyword_html}</div>
+    <div class="toolbar-row">
+      <div class="filters secondary" id="news-sources">
+        <span class="chip active" data-source="all">全部</span>
+        <span class="chip" data-source="RTHK">RTHK</span>
+        <span class="chip" data-source="mingpao">Mingpao</span>
+        <span class="chip" data-source="oncc">ON.cc</span>
+        <span class="chip" data-source="singtao">Singtao</span>
+        <span class="chip" data-source="hk01">HK01</span>
+      </div>
+    </div>
+    <div class="toolbar-row">
+      <div class="keywords">{keyword_html}</div>
+    </div>
   </div>
   <main id="list">
     {"".join(cards) if cards else '<div class="empty">近 12 小時內冇新項目。</div>'}
   </main>
   <footer class="site-footer">生成時間 {build_ts} HKT</footer>
+  <button class="top-btn" id="top-btn" title="回到頂部">↑ 頂部</button>
   <script>
     const categoryChips = document.querySelectorAll('.filters:not(.secondary) .chip');
     const sourceChips = document.querySelectorAll('.filters.secondary .chip');
     const cards = document.querySelectorAll('.card');
     const search = document.getElementById('search');
+    const clearBtn = document.getElementById('clear-search');
     const refreshBtn = document.getElementById('refresh');
+    const fontSm = document.getElementById('font-sm');
+    const fontLg = document.getElementById('font-lg');
+    const viewToggle = document.getElementById('view-toggle');
+    const topBtn = document.getElementById('top-btn');
+    const headerEl = document.querySelector('header.site');
+    const toolbarEl = document.querySelector('.toolbar');
+    const marquee = document.querySelector('.marquee');
+    const marqueeTrack = document.querySelector('.marquee-track');
     const refreshMs = {max(60, int(refresh_seconds))} * 1000;
     let lastAuto = Date.now();
     const contents = Array.from(document.querySelectorAll('.content'));
     const titles = Array.from(document.querySelectorAll('.card h2'));
+    // update category counts in chips
+    const counts = {{ all: 0, news: 0, intl: 0, ent: 0, tech: 0 }};
+    cards.forEach(card => {{
+      const cat = card.dataset.category || '';
+      counts.all += 1;
+      if (counts[cat] !== undefined) counts[cat] += 1;
+    }});
+    categoryChips.forEach(chip => {{
+      const cat = chip.dataset.category || 'all';
+      const label = chip.textContent.replace(/\\(\\d+\\)$/,'').trim();
+      const n = counts[cat] || 0;
+      chip.textContent = `${{label}}(${{n}})`;
+    }});
     contents.forEach(el => {{
       if (!el.dataset.original) el.dataset.original = el.innerHTML;
     }});
     titles.forEach(el => {{
       if (!el.dataset.original) el.dataset.original = el.innerHTML;
     }});
+    // animate cards on load
+    cards.forEach((card, i) => {{
+      setTimeout(() => card.classList.add('show'), 20 + i * 20);
+    }});
+    // animate images when loaded
+    document.querySelectorAll('.content img, .hero').forEach(img => {{
+      if (img.complete) {{
+        img.classList.add('show');
+      }} else {{
+        img.addEventListener('load', () => img.classList.add('show'), {{ once: true }});
+      }}
+    }});
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
+    let fontSize = parseInt(localStorage.getItem('contentFont') || '15', 10);
+    let titleOnly = (localStorage.getItem('titleOnly') || 'true') === 'true';
+    if (!Number.isFinite(fontSize) || fontSize < 12 || fontSize > 22) {{
+      fontSize = 15;
+    }}
+    document.documentElement.style.setProperty('--content-font', fontSize + 'px');
+    document.body.classList.toggle('title-only', titleOnly);
+    if (viewToggle) viewToggle.textContent = titleOnly ? '只睇標題' : '顯示全文';
+
+
+    function applyCollapseByCategory() {{
+      cards.forEach(card => {{
+        const cat = card.dataset.category || '';
+        const isAll = activeCategory === 'all';
+        if (titleOnly) {{
+          card.classList.add('collapsed');
+          const btn = card.querySelector('.toggle');
+          if (btn) btn.classList.remove('open');
+          return;
+        }}
+        if (isAll || cat === activeCategory) {{
+          card.classList.remove('collapsed');
+        }}
+      }});
+    }}
 
     function applyFilter() {{
       const q = (search.value || '').trim().toLowerCase();
@@ -2020,14 +2705,28 @@ def build_html(
         card.style.display = categoryOk && sourceOk && textOk ? '' : 'none';
       }});
     }}
+    function switchToAll() {{
+      activeCategory = 'all';
+      activeSource = 'all';
+      categoryChips.forEach(c => c.classList.remove('active'));
+      if (categoryChips[0]) categoryChips[0].classList.add('active');
+      sourceChips.forEach(c => c.classList.remove('active'));
+      if (sourceChips[0]) sourceChips[0].classList.add('active');
+      newsSources.style.display = 'none';
+      applyFilter();
+      applyCollapseByCategory();
+    }}
 
     categoryChips.forEach(chip => {{
       chip.addEventListener('click', () => {{
         categoryChips.forEach(c => c.classList.remove('active'));
         chip.classList.add('active');
         activeCategory = chip.dataset.category || 'all';
-        if (activeCategory === 'news') {{
+        if (activeCategory === 'news' || activeCategory === 'ent' || activeCategory === 'intl') {{
           newsSources.style.display = 'flex';
+          activeSource = 'all';
+          sourceChips.forEach(c => c.classList.remove('active'));
+          sourceChips[0].classList.add('active');
         }} else {{
           newsSources.style.display = 'none';
           activeSource = 'all';
@@ -2035,6 +2734,7 @@ def build_html(
           sourceChips[0].classList.add('active');
         }}
         applyFilter();
+        applyCollapseByCategory();
       }});
     }});
 
@@ -2049,6 +2749,29 @@ def build_html(
     if (refreshBtn) {{
       refreshBtn.addEventListener('click', () => {{
         window.location.reload();
+      }});
+    }}
+    if (fontSm) {{
+      fontSm.addEventListener('click', () => {{
+        fontSize = Math.max(12, fontSize - 1);
+        document.documentElement.style.setProperty('--content-font', fontSize + 'px');
+        localStorage.setItem('contentFont', fontSize);
+      }});
+    }}
+    if (fontLg) {{
+      fontLg.addEventListener('click', () => {{
+        fontSize = Math.min(22, fontSize + 1);
+        document.documentElement.style.setProperty('--content-font', fontSize + 'px');
+        localStorage.setItem('contentFont', fontSize);
+      }});
+    }}
+    if (viewToggle) {{
+      viewToggle.addEventListener('click', () => {{
+        titleOnly = !titleOnly;
+        document.body.classList.toggle('title-only', titleOnly);
+        localStorage.setItem('titleOnly', titleOnly);
+        viewToggle.textContent = titleOnly ? '只睇標題' : '顯示全文';
+        applyCollapseByCategory();
       }});
     }}
     function clearHighlights() {{
@@ -2115,13 +2838,26 @@ def build_html(
         el.appendChild(frag);
       }});
     }}
+    function setClearVisible() {{
+      if (!clearBtn) return;
+      clearBtn.classList.toggle('visible', !!(search.value || '').trim());
+    }}
     setInterval(() => {{
       if (window.scrollY <= 5 && (Date.now() - lastAuto) >= refreshMs) {{
         window.location.reload();
       }}
     }}, 1000);
 
-    search.addEventListener('input', applyFilter);
+    search.addEventListener('input', () => {{
+      applyFilter();
+      const term = (search.value || '').trim();
+      if (term) {{
+        highlightTerm(term);
+      }} else {{
+        clearHighlights();
+      }}
+      setClearVisible();
+    }});
     document.querySelectorAll('.kw').forEach(kw => {{
       kw.addEventListener('click', () => {{
         const word = kw.dataset.kw || '';
@@ -2129,13 +2865,121 @@ def build_html(
         search.value = word;
         applyFilter();
         highlightTerm(word);
+        setClearVisible();
         const first = Array.from(cards).find(c => c.style.display !== 'none');
-        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'center' }});
+        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
       }});
     }});
-    search.addEventListener('input', () => {{
-      if (!search.value) clearHighlights();
+    const scrollGap = -140;
+    function updateScrollPadding() {{
+      const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
+      const pad = Math.max(12, headerH + toolbarH + scrollGap);
+      document.documentElement.style.scrollPaddingTop = pad + 'px';
+      document.body.style.scrollPaddingTop = pad + 'px';
+    }}
+    function temporarilyDisableSnap() {{
+      document.documentElement.style.scrollSnapType = 'none';
+      document.body.style.scrollSnapType = 'none';
+      setTimeout(() => {{
+        document.documentElement.style.scrollSnapType = 'y proximity';
+        document.body.style.scrollSnapType = 'y proximity';
+      }}, 700);
+    }}
+    function scrollToCard(card) {{
+      if (!card) return;
+      updateScrollPadding();
+      temporarilyDisableSnap();
+      const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
+      const top = card.getBoundingClientRect().top + window.scrollY - headerH - toolbarH - scrollGap;
+      window.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
+    }}
+    document.querySelectorAll('.marquee-link').forEach(link => {{
+      link.addEventListener('click', (e) => {{
+        const href = link.getAttribute('href') || '';
+        const id = href.startsWith('#') ? href.slice(1) : '';
+        if (!id) return;
+        e.preventDefault();
+        search.value = '';
+        clearHighlights();
+        setClearVisible();
+        switchToAll();
+        const target = document.getElementById(id);
+        if (target) {{
+          if (titleOnly) {{
+            titleOnly = false;
+            document.body.classList.remove('title-only');
+            localStorage.setItem('titleOnly', titleOnly);
+            if (viewToggle) viewToggle.textContent = '顯示全文';
+          }}
+          target.classList.remove('collapsed');
+          const btn = target.querySelector('.toggle');
+          if (btn) btn.classList.add('open');
+          scrollToCard(target);
+          history.replaceState(null, '', '#' + id);
+        }}
+      }});
     }});
+    window.addEventListener('resize', updateScrollPadding);
+    updateScrollPadding();
+
+    if (marquee && marqueeTrack) {{
+      marquee.classList.remove('dragging');
+      marqueeTrack.style.removeProperty('--marquee-offset');
+    }}
+    if (clearBtn) {{
+      clearBtn.addEventListener('click', () => {{
+        search.value = '';
+        applyFilter();
+        clearHighlights();
+        setClearVisible();
+        search.focus();
+      }});
+    }}
+    setClearVisible();
+    applyCollapseByCategory();
+
+    document.querySelectorAll('.toggle').forEach(btn => {{
+      btn.addEventListener('click', (e) => {{
+        const card = btn.closest('.card');
+        if (!card) return;
+        card.classList.toggle('collapsed');
+        btn.classList.toggle('open');
+        e.stopPropagation();
+      }});
+    }});
+    document.querySelectorAll('.share-btn').forEach(btn => {{
+      btn.addEventListener('click', async (e) => {{
+        const card = btn.closest('.card');
+        if (!card) return;
+        const link = card.querySelector('.tag')?.dataset?.link || '';
+        const title = card.querySelector('h2')?.textContent || '';
+        if (!link) return;
+        try {{
+          if (navigator.share) {{
+            await navigator.share({{ title, url: link }});
+          }} else if (navigator.clipboard) {{
+            await navigator.clipboard.writeText(link);
+            btn.textContent = '✓';
+            setTimeout(() => (btn.textContent = '↗'), 1000);
+          }} else {{
+            window.open(link, '_blank');
+          }}
+        }} catch (err) {{
+          window.open(link, '_blank');
+        }}
+        e.stopPropagation();
+      }});
+    }});
+    if (topBtn) {{
+      topBtn.addEventListener('click', () => {{
+        window.scrollTo({{ top: 0, behavior: 'smooth' }});
+      }});
+      window.addEventListener('scroll', () => {{
+        topBtn.classList.toggle('show', window.scrollY > 600);
+      }});
+    }}
 
     document.querySelectorAll('.tag').forEach(tag => {{
       tag.addEventListener('click', () => {{
@@ -2154,11 +2998,26 @@ def build_html(
 def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
     items: list[Item] = []
     for url in urls:
+        if "stheadline.com/entertainment" in url:
+            items.extend(fetch_stheadline_ent_list(url, feed_cache))
+            continue
         if "on.cc" in url:
-            items.extend(fetch_oncc_list(url, feed_cache))
+            if "/intnews/" in url:
+                category = "intl"
+            elif "entertainment" in url:
+                category = "ent"
+            else:
+                category = "news"
+            items.extend(fetch_oncc_list(url, feed_cache, category=category))
             continue
         if "hk01.com" in url:
-            items.extend(fetch_hk01_list(url, feed_cache))
+            if "/channel/19/" in url or "/zone/5/" in url:
+                category = "intl"
+            elif "/zone/2/" in url or "/channel/22/" in url:
+                category = "ent"
+            else:
+                category = "news"
+            items.extend(fetch_hk01_list(url, feed_cache, category=category))
             continue
         payload, meta = fetch_with_cache(url, feed_cache)
         if meta:
@@ -2179,13 +3038,19 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
             category = "tech"
         elif "stheadline.com" in url:
             source = "singtao"
-            category = "news"
+            if "realtime-china" in url or "realtime-world" in url:
+                category = "intl"
+            else:
+                category = "news"
         elif "hk01.com" in url:
             source = "hk01"
             category = "news"
         elif "s00007.xml" in url:
             source = "mingpao"
             category = "ent"
+        elif "s00004.xml" in url or "s00005.xml" in url:
+            source = "mingpao"
+            category = "intl"
         else:
             source = "mingpao"
             category = "news"
