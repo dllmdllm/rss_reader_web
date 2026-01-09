@@ -312,7 +312,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
         return fragment
     try:
         root = lxml_html.fragment_fromstring(fragment, create_parent="div")
-        for node in root.xpath(".//script | .//style | .//noscript | .//video | .//iframe"):
+        for node in root.xpath(".//script | .//style | .//noscript | .//video | .//iframe | .//button"):
             node.getparent().remove(node)
         if "stheadline.com" in base_url:
             for node in root.xpath(".//ad"):
@@ -3406,6 +3406,12 @@ def build_html(
 </body>
 </html>
 """
+    # enforce collapse button outside content container (guards against malformed fragments)
+    html_text = re.sub(
+        r'(<div class="content">)([\\s\\S]*?)(<button class="collapse-btn"[^>]*>▴</button>)</div>',
+        r'\\1\\2</div>\\3',
+        html_text,
+    )
     with open(output_path, "w", encoding="utf-8") as handle:
         handle.write(html_text)
 
