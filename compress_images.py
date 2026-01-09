@@ -9,10 +9,10 @@ IMAGES_DIR = os.path.join(PROJECT_ROOT, "images")
 INDEX_PATH = os.path.join(PROJECT_ROOT, "index.html")
 IMAGE_CACHE_PATH = os.path.join(PROJECT_ROOT, "data", "image_cache.json")
 
-MAX_WIDTH = 900
-TARGET_BYTES = 300 * 1024
-QUALITY_JPG = 60
-QUALITY_WEBP = 58
+MAX_WIDTH = 720
+TARGET_BYTES = 200 * 1024
+QUALITY_JPG = 52
+QUALITY_WEBP = 48
 
 
 def load_json(path: str) -> dict:
@@ -49,9 +49,9 @@ def save_with_quality(img_obj: Image.Image, q: int, ext: str) -> str:
             img_obj = img_obj.convert("RGB")
         img_obj.save(tmp_path, format="WEBP", quality=q, method=6)
     else:
-        if img_obj.mode not in ("RGB", "L"):
+        if img_obj.mode not in ("RGB", "RGBA"):
             img_obj = img_obj.convert("RGB")
-        img_obj.save(tmp_path, format="PNG", optimize=True)
+        img_obj.save(tmp_path, format="WEBP", quality=q, method=6)
     return tmp_path
 
 
@@ -113,10 +113,13 @@ def main() -> int:
             continue
         compress_image(path)
         base = os.path.splitext(name)[0]
+        out_ext = ext
+        if ext == ".png":
+            out_ext = ".webp"
         if base.endswith("_OK"):
-            new_name = f"{base}{ext}"
+            new_name = f"{base}{out_ext}"
         else:
-            new_name = f"{base}_OK{ext}"
+            new_name = f"{base}_OK{out_ext}"
         new_path = os.path.join(IMAGES_DIR, new_name)
         try:
             if os.path.exists(new_path):
