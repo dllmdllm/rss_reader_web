@@ -2462,6 +2462,9 @@ def build_html(
       filter: saturate(0.92);
       opacity: 0.86;
     }}
+    .card.seen h2 {{
+      font-weight: 400;
+    }}
     .seen-label {{
       display: inline-block;
       margin-left: 6px;
@@ -2519,9 +2522,10 @@ def build_html(
     }}
     h2 {{
       margin: 0 0 6px;
-      font-size: 14px;
+      font-size: var(--content-font, 15px);
       line-height: 1.4;
       font-family: "Noto Serif TC", "PingFang TC", "Heiti TC", serif;
+      font-weight: 600;
     }}
     .meta-row {{
       display: flex;
@@ -2622,7 +2626,7 @@ def build_html(
       padding-bottom: 26px;
     }}
     .content h1, .content h2, .content h3 {{
-      font-size: 16px;
+      font-size: var(--content-font, 15px);
       line-height: 1.5;
       margin: 8px 0;
     }}
