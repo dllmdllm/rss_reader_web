@@ -14,8 +14,10 @@ import xml.etree.ElementTree as ET
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from email.utils import parsedate_to_datetime
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urljoin, urlparse, urlsplit, urlunsplit, quote
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
 
 try:
     from zoneinfo import ZoneInfo
@@ -74,13 +76,11 @@ FEED_CACHE_PATH = os.path.join(DATA_DIR, "feed_cache.json")
 FULLTEXT_CACHE_PATH = os.path.join(DATA_DIR, "fulltext_cache.json")
 IMAGE_CACHE_PATH = os.path.join(DATA_DIR, "image_cache.json")
 FULLHTML_CACHE_PATH = os.path.join(DATA_DIR, "fullhtml_cache.json")
-SEEN_CACHE_PATH = os.path.join(DATA_DIR, "seen_cache.json")
 
 FULLTEXT_CACHE_TTL = 6 * 60 * 60
 IMAGE_CACHE_TTL = 24 * 60 * 60
 FULLHTML_CACHE_TTL = 6 * 60 * 60
 CACHE_GC_TTL = 7 * 24 * 60 * 60
-SEEN_CACHE_TTL = 30 * 24 * 60 * 60
 
 
 @dataclass
@@ -94,7 +94,6 @@ class Item:
     summary: str
     rss_image: str
     extra_images: list[str] = field(default_factory=list)
-    image_count: int = 0
     image_count: int = 0
 
 
@@ -125,14 +124,6 @@ def gc_cache(cache: dict, ttl_seconds: int) -> dict:
         if not ts or now - ts <= ttl_seconds:
             cleaned[key] = value
     return cleaned
-
-
-def mark_seen(seen_cache: dict, items: list["Item"]) -> dict:
-    now = time.time()
-    for item in items:
-        if item.link:
-            seen_cache[item.link] = {"timestamp": now}
-    return seen_cache
 
 
 def get_trad_converter():
@@ -1168,19 +1159,25 @@ def extract_hk01_article(
     return title, content, image_url, pub_dt, extra_images
 
 
-def fetch_hk01_list(url: str, feed_cache: dict, category: str = "news") -> list[Item]:
+def fetch_hk01_list(url: str, feed_cache: dict, category: str = "news", lock: Optional[threading.Lock] = None) -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
     if meta:
-        entry = feed_cache.get(url, {})
-        if payload:
-            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
-        if meta.get("etag"):
-            entry["etag"] = meta.get("etag")
-        if meta.get("last_modified"):
-            entry["last_modified"] = meta.get("last_modified")
-        entry["timestamp"] = meta.get("timestamp", time.time())
-        feed_cache[url] = entry
+        if lock:
+            lock.acquire()
+        try:
+            entry = feed_cache.get(url, {})
+            if payload:
+                entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+            if meta.get("etag"):
+                entry["etag"] = meta.get("etag")
+            if meta.get("last_modified"):
+                entry["last_modified"] = meta.get("last_modified")
+            entry["timestamp"] = meta.get("timestamp", time.time())
+            feed_cache[url] = entry
+        finally:
+            if lock:
+                lock.release()
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
@@ -1219,19 +1216,25 @@ def fetch_hk01_list(url: str, feed_cache: dict, category: str = "news") -> list[
         )
     return items
 
-def fetch_oncc_list(url: str, feed_cache: dict, category: str = "news") -> list[Item]:
+def fetch_oncc_list(url: str, feed_cache: dict, category: str = "news", lock: Optional[threading.Lock] = None) -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
     if meta:
-        entry = feed_cache.get(url, {})
-        if payload:
-            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
-        if meta.get("etag"):
-            entry["etag"] = meta.get("etag")
-        if meta.get("last_modified"):
-            entry["last_modified"] = meta.get("last_modified")
-        entry["timestamp"] = meta.get("timestamp", time.time())
-        feed_cache[url] = entry
+        if lock:
+            lock.acquire()
+        try:
+            entry = feed_cache.get(url, {})
+            if payload:
+                entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+            if meta.get("etag"):
+                entry["etag"] = meta.get("etag")
+            if meta.get("last_modified"):
+                entry["last_modified"] = meta.get("last_modified")
+            entry["timestamp"] = meta.get("timestamp", time.time())
+            feed_cache[url] = entry
+        finally:
+            if lock:
+                lock.release()
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
@@ -1292,19 +1295,25 @@ def fetch_oncc_list(url: str, feed_cache: dict, category: str = "news") -> list[
         )
     return items
 
-def fetch_stheadline_ent_list(url: str, feed_cache: dict) -> list[Item]:
+def fetch_stheadline_ent_list(url: str, feed_cache: dict, lock: Optional[threading.Lock] = None) -> list[Item]:
     items: list[Item] = []
     payload, meta = fetch_with_cache(url, feed_cache)
     if meta:
-        entry = feed_cache.get(url, {})
-        if payload:
-            entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
-        if meta.get("etag"):
-            entry["etag"] = meta.get("etag")
-        if meta.get("last_modified"):
-            entry["last_modified"] = meta.get("last_modified")
-        entry["timestamp"] = meta.get("timestamp", time.time())
-        feed_cache[url] = entry
+        if lock:
+            lock.acquire()
+        try:
+            entry = feed_cache.get(url, {})
+            if payload:
+                entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+            if meta.get("etag"):
+                entry["etag"] = meta.get("etag")
+            if meta.get("last_modified"):
+                entry["last_modified"] = meta.get("last_modified")
+            entry["timestamp"] = meta.get("timestamp", time.time())
+            feed_cache[url] = entry
+        finally:
+            if lock:
+                lock.release()
     if not payload:
         return items
     html_text = payload.decode("utf-8", errors="ignore")
@@ -1839,7 +1848,6 @@ def build_html(
     image_cache: dict,
     fulltext_cache: dict,
     fullhtml_cache: dict,
-    seen_cache: dict,
 ) -> None:
     build_id = str(int(time.time()))
     now_hkt = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M")
@@ -3251,7 +3259,6 @@ def build_html(
       if (i < 12) prefetchHero(card);
     }});
     let lastFocus = null;
-    let focusTimer = null;
     function updateFocusByScroll() {{
       const now = Date.now();
       if (now < focusPauseUntil) return;
@@ -3343,10 +3350,11 @@ def build_html(
 
 def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
     items: list[Item] = []
-    for url in urls:
+    lock = threading.Lock()
+
+    def worker(url: str) -> list[Item]:
         if "stheadline.com/entertainment" in url:
-            items.extend(fetch_stheadline_ent_list(url, feed_cache))
-            continue
+            return fetch_stheadline_ent_list(url, feed_cache, lock=lock)
         if "on.cc" in url:
             if "/intnews/" in url:
                 category = "intl"
@@ -3354,8 +3362,7 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
                 category = "ent"
             else:
                 category = "news"
-            items.extend(fetch_oncc_list(url, feed_cache, category=category))
-            continue
+            return fetch_oncc_list(url, feed_cache, category=category, lock=lock)
         if "hk01.com" in url:
             if "/channel/19/" in url or "/zone/5/" in url:
                 category = "intl"
@@ -3363,19 +3370,20 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
                 category = "ent"
             else:
                 category = "news"
-            items.extend(fetch_hk01_list(url, feed_cache, category=category))
-            continue
+            return fetch_hk01_list(url, feed_cache, category=category, lock=lock)
+
         payload, meta = fetch_with_cache(url, feed_cache)
         if meta:
-            entry = feed_cache.get(url, {})
-            if payload:
-                entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
-            if meta.get("etag"):
-                entry["etag"] = meta.get("etag")
-            if meta.get("last_modified"):
-                entry["last_modified"] = meta.get("last_modified")
-            entry["timestamp"] = meta.get("timestamp", time.time())
-            feed_cache[url] = entry
+            with lock:
+                entry = feed_cache.get(url, {})
+                if payload:
+                    entry["payload_b64"] = base64.b64encode(payload).decode("ascii")
+                if meta.get("etag"):
+                    entry["etag"] = meta.get("etag")
+                if meta.get("last_modified"):
+                    entry["last_modified"] = meta.get("last_modified")
+                entry["timestamp"] = meta.get("timestamp", time.time())
+                feed_cache[url] = entry
         if "rthk" in url:
             source = "RTHK"
             category = "news"
@@ -3401,10 +3409,18 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
             source = "mingpao"
             category = "news"
         try:
-            items.extend(parse_items(payload, source, category))
+            return parse_items(payload, source, category)
         except Exception as exc:
             print(f"Parse failed ({url}): {exc}")
-            continue
+            return []
+
+    with ThreadPoolExecutor(max_workers=DEFAULT_THREADS) as ex:
+        futures = [ex.submit(worker, url) for url in urls]
+        for fut in as_completed(futures):
+            try:
+                items.extend(fut.result())
+            except Exception as exc:
+                print(f"Fetch failed: {exc}")
     return items
 
 
@@ -3422,12 +3438,10 @@ def main() -> int:
     image_cache = load_json(IMAGE_CACHE_PATH)
     fulltext_cache = load_json(FULLTEXT_CACHE_PATH)
     fullhtml_cache = load_json(FULLHTML_CACHE_PATH)
-    seen_cache = load_json(SEEN_CACHE_PATH)
     feed_cache = gc_cache(feed_cache, CACHE_GC_TTL)
     image_cache = gc_cache(image_cache, CACHE_GC_TTL)
     fulltext_cache = gc_cache(fulltext_cache, CACHE_GC_TTL)
     fullhtml_cache = gc_cache(fullhtml_cache, CACHE_GC_TTL)
-    seen_cache = gc_cache(seen_cache, SEEN_CACHE_TTL)
 
     urls = [u.strip() for u in args.url.split(",") if u.strip()]
     items = fetch_all(urls, feed_cache)
@@ -3451,7 +3465,6 @@ def main() -> int:
         image_cache,
         fulltext_cache,
         fullhtml_cache,
-        seen_cache,
     )
 
     save_json(FEED_CACHE_PATH, feed_cache)
