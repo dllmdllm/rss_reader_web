@@ -2843,7 +2843,7 @@ def build_html(
         padding: 14px;
       }}
       h2 {{
-        font-size: 14px;
+        font-size: var(--content-font, 15px);
       }}
       .toolbar {{
         padding: 10px 12px;
