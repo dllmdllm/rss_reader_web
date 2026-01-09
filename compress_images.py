@@ -57,6 +57,7 @@ def save_with_quality(img_obj: Image.Image, q: int, ext: str) -> str:
 
 def compress_image(path: str) -> None:
     ext = os.path.splitext(path)[1].lower()
+    tmp_path = ""
     try:
         img = Image.open(path)
         img.load()
@@ -65,7 +66,7 @@ def compress_image(path: str) -> None:
             img = img.resize((MAX_WIDTH, new_h), Image.LANCZOS)
         q = QUALITY_JPG if ext in (".jpg", ".jpeg") else QUALITY_WEBP
         tmp_path = save_with_quality(img, q, ext)
-        if ext in (".jpg", ".jpeg", ".webp"):
+        if ext in (".jpg", ".jpeg", ".webp", ".png"):
             while os.path.getsize(tmp_path) > TARGET_BYTES and q > 40:
                 os.remove(tmp_path)
                 q -= 5

@@ -771,8 +771,6 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
             )
         elif "stheadline.com" in url:
             nodes = root.xpath('//*[@itemprop="articleBody"]')
-        elif "stheadline.com" in url:
-            nodes = root.xpath('//*[@itemprop="articleBody"]')
         else:
             nodes = root.xpath("//article")
         if nodes:
@@ -1864,8 +1862,8 @@ def build_html(
             full_html = extract_full_html(item.link, fullhtml_cache, image_cache)
             if full_html:
                 text_from_html = strip_html(full_html)
-                # only trust full_html when it contains real text
-                if len(text_from_html) >= 40:
+                # accept shorter html if it still has meaningful text or images
+                if len(text_from_html) >= 20 or "<img" in full_html:
                     content_html = full_html
                     content = text_from_html
                 else:
