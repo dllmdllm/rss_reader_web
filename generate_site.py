@@ -38,6 +38,8 @@ STANZA_NLP = None
 DEFAULT_URLS = ",".join(
     [
         "https://rthk9.rthk.hk/rthk/news/rss/c_expressnews_clocal.xml",
+        "https://rthk.hk/rthk/news/rss/c_expressnews_cinternational.xml",
+        "https://rthk.hk/rthk/news/rss/c_expressnews_greaterchina.xml",
         "https://news.mingpao.com/rss/ins/all.xml",
         "https://news.mingpao.com/rss/ins/s00004.xml",
         "https://news.mingpao.com/rss/ins/s00005.xml",
@@ -3459,7 +3461,10 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
                 feed_cache[url] = entry
         if "rthk" in url:
             source = "RTHK"
-            category = "news"
+            if "cinternational" in url or "greaterchina" in url:
+                category = "intl"
+            else:
+                category = "news"
         elif "cnbeta" in url:
             source = "cnbeta"
             category = "tech"
