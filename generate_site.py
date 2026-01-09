@@ -545,12 +545,16 @@ def get_image_prefix(referer: str | None) -> str:
     return ""
 
 
-def download_image(url: str, cache: dict, referer: str | None = None) -> str:
+def download_image(url: str, cache: dict, referer: str | None = None, lock: Optional[threading.Lock] = None) -> str:
     if not url:
         return ""
     now = time.time()
     prefix = get_image_prefix(referer or url)
-    entry = cache.get(url, {})
+    if lock:
+        with lock:
+            entry = cache.get(url, {})
+    else:
+        entry = cache.get(url, {})
     cached_path = entry.get("path", "")
     cached_ts = float(entry.get("timestamp", 0) or 0)
     if cached_path and (now - cached_ts) <= IMAGE_CACHE_TTL:
@@ -562,12 +566,20 @@ def download_image(url: str, cache: dict, referer: str | None = None) -> str:
                         os.path.join(IMAGES_DIR, cached_path),
                         os.path.join(IMAGES_DIR, new_name),
                     )
-                    cache[url] = {"path": new_name, "timestamp": cached_ts}
+                    if lock:
+                        with lock:
+                            cache[url] = {"path": new_name, "timestamp": cached_ts}
+                    else:
+                        cache[url] = {"path": new_name, "timestamp": cached_ts}
                     return new_name
                 except Exception:
                     return cached_path
             return cached_path
-        cache.pop(url, None)
+        if lock:
+            with lock:
+                cache.pop(url, None)
+        else:
+            cache.pop(url, None)
     headers = {"User-Agent": "Mozilla/5.0"}
     if referer:
         headers["Referer"] = referer
@@ -600,7 +612,11 @@ def download_image(url: str, cache: dict, referer: str | None = None) -> str:
     try:
         with open(path, "wb") as handle:
             handle.write(data)
-        cache[url] = {"path": filename, "timestamp": now}
+        if lock:
+            with lock:
+                cache[url] = {"path": filename, "timestamp": now}
+        else:
+            cache[url] = {"path": filename, "timestamp": now}
         return filename
     except Exception:
         return ""
@@ -1854,6 +1870,8 @@ def build_html(
     cards = []
     keyword_texts: list[tuple[str, str]] = []
     now_dt = datetime.now(ZoneInfo("Asia/Hong_Kong"))
+    prepared: list[dict[str, Any]] = []
+    prefetch_tasks: list[tuple[str, str]] = []
     for idx, item in enumerate(items, start=1):
         content = item.summary
         content_html = ""
@@ -1880,21 +1898,11 @@ def build_html(
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
         image_count = 0
-        if item.source == "hk01" and item.extra_images:
-            extra_html_parts: list[str] = []
-            for img in item.extra_images:
+        extra_images = item.extra_images[:] if item.extra_images else []
+        if item.source == "hk01" and extra_images:
+            for img in extra_images:
                 img = normalize_image_url(item.link, img)
-                local_name = download_image(img, image_cache, item.link)
-                if local_name:
-                    img_url = f"images/{local_name}?v={build_id}"
-                else:
-                    img_url = f"{img}?v={build_id}"
-                extra_html_parts.append(
-                    f"<img src='{html.escape(img_url)}' alt='' loading='lazy' decoding='async'>"
-                )
-            if extra_html_parts:
-                content_html = "<br>".join(extra_html_parts) + "<br>" + content_html
-                image_count += len(extra_html_parts)
+                prefetch_tasks.append((img, item.link))
         if item.source == "singtao" and image_url:
             m = re.search(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html)
             if m:
@@ -1932,12 +1940,70 @@ def build_html(
                 age_class = "age-old"
         else:
             age_class = "age-old"
+        if image_url:
+            image_url = normalize_image_url(item.link, image_url)
+            prefetch_tasks.append((image_url, item.link))
+        prepared.append(
+            {
+                "idx": idx,
+                "item": item,
+                "content": content,
+                "content_html": content_html,
+                "image_url": image_url,
+                "extra_images": extra_images,
+                "pub_text": pub_text,
+                "date_class": date_class,
+                "age_class": age_class,
+                "category": category,
+                "image_count": image_count,
+            }
+        )
+
+    if prefetch_tasks:
+        dedup: list[tuple[str, str]] = []
+        seen: set[str] = set()
+        for url, ref in prefetch_tasks:
+            if not url:
+                continue
+            if url in seen:
+                continue
+            seen.add(url)
+            dedup.append((url, ref))
+        dl_lock = threading.Lock()
+        with ThreadPoolExecutor(max_workers=DEFAULT_THREADS) as ex:
+            list(ex.map(lambda t: download_image(t[0], image_cache, t[1], lock=dl_lock), dedup))
+
+    for row in prepared:
+        idx = row["idx"]
+        item = row["item"]
+        content_html = row["content_html"]
+        image_url = row["image_url"]
+        extra_images = row["extra_images"]
+        pub_text = row["pub_text"]
+        date_class = row["date_class"]
+        age_class = row["age_class"]
+        category = row["category"]
+        image_count = row["image_count"]
         hero_html = ""
         hero_caption = ""
         hero_attr = ""
         prefetch_src = ""
+        if item.source == "hk01" and extra_images:
+            extra_html_parts: list[str] = []
+            for img in extra_images:
+                img = normalize_image_url(item.link, img)
+                local_name = download_image(img, image_cache, item.link)
+                if local_name:
+                    img_url = f"images/{local_name}?v={build_id}"
+                else:
+                    img_url = f"{img}?v={build_id}"
+                extra_html_parts.append(
+                    f"<img src='{html.escape(img_url)}' alt='' loading='lazy' decoding='async'>"
+                )
+            if extra_html_parts:
+                content_html = "<br>".join(extra_html_parts) + "<br>" + content_html
+                image_count += len(extra_html_parts)
         if image_url:
-            image_url = normalize_image_url(item.link, image_url)
             local_name = download_image(image_url, image_cache, item.link)
             if local_name:
                 hero_url = f"images/{local_name}?v={build_id}"
