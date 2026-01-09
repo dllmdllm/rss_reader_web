@@ -177,7 +177,11 @@ def save_json(path: str, payload: dict) -> None:
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(tmp, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
-    os.replace(tmp, path)
+    if os.path.exists(tmp):
+        os.replace(tmp, path)
+    else:
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
 def fetch_with_cache(url: str, cache: dict) -> tuple[bytes, dict]:
@@ -1960,7 +1964,7 @@ def build_html(
             <div class="thumb-spinner"></div>
           </div>
           <div>
-            {seen_label}<h2>{title}</h2>
+            <h2>{title}{seen_label}</h2>
             <div class="meta-row">
               <span class="tag" data-link="{link}">{source}</span>
               <button class="share-btn" aria-label="分享">↗</button>
@@ -2357,11 +2361,12 @@ def build_html(
     }}
     .seen-label {{
       display: inline-block;
-      margin-bottom: 6px;
-      font-size: 12px;
+      margin-left: 6px;
+      font-size: 11px;
       color: #5573a6;
       font-weight: 600;
       letter-spacing: 0.5px;
+      vertical-align: middle;
     }}
     .category-news {{
       --cat-bg: #eef5ff;
