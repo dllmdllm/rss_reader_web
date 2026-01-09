@@ -2074,6 +2074,7 @@ def build_html(
         {hero}
         {hero_note}
         <div class="content">{content}</div>
+        <button class="collapse-btn left" aria-label="收起">▴</button>
         <button class="collapse-btn" aria-label="收起">▴</button>
       </article>
             """.format(
@@ -2564,6 +2565,10 @@ def build_html(
       font-size: 12px;
       cursor: pointer;
       touch-action: manipulation;
+    }}
+    .collapse-btn.left {{
+      left: 12px;
+      right: auto;
     }}
     .card.collapsed .collapse-btn {{
       display: none;
