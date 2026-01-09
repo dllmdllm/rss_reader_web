@@ -3203,12 +3203,7 @@ def build_html(
         best.classList.add('focus');
       }}
     }}
-    window.addEventListener('scroll', () => {{
-      if (focusTimer) clearTimeout(focusTimer);
-      focusTimer = setTimeout(() => {{
-        updateFocusByScroll();
-      }}, 180);
-    }});
+    // focus only updates on click; no scroll-based focus updates
     window.addEventListener('scroll', () => {{
       if (!snapArmed) return;
       if (Date.now() < snapIgnoreUntil) return;
