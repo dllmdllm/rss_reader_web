@@ -1950,7 +1950,7 @@ def build_html(
                 image_count = len(root.xpath(".//img")) + (1 if hero_html else 0)
             except Exception:
                 image_count = (1 if hero_html else 0)
-        seen_class = " seen" if item.link and item.link in seen_cache else ""
+        seen_class = ""
         cards.append(
             """
       <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}"{hero_attr}>
@@ -3428,7 +3428,7 @@ def main() -> int:
     save_json(FULLTEXT_CACHE_PATH, fulltext_cache)
     save_json(IMAGE_CACHE_PATH, image_cache)
     save_json(FULLHTML_CACHE_PATH, fullhtml_cache)
-    save_json(SEEN_CACHE_PATH, mark_seen(seen_cache, items))
+    # seen state handled in browser via localStorage
     return 0
 
 
