@@ -17,10 +17,10 @@ images_dir = os.path.join(root, "images")
 if not os.path.isdir(images_dir):
     raise SystemExit(0)
 
-quality_jpg = 70
-quality_webp = 68
+quality_jpg = 60
+quality_webp = 58
 max_width = 900
-target_bytes = 500 * 1024
+target_bytes = 300 * 1024
 
 def total_size():
     total = 0
@@ -37,7 +37,7 @@ for name in os.listdir(images_dir):
     if not os.path.isfile(path):
         continue
     ext = os.path.splitext(name)[1].lower()
-    if ext not in {".jpg", ".jpeg", ".webp"}:
+    if ext not in {".jpg", ".jpeg", ".webp", ".png"}:
         continue
     try:
         img = Image.open(path)
@@ -60,23 +60,28 @@ for name in os.listdir(images_dir):
             return tmp_path
 
         q = quality_jpg if ext in {".jpg", ".jpeg"} else quality_webp
-        tmp_path = save_with_quality(img, q, ext)
-        while os.path.getsize(tmp_path) > target_bytes and q > 45:
+        if ext == ".png":
+            tmp_fd, tmp_path = tempfile.mkstemp(suffix=ext)
+            os.close(tmp_fd)
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+            img.save(tmp_path, format="PNG", optimize=True)
+        else:
+            tmp_path = save_with_quality(img, q, ext)
+        while os.path.getsize(tmp_path) > target_bytes and q > 40:
             os.remove(tmp_path)
             q -= 5
             tmp_path = save_with_quality(img, q, ext)
-        if os.path.getsize(tmp_path) > target_bytes and img.width > 640:
-            # final fallback: shrink a bit more
-            new_w = max(640, int(img.width * 0.85))
-            new_h = max(1, int(img.height * (new_w / img.width)))
-            img2 = img.resize((new_w, new_h), Image.LANCZOS)
+        # iterative downscale until under target or too small
+        cur_img = img
+        while os.path.getsize(tmp_path) > target_bytes and cur_img.width > 640:
+            new_w = max(640, int(cur_img.width * 0.85))
+            new_h = max(1, int(cur_img.height * (new_w / cur_img.width)))
+            cur_img = cur_img.resize((new_w, new_h), Image.LANCZOS)
             os.remove(tmp_path)
-            tmp_path = save_with_quality(img2, q, ext)
+            tmp_path = save_with_quality(cur_img, q, ext)
 
-        if os.path.getsize(tmp_path) < os.path.getsize(path):
-            os.replace(tmp_path, path)
-        else:
-            os.remove(tmp_path)
+        os.replace(tmp_path, path)
     except Exception:
         try:
             if os.path.exists(tmp_path):
@@ -92,15 +97,9 @@ if before > 0:
 PY
 fi
 
-# Daily cleanup: remove images no longer referenced by index.html
+# Cleanup: remove images no longer referenced by index.html
 CLEAN_MARK="$ROOT_DIR/data/last_image_cleanup.txt"
-NOW_EPOCH="$(date +%s)"
-LAST_EPOCH=0
-if [ -f "$CLEAN_MARK" ]; then
-  LAST_EPOCH="$(cat "$CLEAN_MARK" 2>/dev/null || echo 0)"
-fi
-if [ $((NOW_EPOCH - LAST_EPOCH)) -ge 86400 ]; then
-  ROOT_DIR="$ROOT_DIR" python3 - <<'PY'
+ROOT_DIR="$ROOT_DIR" python3 - <<'PY'
 import os, re, time
 
 root = os.environ.get("ROOT_DIR") or os.getcwd()
@@ -134,7 +133,6 @@ os.makedirs(os.path.dirname(mark_path), exist_ok=True)
 with open(mark_path, "w", encoding="utf-8") as f:
     f.write(str(int(time.time())))
 PY
-fi
 
 if [ -d "$ROOT_DIR/.git" ]; then
   if ! git -C "$ROOT_DIR" config --global --get-all safe.directory | grep -qx "$ROOT_DIR"; then

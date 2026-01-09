@@ -533,15 +533,44 @@ def guess_image_ext(url: str, content_type: str) -> str:
     return ".jpg"
 
 
+def get_image_prefix(referer: str | None) -> str:
+    ref = (referer or "").lower()
+    if "hk01" in ref:
+        return "hk01_"
+    if "on.cc" in ref or "oncc" in ref:
+        return "oncc_"
+    if "rthk" in ref:
+        return "rthk_"
+    if "stheadline" in ref or "singtao" in ref:
+        return "singtao_"
+    if "mingpao" in ref:
+        return "mingpao_"
+    if "cnbeta" in ref:
+        return "cnbeta_"
+    return ""
+
+
 def download_image(url: str, cache: dict, referer: str | None = None) -> str:
     if not url:
         return ""
     now = time.time()
+    prefix = get_image_prefix(referer or url)
     entry = cache.get(url, {})
     cached_path = entry.get("path", "")
     cached_ts = float(entry.get("timestamp", 0) or 0)
     if cached_path and (now - cached_ts) <= IMAGE_CACHE_TTL:
         if os.path.exists(os.path.join(IMAGES_DIR, cached_path)):
+            if prefix and not cached_path.startswith(prefix):
+                new_name = f"{prefix}{cached_path}"
+                try:
+                    os.replace(
+                        os.path.join(IMAGES_DIR, cached_path),
+                        os.path.join(IMAGES_DIR, new_name),
+                    )
+                    cache[url] = {"path": new_name, "timestamp": cached_ts}
+                    return new_name
+                except Exception:
+                    return cached_path
             return cached_path
         cache.pop(url, None)
     headers = {"User-Agent": "Mozilla/5.0"}
@@ -571,7 +600,7 @@ def download_image(url: str, cache: dict, referer: str | None = None) -> str:
             return ""
     name = hashlib.sha1(url.encode("utf-8")).hexdigest()
     ext = guess_image_ext(url, content_type)
-    filename = f"{name[:16]}{ext}"
+    filename = f"{prefix}{name[:16]}{ext}"
     path = os.path.join(IMAGES_DIR, filename)
     try:
         with open(path, "wb") as handle:
@@ -1810,41 +1839,9 @@ def build_html(
 ) -> None:
     build_id = str(int(time.time()))
     now_hkt = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M")
+    now_hkt_short = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%m-%d %H:%M")
     latest_pub = ""
     cards = []
-    marquee_items: list[str] = []
-    marquee_items.append(f"<span class='marquee-count'>總數 {len(items)}</span>")
-    marquee_colors = [
-        "#ffd166",
-        "#9bdeac",
-        "#7bdff2",
-        "#f4a261",
-        "#a0c4ff",
-        "#ffadad",
-        "#cdb4db",
-        "#b8f2e6",
-        "#ffb703",
-        "#90caf9",
-    ]
-    def pick_marquee_color() -> str:
-        return random.choice(marquee_colors)
-    first_link = True
-    for idx, item in enumerate(items, start=1):
-        if not item.title:
-            continue
-        if first_link:
-            first_link = False
-        else:
-            color = pick_marquee_color()
-            marquee_items.append(f"<span class='marquee-sep' style='color:{color}'>⟡</span>")
-        marquee_items.append(
-            "<a class='marquee-link' href='#item-{idx:02d}'>{title}</a>".format(
-                idx=idx, title=html.escape(item.title)
-            )
-        )
-    if not marquee_items:
-        marquee_items.append("<span class='marquee-count'>即時焦點</span>")
-    marquee_safe = " ".join(marquee_items)
     keyword_texts: list[tuple[str, str]] = []
     now_dt = datetime.now(ZoneInfo("Asia/Hong_Kong"))
     for idx, item in enumerate(items, start=1):
@@ -1897,10 +1894,13 @@ def build_html(
                     image_url = ""
         if item.pub_dt:
             pub_text = item.pub_dt.astimezone(ZoneInfo("Asia/Hong_Kong")).strftime(
-                "%Y-%m-%d %H:%M HKT"
+                "%m-%d %H:%M HKT"
             )
         else:
             pub_text = item.pub_text or ""
+        if pub_text:
+            pub_text = pub_text.strip()
+            pub_text = re.sub(r"^\\s*\\d{4}[-/\\.]", "", pub_text)
         if idx == 1 and pub_text:
             latest_pub = pub_text.replace(" HKT", "")
         is_recent = False
@@ -1924,6 +1924,8 @@ def build_html(
             age_class = "age-old"
         hero_html = ""
         hero_caption = ""
+        hero_attr = ""
+        prefetch_src = ""
         if image_url:
             image_url = normalize_image_url(item.link, image_url)
             local_name = download_image(image_url, image_cache, item.link)
@@ -1933,7 +1935,14 @@ def build_html(
                 hero_url = f"{image_url}?v={build_id}"
             if item.source != "cnbeta":
                 hero_html = f"<img class='hero' src='{html.escape(hero_url)}' alt='' loading='lazy' decoding='async'>"
+                hero_attr = f' data-hero-src="{html.escape(hero_url)}"'
+                prefetch_src = hero_url
                 image_count += 1
+        if not prefetch_src and content_html:
+            m = re.search(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html)
+            if m:
+                prefetch_src = m.group(1)
+                hero_attr = f' data-hero-src="{html.escape(prefetch_src)}"'
         if image_count == 0:
             try:
                 from lxml import html as lxml_html
@@ -1944,11 +1953,11 @@ def build_html(
         seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-imgcount="{imgcount}">
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-imgcount="{imgcount}"{hero_attr}>
         <header class="card-head">
           <div class="index-col">
             <span class="index">{idx:02d}</span>
-            <div class="thumb-spinner">⟳</div>
+            <div class="thumb-spinner"></div>
           </div>
           <div>
             <h2>{title}</h2>
@@ -1960,11 +1969,10 @@ def build_html(
               {img_count}
             </div>
           </div>
-          <button class="toggle" aria-label="展開/收起">▾</button>
         </header>
         {hero}
         {hero_note}
-        <div class="content">{content}</div>
+        <div class="content">{content}<button class="collapse-btn" aria-label="收起">▴</button></div>
       </article>
             """.format(
                 idx=idx,
@@ -1986,26 +1994,76 @@ def build_html(
                 age_class=age_class,
                 img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
                 imgcount=image_count,
+                hero_attr=hero_attr,
             )
         )
 
     build_ts = datetime.now(ZoneInfo("Asia/Hong_Kong")).strftime("%Y-%m-%d %H:%M:%S")
     if MIXED_MODE:
+        latest_pub_short = re.sub(r"^\\d{4}[-/\\.]", "", latest_pub) if latest_pub else ""
         meta_line = (
-            f"更新時間 {now_hkt}"
-            + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
+            f"更新時間 {now_hkt_short}"
+            + (f"｜最新新聞 {latest_pub_short}" if latest_pub_short else "")
         )
     else:
+        latest_pub_short = re.sub(r"^\\d{4}[-/\\.]", "", latest_pub) if latest_pub else ""
         meta_line = (
-            f"過去{int(lookback_hours)}小時共{len(items)}則｜更新時間 {now_hkt}"
-            + (f"｜最新新聞時間 {latest_pub}" if latest_pub else "")
+            f"過去{int(lookback_hours)}小時共{len(items)}則｜更新時間 {now_hkt_short}"
+            + (f"｜最新新聞 {latest_pub_short}" if latest_pub_short else "")
         )
 
+    news_marquee_items: list[str] = []
+    news_marquee_items.append(f"<span class='marquee-count'>總數 {len(items)}</span>")
+    marquee_colors = [
+        "#ffd166",
+        "#9bdeac",
+        "#7bdff2",
+        "#f4a261",
+        "#a0c4ff",
+        "#ffadad",
+        "#cdb4db",
+        "#b8f2e6",
+        "#ffb703",
+        "#90caf9",
+    ]
+    def pick_marquee_color() -> str:
+        return random.choice(marquee_colors)
+    first_link = True
+    marquee_source = list(enumerate(items, start=1))
+    random.shuffle(marquee_source)
+    for idx, item in marquee_source:
+        if not item.title:
+            continue
+        if first_link:
+            first_link = False
+        else:
+            color = pick_marquee_color()
+            news_marquee_items.append(f"<span class='marquee-sep' style='color:{color}'>⟡</span>")
+        news_marquee_items.append(
+            "<a class='marquee-link' href='#item-{idx:02d}'>{title}</a>".format(
+                idx=idx, title=html.escape(item.title)
+            )
+        )
+    if len(news_marquee_items) == 1:
+        news_marquee_items.append("<span class='marquee-count'>即時焦點</span>")
+    marquee_safe = " ".join(news_marquee_items)
+
     keywords = extract_keywords(keyword_texts, 10)
-    keyword_html = "".join(
-        f"<span class=\"kw\" data-kw=\"{html.escape(k)}\">{html.escape(k)}</span>"
-        for k in keywords
-    )
+    kw_marquee_items: list[str] = []
+    kw_marquee_items.append(f"<span class='marquee-count'>關鍵字</span>")
+    first_kw = True
+    for kw in keywords:
+        if not kw:
+            continue
+        if first_kw:
+            first_kw = False
+        else:
+            color = pick_marquee_color()
+            kw_marquee_items.append(f"<span class='marquee-sep' style='color:{color}'>⟡</span>")
+        kw_marquee_items.append(
+            "<a class='kw-link' data-kw='{kw}'>{kw}</a>".format(kw=html.escape(kw))
+        )
+    kw_marquee_safe = " ".join(kw_marquee_items)
 
     html_text = f"""<!doctype html>
 <html lang="zh-Hant">
@@ -2041,8 +2099,6 @@ def build_html(
       text-align: center;
       background: var(--bg);
       box-shadow: 0 6px 18px rgba(0,0,0,0.06);
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
     }}
     header.site h1 {{
       font-size: 14px;
@@ -2053,13 +2109,25 @@ def build_html(
       position: relative;
       overflow: hidden;
       white-space: nowrap;
-      font-size: 16px;
+      font-size: 14px;
       user-select: none;
       touch-action: pan-y;
     }}
+    .kw-marquee {{
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      font-size: 14px;
+      color: var(--muted);
+    }}
     .marquee-track {{
       display: inline-block;
-      animation: marquee 1170s linear infinite;
+      animation: marquee 2106s linear infinite;
+      will-change: transform;
+    }}
+    .kw-track {{
+      display: inline-block;
+      animation: kwmarquee 36s linear infinite;
       will-change: transform;
     }}
     .marquee-item {{
@@ -2075,6 +2143,12 @@ def build_html(
     .marquee-link:hover {{
       opacity: 0.85;
     }}
+    .kw-link {{
+      color: inherit;
+      text-decoration: none;
+      border-bottom: 1px dotted rgba(0,0,0,0.2);
+      padding-bottom: 1px;
+    }}
     .marquee-count {{
       font-weight: 600;
       opacity: 0.9;
@@ -2087,17 +2161,21 @@ def build_html(
       0% {{ transform: translateX(calc(var(--marquee-offset, 0px) + 0px)); }}
       100% {{ transform: translateX(calc(var(--marquee-offset, 0px) - 100%)); }}
     }}
+    @keyframes kwmarquee {{
+      0% {{ transform: translateX(0); }}
+      100% {{ transform: translateX(-100%); }}
+    }}
     @keyframes spin {{
       to {{ transform: rotate(360deg); }}
     }}
     @media (min-width: 900px) {{
       .marquee {{
-        font-size: 18px;
+        font-size: 14px;
       }}
     }}
     header.site .meta {{
       color: var(--muted);
-      font-size: 14px;
+      font-size: 10px;
     }}
     .toolbar {{
       position: static;
@@ -2110,8 +2188,6 @@ def build_html(
       gap: 10px;
       align-items: center;
       justify-content: center;
-      scroll-snap-align: start;
-      scroll-snap-stop: always;
     }}
     .toolbar-row {{
       width: 100%;
@@ -2159,33 +2235,17 @@ def build_html(
     }}
     .filters.secondary {{
       display: none;
+      flex-wrap: wrap;
+      justify-content: center;
+    }}
+    .filters.secondary.show {{
+      display: flex;
     }}
     .submeta {{
       width: 100%;
       text-align: center;
       color: var(--muted);
       font-size: 12px;
-    }}
-    .keywords {{
-      width: 100%;
-      display: flex;
-      gap: 8px;
-      flex-wrap: nowrap;
-      justify-content: center;
-      overflow-x: auto;
-      padding-bottom: 2px;
-      scrollbar-width: thin;
-    }}
-    .kw {{
-      border: 1px dashed var(--border);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      background: #fff7ee;
-    }}
-    .kw:hover {{
-      border-color: var(--accent);
     }}
     .chip {{
       border: 1px solid var(--border);
@@ -2237,14 +2297,13 @@ def build_html(
       gap: 16px;
     }}
     .card {{
+      position: relative;
       background: var(--card);
       border-radius: 16px;
       padding: 16px;
       box-shadow: 0 10px 24px var(--shadow);
       border: 1px solid var(--border);
-      scroll-snap-align: start;
       scroll-margin-top: 180px;
-      scroll-snap-stop: always;
       opacity: 0;
       transform: translateY(10px);
       transition: opacity 0.5s ease, transform 0.5s ease;
@@ -2287,7 +2346,7 @@ def build_html(
       box-shadow: 0 0 0 6px rgba(52, 120, 255, 0.15);
     }}
     html, body {{
-      scroll-snap-type: y proximity;
+      scroll-snap-type: none;
       scroll-padding-top: 12px;
       scroll-behavior: smooth;
     }}
@@ -2342,7 +2401,7 @@ def build_html(
     }}
     h2 {{
       margin: 0 0 6px;
-      font-size: 17px;
+      font-size: 14px;
       line-height: 1.4;
       font-family: "Noto Serif TC", "PingFang TC", "Heiti TC", serif;
     }}
@@ -2370,6 +2429,22 @@ def build_html(
       display: inline-flex;
       align-items: center;
       gap: 4px;
+    }}
+    .collapse-btn {{
+      position: absolute;
+      right: 12px;
+      bottom: 8px;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }}
+    .card.collapsed .collapse-btn {{
+      display: none;
     }}
     .date.recent {{
       color: var(--recent);
@@ -2425,6 +2500,8 @@ def build_html(
       font-size: var(--content-font, 15px);
       color: #262626;
       white-space: normal;
+      position: relative;
+      padding-bottom: 26px;
     }}
     .content h1, .content h2, .content h3 {{
       font-size: 16px;
@@ -2444,23 +2521,6 @@ def build_html(
       cursor: pointer;
       user-select: none;
       touch-action: manipulation;
-    }}
-    .toggle {{
-      border: 1px solid var(--border);
-      background: #fff;
-      color: var(--accent);
-      border-radius: 999px;
-      width: 28px;
-      height: 28px;
-      line-height: 26px;
-      text-align: center;
-      font-size: 14px;
-      cursor: pointer;
-      user-select: none;
-      touch-action: manipulation;
-    }}
-    .toggle.open {{
-      transform: rotate(180deg);
     }}
     .card .content {{
       transition: max-height 0.35s ease, opacity 0.35s ease, transform 0.35s ease;
@@ -2653,7 +2713,7 @@ def build_html(
         padding: 14px;
       }}
       h2 {{
-        font-size: 18px;
+        font-size: 14px;
       }}
       .toolbar {{
         padding: 10px 12px;
@@ -2674,12 +2734,15 @@ def build_html(
     <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button> <button class="font-btn" id="font-sm" title="內文縮細">A-</button> <button class="font-btn" id="font-lg" title="內文放大">A+</button></div>
   </header>
   <div class="toolbar">
-    <div class="toolbar-row">
-      <div class="search-wrap">
-        <input id="search" type="search" placeholder="搜尋標題或內容…">
-        <button class="clear-search" id="clear-search" title="清除">✕</button>
+      <div class="toolbar-row">
+        <div class="kw-marquee"><span class="kw-track">{kw_marquee_safe}</span></div>
       </div>
-    </div>
+      <div class="toolbar-row">
+        <div class="search-wrap">
+          <input id="search" type="search" placeholder="搜尋標題或內容…">
+          <button class="clear-search" id="clear-search" title="清除">✕</button>
+        </div>
+      </div>
     <div class="toolbar-row">
       <div class="filters">
         <span class="chip active" data-category="all">全部(0)</span>
@@ -2698,9 +2761,6 @@ def build_html(
         <span class="chip" data-source="singtao">Singtao</span>
         <span class="chip" data-source="hk01">HK01</span>
       </div>
-    </div>
-    <div class="toolbar-row">
-      <div class="keywords">{keyword_html}</div>
     </div>
   </div>
   <main id="list">
@@ -2773,6 +2833,19 @@ def build_html(
         img.addEventListener('error', done, {{ once: true }});
       }}
     }}
+    function prefetchHero(card) {{
+      if (!card || card.dataset.heroPrefetch === '1') return;
+      const src = card.dataset.heroSrc || '';
+      if (!src) return;
+      card.dataset.heroPrefetch = '1';
+      const img = new Image();
+      img.src = src;
+      const done = () => {{
+        card.classList.add('img-loaded');
+      }};
+      img.addEventListener('load', done, {{ once: true }});
+      img.addEventListener('error', done, {{ once: true }});
+    }}
     function ensureImageSpinners(card) {{
       if (!card) return;
       if (card.classList.contains('collapsed')) return;
@@ -2793,11 +2866,10 @@ def build_html(
     function applyCollapseByCategory() {{
       cards.forEach(card => {{
         const cat = card.dataset.category || '';
-        const isAll = activeCategory === 'all';
-        if (isAll || cat === activeCategory) {{
+        if (activeCategory === 'all') {{
           card.classList.add('collapsed');
-          const btn = card.querySelector('.toggle');
-          if (btn) btn.classList.remove('open');
+        }} else if (cat === activeCategory) {{
+          card.classList.remove('collapsed');
         }}
       }});
     }}
@@ -2821,7 +2893,7 @@ def build_html(
       if (categoryChips[0]) categoryChips[0].classList.add('active');
       sourceChips.forEach(c => c.classList.remove('active'));
       if (sourceChips[0]) sourceChips[0].classList.add('active');
-      newsSources.style.display = 'none';
+      newsSources.classList.remove('show');
       applyFilter();
       applyCollapseByCategory();
     }}
@@ -2832,12 +2904,12 @@ def build_html(
         chip.classList.add('active');
         activeCategory = chip.dataset.category || 'all';
         if (activeCategory === 'news' || activeCategory === 'ent' || activeCategory === 'intl') {{
-          newsSources.style.display = 'flex';
+          newsSources.classList.add('show');
           activeSource = 'all';
           sourceChips.forEach(c => c.classList.remove('active'));
           sourceChips[0].classList.add('active');
         }} else {{
-          newsSources.style.display = 'none';
+          newsSources.classList.remove('show');
           activeSource = 'all';
           sourceChips.forEach(c => c.classList.remove('active'));
           sourceChips[0].classList.add('active');
@@ -2959,19 +3031,7 @@ def build_html(
       }}
       setClearVisible();
     }});
-    document.querySelectorAll('.kw').forEach(kw => {{
-      kw.addEventListener('click', () => {{
-        const word = kw.dataset.kw || '';
-        if (!word) return;
-        search.value = word;
-        applyFilter();
-        highlightTerm(word);
-        setClearVisible();
-        const first = Array.from(cards).find(c => c.style.display !== 'none');
-        if (first) first.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
-      }});
-    }});
-    const scrollGap = -140;
+    const scrollGap = -220;
     function updateScrollPadding() {{
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
       const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
@@ -2980,12 +3040,7 @@ def build_html(
       document.body.style.scrollPaddingTop = pad + 'px';
     }}
     function temporarilyDisableSnap() {{
-      document.documentElement.style.scrollSnapType = 'none';
-      document.body.style.scrollSnapType = 'none';
-      setTimeout(() => {{
-        document.documentElement.style.scrollSnapType = 'y proximity';
-        document.body.style.scrollSnapType = 'y proximity';
-      }}, 700);
+      return;
     }}
     function scrollToCard(card) {{
       if (!card) return;
@@ -3011,10 +3066,27 @@ def build_html(
           target.classList.remove('collapsed');
           document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
           target.classList.add('hi');
-          const btn = target.querySelector('.toggle');
-          if (btn) btn.classList.add('open');
           ensureImageSpinners(target);
           scrollToCard(target);
+        }}
+      }});
+    }});
+    document.querySelectorAll('.kw-link').forEach(link => {{
+      link.addEventListener('click', (e) => {{
+        const kw = link.dataset.kw || '';
+        if (!kw) return;
+        e.preventDefault();
+        search.value = kw;
+        applyFilter();
+        highlightTerm(kw);
+        setClearVisible();
+        const first = Array.from(cards).find(c => c.style.display !== 'none');
+        if (first) {{
+          first.classList.remove('collapsed');
+          document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
+          first.classList.add('hi');
+          ensureImageSpinners(first);
+          scrollToCard(first);
         }}
       }});
     }});
@@ -3036,35 +3108,103 @@ def build_html(
     }}
     setClearVisible();
     applyCollapseByCategory();
+    let snapArmed = false;
+    let snapIgnoreUntil = 0;
+    let focusPauseUntil = 0;
+    function armSnapOnce() {{
+      snapArmed = false;
+      snapIgnoreUntil = 0;
+      focusPauseUntil = Date.now() + 200;
+      return;
+    }}
+    function releaseSnapOnce() {{
+      snapArmed = false;
+      return;
+    }}
 
-    document.querySelectorAll('.toggle').forEach(btn => {{
+    cards.forEach(card => {{
+      card.addEventListener('click', (e) => {{
+        if (!card.classList.contains('collapsed')) return;
+        if (e.target.closest('a, button, input, .tag, .share-btn, .collapse-btn')) return;
+        const beforeTop = card.getBoundingClientRect().top;
+        cards.forEach(other => {{
+          if (other !== card) other.classList.add('collapsed');
+        }});
+        document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
+        card.classList.add('focus');
+        card.classList.remove('collapsed');
+        ensureImageSpinners(card);
+        armSnapOnce();
+        requestAnimationFrame(() => {{
+          const afterTop = card.getBoundingClientRect().top;
+          const delta = afterTop - beforeTop;
+          if (delta < 0) {{
+            window.scrollBy({{ top: delta, left: 0, behavior: 'auto' }});
+          }}
+        }});
+      }});
+    }});
+    document.querySelectorAll('.collapse-btn').forEach(btn => {{
       btn.addEventListener('click', (e) => {{
         const card = btn.closest('.card');
         if (!card) return;
-        card.classList.toggle('collapsed');
-        btn.classList.toggle('open');
-        ensureImageSpinners(card);
+        const beforeTop = card.getBoundingClientRect().top;
+        card.classList.add('collapsed');
+        requestAnimationFrame(() => {{
+          const afterTop = card.getBoundingClientRect().top;
+          const delta = afterTop - beforeTop;
+          if (delta !== 0) {{
+            window.scrollBy({{ top: delta, left: 0, behavior: 'auto' }});
+          }}
+        }});
         e.stopPropagation();
       }});
     }});
-    if ('IntersectionObserver' in window) {{
-      let lastFocus = null;
-      const observer = new IntersectionObserver((entries) => {{
-        let best = null;
-        for (const entry of entries) {{
-          if (!entry.isIntersecting) continue;
-          if (!best || entry.intersectionRatio > best.intersectionRatio) {{
-            best = entry;
-          }}
+    cards.forEach((card, i) => {{
+      if (i < 12) prefetchHero(card);
+    }});
+    let lastFocus = null;
+    let focusTimer = null;
+    function updateFocusByScroll() {{
+      if (Date.now() < focusPauseUntil) return;
+      const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
+      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
+      if (window.scrollY < (headerH + toolbarH - 6)) return;
+      const anchorY = headerH + toolbarH + 8;
+      let best = null;
+      let bestDist = Infinity;
+      cards.forEach(card => {{
+        if (card.style.display === 'none') return;
+        const rect = card.getBoundingClientRect();
+        if (rect.bottom <= anchorY) return;
+        const dist = Math.abs(rect.top - anchorY);
+        if (dist < bestDist) {{
+          bestDist = dist;
+          best = card;
         }}
-        if (best && best.target !== lastFocus) {{
-          if (lastFocus) lastFocus.classList.remove('focus');
-          best.target.classList.add('focus');
-          lastFocus = best.target;
+      }});
+      if (best) {{
+        if (best !== lastFocus) {{
+          if (lastFocus) lastFocus.classList.add('collapsed');
+          lastFocus = best;
         }}
-      }}, {{ threshold: [0.25, 0.5, 0.75] }});
-      cards.forEach(card => observer.observe(card));
+        document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
+        best.classList.add('focus');
+      }}
     }}
+    window.addEventListener('scroll', () => {{
+      if (focusTimer) clearTimeout(focusTimer);
+      focusTimer = setTimeout(() => {{
+        updateFocusByScroll();
+      }}, 180);
+    }});
+    window.addEventListener('scroll', () => {{
+      if (!snapArmed) return;
+      if (Date.now() < snapIgnoreUntil) return;
+      releaseSnapOnce();
+    }});
+    window.addEventListener('resize', updateFocusByScroll);
+    setTimeout(updateFocusByScroll, 50);
     document.querySelectorAll('.share-btn').forEach(btn => {{
       btn.addEventListener('click', async (e) => {{
         const card = btn.closest('.card');
@@ -3090,6 +3230,8 @@ def build_html(
     }});
     if (topBtn) {{
       topBtn.addEventListener('click', () => {{
+        document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
+        temporarilyDisableSnap();
         window.scrollTo({{ top: 0, behavior: 'smooth' }});
       }});
       window.addEventListener('scroll', () => {{
