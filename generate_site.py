@@ -3184,10 +3184,7 @@ def build_html(
         }}
       }});
       if (best) {{
-        if (best !== lastFocus) {{
-          if (lastFocus) lastFocus.classList.add('collapsed');
-          lastFocus = best;
-        }}
+        lastFocus = best;
         document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
         best.classList.add('focus');
       }}
