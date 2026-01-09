@@ -2098,7 +2098,7 @@ def build_html(
                 img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
                 imgcount=image_count,
                 hero_attr=hero_attr,
-                seen_label=("<span class='seen-label'>✓ 已讀</span>" if seen_class else ""),
+                seen_label="",
             )
         )
 
@@ -2144,8 +2144,8 @@ def build_html(
             color = pick_marquee_color()
             news_marquee_items.append(f"<span class='marquee-sep' style='color:{color}'>⟡</span>")
         news_marquee_items.append(
-            "<a class='marquee-link' href='#item-{idx:02d}'>{title}</a>".format(
-                idx=idx, title=html.escape(item.title)
+            "<a class='marquee-link' data-link='{link}' href='#item-{idx:02d}'>{title}</a>".format(
+                idx=idx, title=html.escape(item.title), link=html.escape(item.link)
             )
         )
     if len(news_marquee_items) == 1:
@@ -2243,6 +2243,10 @@ def build_html(
       text-decoration: none;
       border-bottom: 1px solid rgba(255,255,255,0.12);
       padding-bottom: 2px;
+    }}
+    .marquee-link.seen {{
+      font-weight: 400;
+      opacity: 0.85;
     }}
     .marquee-link:hover {{
       opacity: 0.85;
@@ -2465,15 +2469,6 @@ def build_html(
     }}
     .card.seen h2 {{
       font-weight: 400;
-    }}
-    .seen-label {{
-      display: inline-block;
-      margin-left: 6px;
-      font-size: 11px;
-      color: #5573a6;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      vertical-align: middle;
     }}
     .category-news {{
       --cat-bg: #eef5ff;
@@ -2924,14 +2919,11 @@ def build_html(
       const link = card.dataset.link || '';
       if (link && seenSet.has(link)) {{
         card.classList.add('seen');
-        if (!card.querySelector('.seen-label')) {{
-          const label = document.createElement('span');
-          label.className = 'seen-label';
-          label.textContent = '✓ 已讀';
-          const h2 = card.querySelector('h2');
-          if (h2) h2.appendChild(label);
-        }}
       }}
+    }});
+    document.querySelectorAll('.marquee-link').forEach(link => {{
+      const lnk = link.dataset.link || '';
+      if (lnk && seenSet.has(lnk)) link.classList.add('seen');
     }});
     function markSeen(card) {{
       if (!card) return;
@@ -2939,16 +2931,11 @@ def build_html(
       if (!link) return;
       if (!card.classList.contains('seen')) {{
         card.classList.add('seen');
-        if (!card.querySelector('.seen-label')) {{
-          const label = document.createElement('span');
-          label.className = 'seen-label';
-          label.textContent = '✓ 已讀';
-          const h2 = card.querySelector('h2');
-          if (h2) h2.appendChild(label);
-        }}
       }}
       seenSet.add(link);
       localStorage.setItem('seenLinks', JSON.stringify(Array.from(seenSet)));
+      const m = document.querySelector(`.marquee-link[data-link="${{link}}"]`);
+      if (m) m.classList.add('seen');
     }}
     // update category counts in chips
     const counts = {{ all: 0, news: 0, intl: 0, ent: 0, tech: 0 }};
