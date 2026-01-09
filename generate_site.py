@@ -510,7 +510,23 @@ def safe_fetch_url(url: str) -> str:
         parts = urlsplit(url)
         path = quote(parts.path)
         query = quote(parts.query, safe="=&%")
-        return urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
+    return urlunsplit((parts.scheme, parts.netloc, path, query, parts.fragment))
+
+
+def normalize_link(link: str) -> str:
+    if not link:
+        return ""
+    link = html.unescape(link).strip()
+    if "<a" in link and "href" in link:
+        m = re.search(r'href=["\\\']([^"\\\']+)["\\\']', link)
+        if m:
+            return m.group(1).strip()
+    # handle malformed link strings containing extra attributes
+    if '"' in link:
+        link = link.split('"', 1)[0].strip()
+    if " " in link:
+        link = link.split(" ", 1)[0].strip()
+    return link
 
 
 def guess_image_ext(url: str, content_type: str) -> str:
@@ -961,6 +977,7 @@ def parse_items(payload: bytes | str, source: str, category: str = "") -> list[I
         for item in root.findall(".//item"):
             title = find_text(item, "title")
             link = find_text(item, "link")
+            link = normalize_link(link)
             pub_text = find_text(item, "pubDate")
             pub_dt = parse_pub_date(pub_text)
             summary = find_text(item, "encoded") or find_text(item, "description")
@@ -994,6 +1011,7 @@ def parse_items(payload: bytes | str, source: str, category: str = "") -> list[I
             for item in root.xpath("//item"):
                 title = lxml_text(item, "title")
                 link = lxml_text(item, "link")
+                link = normalize_link(link)
                 pub_text = lxml_text(item, "pubDate")
                 pub_dt = parse_pub_date(pub_text)
                 desc_raw = lxml_text(item, "encoded") or lxml_text(item, "description")
