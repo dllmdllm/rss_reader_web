@@ -2813,7 +2813,7 @@ def build_html(
           label.className = 'seen-label';
           label.textContent = '✓ 已讀';
           const h2 = card.querySelector('h2');
-          if (h2) h2.parentNode.insertBefore(label, h2);
+          if (h2) h2.appendChild(label);
         }}
       }}
     }});
@@ -2828,7 +2828,7 @@ def build_html(
           label.className = 'seen-label';
           label.textContent = '✓ 已讀';
           const h2 = card.querySelector('h2');
-          if (h2) h2.parentNode.insertBefore(label, h2);
+          if (h2) h2.appendChild(label);
         }}
       }}
       seenSet.add(link);
@@ -2950,12 +2950,7 @@ def build_html(
 
     function applyCollapseByCategory() {{
       cards.forEach(card => {{
-        const cat = card.dataset.category || '';
-        if (activeCategory === 'all') {{
-          card.classList.add('collapsed');
-        }} else if (cat === activeCategory) {{
-          card.classList.remove('collapsed');
-        }}
+        card.classList.add('collapsed');
       }});
     }}
 
