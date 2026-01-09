@@ -3124,8 +3124,7 @@ def build_html(
     const scrollGap = 0;
     function updateScrollPadding() {{
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
-      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
-      const pad = Math.max(12, headerH + toolbarH + scrollGap);
+      const pad = Math.max(12, headerH + scrollGap);
       document.documentElement.style.scrollPaddingTop = pad + 'px';
       document.body.style.scrollPaddingTop = pad + 'px';
     }}
@@ -3137,8 +3136,7 @@ def build_html(
       updateScrollPadding();
       temporarilyDisableSnap();
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
-      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
-      const top = card.offsetTop - headerH - toolbarH - scrollGap - 8;
+      const top = card.offsetTop - headerH - scrollGap - 8;
       window.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
     }}
     document.querySelectorAll('.marquee-link').forEach(link => {{
@@ -3271,9 +3269,8 @@ def build_html(
         }}
       }}
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
-      const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
-      if (window.scrollY < (headerH + toolbarH - 6)) return;
-      const anchorY = headerH + toolbarH + 8;
+      if (window.scrollY < (headerH - 6)) return;
+      const anchorY = headerH + 8;
       let best = null;
       let bestDist = Infinity;
       cards.forEach(card => {{
