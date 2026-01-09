@@ -2607,6 +2607,7 @@ def build_html(
     }}
     .hero {{
       width: 100% !important;
+      max-width: 100% !important;
       height: auto;
       max-height: 420px;
       object-fit: contain;
@@ -2679,6 +2680,9 @@ def build_html(
       opacity: 0;
       transform: translateY(8px);
       transition: opacity 0.5s ease, transform 0.5s ease;
+    }}
+    .img-wrap {{
+      width: 100%;
     }}
     .img-wrap {{
       position: relative;
