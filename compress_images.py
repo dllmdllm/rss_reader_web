@@ -30,7 +30,11 @@ def save_json(path: str, payload: dict) -> None:
     tmp = path + ".tmp"
     with open(tmp, "w", encoding="utf-8") as handle:
         json.dump(payload, handle, ensure_ascii=False, indent=2)
-    os.replace(tmp, path)
+    if os.path.exists(tmp):
+        os.replace(tmp, path)
+    else:
+        with open(path, "w", encoding="utf-8") as handle:
+            json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
 def save_with_quality(img_obj: Image.Image, q: int, ext: str) -> str:
