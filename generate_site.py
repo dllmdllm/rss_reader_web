@@ -3226,13 +3226,33 @@ def build_html(
     function temporarilyDisableSnap() {{
       return;
     }}
+    function smoothScrollTo(targetY, duration = 420) {{
+      if (!Number.isFinite(targetY)) return;
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {{
+        window.scrollTo({{ top: Math.max(0, targetY), behavior: 'auto' }});
+        return;
+      }}
+      const startY = window.scrollY;
+      const diff = targetY - startY;
+      if (Math.abs(diff) < 2) return;
+      const start = performance.now();
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+      function step(now) {{
+        const elapsed = now - start;
+        const t = Math.min(1, elapsed / duration);
+        const eased = easeOutCubic(t);
+        window.scrollTo(0, startY + diff * eased);
+        if (t < 1) requestAnimationFrame(step);
+      }}
+      requestAnimationFrame(step);
+    }}
     function scrollToCard(card) {{
       if (!card) return;
       updateScrollPadding();
       temporarilyDisableSnap();
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
       const top = card.offsetTop - headerH - scrollGap - 8;
-      window.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
+      smoothScrollTo(Math.max(0, top), 420);
     }}
     document.querySelectorAll('.marquee-link').forEach(link => {{
       link.addEventListener('click', (e) => {{
@@ -3419,7 +3439,7 @@ def build_html(
       topBtn.addEventListener('click', () => {{
         document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
         temporarilyDisableSnap();
-        window.scrollTo({{ top: 0, behavior: 'smooth' }});
+        smoothScrollTo(0, 420);
       }});
       window.addEventListener('scroll', () => {{
         topBtn.classList.toggle('show', window.scrollY > 600);
