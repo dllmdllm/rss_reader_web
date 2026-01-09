@@ -1886,6 +1886,11 @@ def build_html(
                     content = text_from_html
                 else:
                     full_html = ""
+            # if full_html used but no image from RSS, try to fetch og/image only
+            if full_html and (not image_url) and item.link and item.source == "RTHK":
+                _, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
+                if og_image and not is_generic_image(og_image, item.link):
+                    image_url = og_image
             if not full_html:
                 fulltext, og_image = extract_fulltext_and_image(item.link, fulltext_cache)
                 if fulltext:
