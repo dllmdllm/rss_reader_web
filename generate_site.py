@@ -3132,7 +3132,7 @@ def build_html(
         card.classList.add('focus');
         card.classList.remove('collapsed');
         ensureImageSpinners(card);
-        focusPauseUntil = Date.now() + 1200;
+        focusPauseUntil = Date.now() + 2000;
         armSnapOnce();
         requestAnimationFrame(() => {{
           const afterTop = card.getBoundingClientRect().top;
