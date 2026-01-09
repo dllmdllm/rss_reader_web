@@ -3029,7 +3029,7 @@ def build_html(
       }}
       setClearVisible();
     }});
-    const scrollGap = -220;
+    const scrollGap = 0;
     function updateScrollPadding() {{
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
       const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
@@ -3046,7 +3046,7 @@ def build_html(
       temporarilyDisableSnap();
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
       const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
-      const top = card.getBoundingClientRect().top + window.scrollY - headerH - toolbarH - scrollGap;
+      const top = card.offsetTop - headerH - toolbarH - scrollGap - 8;
       window.scrollTo({{ top: Math.max(0, top), behavior: 'smooth' }});
     }}
     document.querySelectorAll('.marquee-link').forEach(link => {{
