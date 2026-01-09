@@ -2731,12 +2731,10 @@ def build_html(
 <body>
   <header class="site">
     <h1 class="marquee"><span class="marquee-track">{marquee_safe}</span></h1>
+    <div class="kw-marquee"><span class="kw-track">{kw_marquee_safe}</span></div>
     <div class="meta">{meta_line}｜<button class="refresh-btn" id="refresh" title="更新">⟳</button> <button class="font-btn" id="font-sm" title="內文縮細">A-</button> <button class="font-btn" id="font-lg" title="內文放大">A+</button></div>
   </header>
   <div class="toolbar">
-      <div class="toolbar-row">
-        <div class="kw-marquee"><span class="kw-track">{kw_marquee_safe}</span></div>
-      </div>
       <div class="toolbar-row">
         <div class="search-wrap">
           <input id="search" type="search" placeholder="搜尋標題或內容…">
