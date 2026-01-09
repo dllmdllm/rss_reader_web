@@ -2048,7 +2048,8 @@ def build_html(
         </header>
         {hero}
         {hero_note}
-        <div class="content">{content}<button class="collapse-btn" aria-label="收起">▴</button></div>
+        <div class="content">{content}</div>
+        <button class="collapse-btn" aria-label="收起">▴</button>
       </article>
             """.format(
                 idx=idx,
