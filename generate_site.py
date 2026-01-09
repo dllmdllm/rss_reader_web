@@ -2054,7 +2054,7 @@ def build_html(
         seen_class = ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}"{hero_attr}>
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}" data-pubts="{pub_ts}"{hero_attr}>
         <header class="card-head">
           <div class="index-col">
             <span class="index">{idx:02d}</span>
@@ -2098,6 +2098,7 @@ def build_html(
                 img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
                 imgcount=image_count,
                 hero_attr=hero_attr,
+                pub_ts=(int(item.pub_dt.timestamp()) if item.pub_dt else 0),
                 seen_label="",
             )
         )
@@ -2743,6 +2744,14 @@ def build_html(
       color: var(--muted);
       padding: 40px 16px;
     }}
+    .update-marker {{
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 1px;
+      padding: 6px 0 2px;
+      opacity: 0.85;
+    }}
     .site-footer {{
       text-align: center;
       color: var(--muted);
@@ -3050,6 +3059,25 @@ def build_html(
     document.documentElement.style.setProperty('--content-font', fontSize + 'px');
     let titleOnly = false;
 
+    function insertUpdateMarker() {{
+      const lastTs = parseInt(localStorage.getItem('lastUpdateTs') || '0', 10) || 0;
+      let markerInserted = false;
+      let newestTs = lastTs;
+      cards.forEach(card => {{
+        const ts = parseInt(card.dataset.pubts || '0', 10) || 0;
+        if (ts > newestTs) newestTs = ts;
+        if (markerInserted) return;
+        if (lastTs && ts && ts < lastTs) {{
+          const mark = document.createElement('div');
+          mark.className = 'update-marker';
+          mark.textContent = '～～～ 更新分隔 ～～～';
+          card.parentNode.insertBefore(mark, card);
+          markerInserted = true;
+        }}
+      }});
+      if (newestTs) localStorage.setItem('lastUpdateTs', String(newestTs));
+    }}
+
 
     function applyCollapseByCategory() {{
       cards.forEach(card => {{
@@ -3313,6 +3341,7 @@ def build_html(
     }}
     setClearVisible();
     applyCollapseByCategory();
+    insertUpdateMarker();
     let snapArmed = false;
     let snapIgnoreUntil = 0;
     let focusPauseUntil = 0;
