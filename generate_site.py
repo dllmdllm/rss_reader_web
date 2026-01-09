@@ -1953,14 +1953,14 @@ def build_html(
         seen_class = " seen" if item.link and item.link in seen_cache else ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-imgcount="{imgcount}"{hero_attr}>
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}"{hero_attr}>
         <header class="card-head">
           <div class="index-col">
             <span class="index">{idx:02d}</span>
             <div class="thumb-spinner"></div>
           </div>
           <div>
-            <h2>{title}</h2>
+            {seen_label}<h2>{title}</h2>
             <div class="meta-row">
               <span class="tag" data-link="{link}">{source}</span>
               <button class="share-btn" aria-label="分享">↗</button>
@@ -1995,6 +1995,7 @@ def build_html(
                 img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
                 imgcount=image_count,
                 hero_attr=hero_attr,
+                seen_label=("<span class='seen-label'>✓ 已讀</span>" if seen_class else ""),
             )
         )
 
@@ -2351,7 +2352,16 @@ def build_html(
       scroll-behavior: smooth;
     }}
     .card.seen {{
-      filter: saturate(0.95);
+      filter: saturate(0.92);
+      opacity: 0.86;
+    }}
+    .seen-label {{
+      display: inline-block;
+      margin-bottom: 6px;
+      font-size: 12px;
+      color: #5573a6;
+      font-weight: 600;
+      letter-spacing: 0.5px;
     }}
     .category-news {{
       --cat-bg: #eef5ff;
@@ -2788,6 +2798,37 @@ def build_html(
     let lastAuto = Date.now();
     const contents = Array.from(document.querySelectorAll('.content'));
     const titles = Array.from(document.querySelectorAll('.card h2'));
+    const seenSet = new Set(JSON.parse(localStorage.getItem('seenLinks') || '[]'));
+    cards.forEach(card => {{
+      const link = card.dataset.link || '';
+      if (link && seenSet.has(link)) {{
+        card.classList.add('seen');
+        if (!card.querySelector('.seen-label')) {{
+          const label = document.createElement('span');
+          label.className = 'seen-label';
+          label.textContent = '✓ 已讀';
+          const h2 = card.querySelector('h2');
+          if (h2) h2.parentNode.insertBefore(label, h2);
+        }}
+      }}
+    }});
+    function markSeen(card) {{
+      if (!card) return;
+      const link = card.dataset.link || '';
+      if (!link) return;
+      if (!card.classList.contains('seen')) {{
+        card.classList.add('seen');
+        if (!card.querySelector('.seen-label')) {{
+          const label = document.createElement('span');
+          label.className = 'seen-label';
+          label.textContent = '✓ 已讀';
+          const h2 = card.querySelector('h2');
+          if (h2) h2.parentNode.insertBefore(label, h2);
+        }}
+      }}
+      seenSet.add(link);
+      localStorage.setItem('seenLinks', JSON.stringify(Array.from(seenSet)));
+    }}
     // update category counts in chips
     const counts = {{ all: 0, news: 0, intl: 0, ent: 0, tech: 0 }};
     cards.forEach(card => {{
@@ -3072,6 +3113,7 @@ def build_html(
           target.classList.remove('collapsed');
           document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
           target.classList.add('hi');
+          markSeen(target);
           ensureImageSpinners(target);
           scrollToCard(target);
         }}
@@ -3091,6 +3133,7 @@ def build_html(
           first.classList.remove('collapsed');
           document.querySelectorAll('.card.hi').forEach(c => c.classList.remove('hi'));
           first.classList.add('hi');
+          markSeen(first);
           ensureImageSpinners(first);
           scrollToCard(first);
         }}
@@ -3145,6 +3188,7 @@ def build_html(
         document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
         card.classList.add('focus');
         card.classList.remove('collapsed');
+        markSeen(card);
         ensureImageSpinners(card);
         focusPauseUntil = Date.now() + 2000;
         focusLockCard = card;
