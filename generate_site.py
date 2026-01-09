@@ -3109,6 +3109,9 @@ def build_html(
     let snapArmed = false;
     let snapIgnoreUntil = 0;
     let focusPauseUntil = 0;
+    let focusLockCard = null;
+    let focusLockUntil = 0;
+    let focusLockScrollY = 0;
     function armSnapOnce() {{
       snapArmed = false;
       snapIgnoreUntil = 0;
@@ -3133,6 +3136,9 @@ def build_html(
         card.classList.remove('collapsed');
         ensureImageSpinners(card);
         focusPauseUntil = Date.now() + 2000;
+        focusLockCard = card;
+        focusLockUntil = Date.now() + 2500;
+        focusLockScrollY = window.scrollY;
         armSnapOnce();
         requestAnimationFrame(() => {{
           const afterTop = card.getBoundingClientRect().top;
@@ -3165,7 +3171,16 @@ def build_html(
     let lastFocus = null;
     let focusTimer = null;
     function updateFocusByScroll() {{
-      if (Date.now() < focusPauseUntil) return;
+      const now = Date.now();
+      if (now < focusPauseUntil) return;
+      if (focusLockCard && now < focusLockUntil) {{
+        const dy = Math.abs(window.scrollY - focusLockScrollY);
+        if (dy < 120) {{
+          document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
+          focusLockCard.classList.add('focus');
+          return;
+        }}
+      }}
       const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
       const toolbarH = toolbarEl ? toolbarEl.getBoundingClientRect().height : 0;
       if (window.scrollY < (headerH + toolbarH - 6)) return;
