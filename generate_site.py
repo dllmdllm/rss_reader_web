@@ -3239,15 +3239,10 @@ def build_html(
       btn.addEventListener('click', (e) => {{
         const card = btn.closest('.card');
         if (!card) return;
-        const beforeTop = card.getBoundingClientRect().top;
         card.classList.add('collapsed');
         cleanupSpinners(card);
         requestAnimationFrame(() => {{
-          const afterTop = card.getBoundingClientRect().top;
-          const delta = afterTop - beforeTop;
-          if (delta !== 0) {{
-            window.scrollBy({{ top: delta, left: 0, behavior: 'auto' }});
-          }}
+          scrollToCard(card);
         }});
         e.stopPropagation();
       }});
