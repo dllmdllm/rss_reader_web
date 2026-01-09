@@ -2847,6 +2847,39 @@ def build_html(
       const n = counts[cat] || 0;
       chip.textContent = `${{label}}(${{n}})`;
     }});
+    sourceChips.forEach(chip => {{
+      if (!chip.dataset.label) {{
+        chip.dataset.label = chip.textContent.replace(/\\(\\d+\\)$/,'').trim();
+      }}
+    }});
+    function updateSourceCounts() {{
+      const srcCounts = {{}};
+      sourceChips.forEach(chip => {{
+        const src = chip.dataset.source || '';
+        if (src) srcCounts[src] = 0;
+      }});
+      if (activeCategory !== 'all') {{
+        cards.forEach(card => {{
+          if (card.style.display === 'none') return;
+          if ((card.dataset.category || '') !== activeCategory) return;
+          const src = card.dataset.source || '';
+          if (src in srcCounts) srcCounts[src] += 1;
+        }});
+      }}
+      let total = 0;
+      Object.keys(srcCounts).forEach(k => {{
+        if (k !== 'all') total += srcCounts[k];
+      }});
+      sourceChips.forEach(chip => {{
+        const src = chip.dataset.source || '';
+        const base = chip.dataset.label || chip.textContent.replace(/\\(\\d+\\)$/,'').trim();
+        if (src === 'all') {{
+          chip.textContent = `${{base}}(${{total}})`;
+        }} else {{
+          chip.textContent = `${{base}}(${{srcCounts[src] || 0}})`;
+        }}
+      }});
+    }}
     contents.forEach(el => {{
       if (!el.dataset.original) el.dataset.original = el.innerHTML;
     }});
@@ -2948,6 +2981,7 @@ def build_html(
       newsSources.classList.remove('show');
       applyFilter();
       applyCollapseByCategory();
+      updateSourceCounts();
     }}
 
     categoryChips.forEach(chip => {{
@@ -2960,6 +2994,7 @@ def build_html(
           activeSource = 'all';
           sourceChips.forEach(c => c.classList.remove('active'));
           sourceChips[0].classList.add('active');
+          updateSourceCounts();
         }} else {{
           newsSources.classList.remove('show');
           activeSource = 'all';
