@@ -2538,6 +2538,10 @@ def build_html(
     .card.collapsed .img-note {{
       display: none;
     }}
+    .card.collapsed .img-wrap,
+    .card.collapsed .img-spinner {{
+      display: none;
+    }}
     .content img {{
       display: block;
       margin-left: auto;
@@ -2849,6 +2853,10 @@ def build_html(
       if (card.classList.contains('collapsed')) return;
       card.querySelectorAll('.content img, .hero').forEach(img => attachSpinner(img));
     }}
+    function cleanupSpinners(card) {{
+      if (!card) return;
+      card.querySelectorAll('.img-spinner').forEach(sp => sp.remove());
+    }}
     cards.forEach(card => ensureImageSpinners(card));
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
@@ -3129,7 +3137,10 @@ def build_html(
         if (e.target.closest('a, button, input, .tag, .share-btn, .collapse-btn')) return;
         const beforeTop = card.getBoundingClientRect().top;
         cards.forEach(other => {{
-          if (other !== card) other.classList.add('collapsed');
+          if (other !== card) {{
+            other.classList.add('collapsed');
+            cleanupSpinners(other);
+          }}
         }});
         document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
         card.classList.add('focus');
@@ -3141,11 +3152,7 @@ def build_html(
         focusLockScrollY = window.scrollY;
         armSnapOnce();
         requestAnimationFrame(() => {{
-          const afterTop = card.getBoundingClientRect().top;
-          const delta = afterTop - beforeTop;
-          if (delta < 0) {{
-            window.scrollBy({{ top: delta, left: 0, behavior: 'auto' }});
-          }}
+          scrollToCard(card);
         }});
       }});
     }});
@@ -3155,6 +3162,7 @@ def build_html(
         if (!card) return;
         const beforeTop = card.getBoundingClientRect().top;
         card.classList.add('collapsed');
+        cleanupSpinners(card);
         requestAnimationFrame(() => {{
           const afterTop = card.getBoundingClientRect().top;
           const delta = afterTop - beforeTop;
