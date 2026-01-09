@@ -2333,6 +2333,9 @@ def build_html(
       font-size: 12px;
     }}
     .chip {{
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       border: 1px solid var(--border);
       border-radius: 999px;
       padding: 6px 12px;
@@ -2341,6 +2344,8 @@ def build_html(
       cursor: pointer;
       user-select: none;
       touch-action: manipulation;
+      font-family: inherit;
+      color: inherit;
     }}
     .chip.active {{
       background: var(--accent);
@@ -2842,21 +2847,21 @@ def build_html(
       </div>
     <div class="toolbar-row">
       <div class="filters">
-        <span class="chip active" data-category="all">全部(0)</span>
-        <span class="chip" data-category="news">新聞(0)</span>
-        <span class="chip" data-category="intl">國際(0)</span>
-        <span class="chip" data-category="ent">娛樂(0)</span>
-        <span class="chip" data-category="tech">科技(0)</span>
+        <button class="chip active" data-category="all" type="button">全部(0)</button>
+        <button class="chip" data-category="news" type="button">新聞(0)</button>
+        <button class="chip" data-category="intl" type="button">國際(0)</button>
+        <button class="chip" data-category="ent" type="button">娛樂(0)</button>
+        <button class="chip" data-category="tech" type="button">科技(0)</button>
       </div>
     </div>
     <div class="toolbar-row">
       <div class="filters secondary" id="news-sources">
-        <span class="chip active" data-source="all">全部</span>
-        <span class="chip" data-source="RTHK">RTHK</span>
-        <span class="chip" data-source="mingpao">Mingpao</span>
-        <span class="chip" data-source="oncc">ON.cc</span>
-        <span class="chip" data-source="singtao">Singtao</span>
-        <span class="chip" data-source="hk01">HK01</span>
+        <button class="chip active" data-source="all" type="button">全部</button>
+        <button class="chip" data-source="RTHK" type="button">RTHK</button>
+        <button class="chip" data-source="mingpao" type="button">Mingpao</button>
+        <button class="chip" data-source="oncc" type="button">ON.cc</button>
+        <button class="chip" data-source="singtao" type="button">Singtao</button>
+        <button class="chip" data-source="hk01" type="button">HK01</button>
       </div>
     </div>
   </div>
