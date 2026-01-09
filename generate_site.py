@@ -38,8 +38,8 @@ STANZA_NLP = None
 DEFAULT_URLS = ",".join(
     [
         "https://rthk9.rthk.hk/rthk/news/rss/c_expressnews_clocal.xml",
-        "https://rthk.hk/rthk/news/rss/c_expressnews_cinternational.xml",
-        "https://rthk.hk/rthk/news/rss/c_expressnews_greaterchina.xml",
+        "https://rthk9.rthk.hk/rthk/news/rss/c_expressnews_cinternational.xml",
+        "https://rthk9.rthk.hk/rthk/news/rss/c_expressnews_greaterchina.xml",
         "https://news.mingpao.com/rss/ins/all.xml",
         "https://news.mingpao.com/rss/ins/s00004.xml",
         "https://news.mingpao.com/rss/ins/s00005.xml",
