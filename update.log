@@ -71218,3 +71218,9 @@ After doing this, you may fix the identity used for this commit with:
  delete mode 100644 images/rthk_a029e2f4f25894e4_OK.jpg
  create mode 100644 images/rthk_a3a803a8647395a6_OK.jpg
  delete mode 100644 images/rthk_f1a41c2e4bd6f7b6_OK.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   f4986c8..512a451  main -> main
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/generate_site.py", line 3111
+    }
+    ^
+SyntaxError: f-string: single '}' is not allowed

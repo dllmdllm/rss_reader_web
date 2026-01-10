@@ -2,7 +2,9 @@
 import os
 import json
 import tempfile
-from PIL import Image
+from PIL import Image, ImageFile
+
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 PROJECT_ROOT = os.path.dirname(__file__)
 IMAGES_DIR = os.path.join(PROJECT_ROOT, "images")
@@ -13,6 +15,7 @@ MAX_WIDTH = 720
 TARGET_BYTES = 200 * 1024
 QUALITY_JPG = 52
 QUALITY_WEBP = 48
+MIN_WIDTH = 480
 
 
 def load_json(path: str) -> dict:
@@ -69,16 +72,18 @@ def compress_image(path: str) -> None:
         if img.width > MAX_WIDTH:
             new_h = max(1, int(img.height * (MAX_WIDTH / img.width)))
             img = img.resize((MAX_WIDTH, new_h), Image.LANCZOS)
+        if ext in (".gif", ".png"):
+            ext = ".webp"
         q = QUALITY_JPG if ext in (".jpg", ".jpeg") else QUALITY_WEBP
         tmp_path = save_with_quality(img, q, ext)
-        if ext in (".jpg", ".jpeg", ".webp", ".png"):
-            while os.path.getsize(tmp_path) > TARGET_BYTES and q > 40:
+        if ext in (".jpg", ".jpeg", ".webp"):
+            while os.path.getsize(tmp_path) > TARGET_BYTES and q > 30:
                 os.remove(tmp_path)
                 q -= 5
                 tmp_path = save_with_quality(img, q, ext)
             cur = img
-            while os.path.getsize(tmp_path) > TARGET_BYTES and cur.width > 640:
-                new_w = max(640, int(cur.width * 0.85))
+            while os.path.getsize(tmp_path) > TARGET_BYTES and cur.width > MIN_WIDTH:
+                new_w = max(MIN_WIDTH, int(cur.width * 0.85))
                 new_h = max(1, int(cur.height * (new_w / cur.width)))
                 cur = cur.resize((new_w, new_h), Image.LANCZOS)
                 os.remove(tmp_path)
@@ -107,7 +112,7 @@ def main() -> int:
         if not os.path.isfile(path):
             continue
         ext = os.path.splitext(name)[1].lower()
-        if ext not in (".jpg", ".jpeg", ".webp", ".png"):
+        if ext not in (".jpg", ".jpeg", ".webp", ".png", ".gif"):
             continue
         size_ok = os.path.getsize(path) <= TARGET_BYTES
         try:

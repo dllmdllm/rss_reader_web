@@ -2733,6 +2733,9 @@ def build_html(
       opacity: 1;
       transform: translateY(0);
     }}
+    .content img.img-hidden {{
+      opacity: 0;
+    }}
     .card[data-source="singtao"] .content img {{
       max-height: 320px;
       background: #fff;
@@ -3035,6 +3038,7 @@ def build_html(
       img.parentNode.insertBefore(wrap, img);
       wrap.appendChild(img);
       wrap.appendChild(spinner);
+      img.classList.add('img-hidden');
       const done = () => {{
         img.classList.add('show');
         spinner.classList.add('hide');
@@ -3042,11 +3046,22 @@ def build_html(
         const card = img.closest('.card');
         if (card) card.classList.add('img-loaded');
       }};
+      const fail = () => {{
+        img.remove();
+        spinner.classList.add('hide');
+        setTimeout(() => spinner.remove(), 250);
+        const card = img.closest('.card');
+        if (card) card.classList.add('img-loaded');
+      }};
       if (img.complete) {{
-        done();
+        if (img.naturalWidth > 0) {{
+          done();
+        }} else {{
+          fail();
+        }}
       }} else {{
         img.addEventListener('load', done, {{ once: true }});
-        img.addEventListener('error', done, {{ once: true }});
+        img.addEventListener('error', fail, {{ once: true }});
       }}
     }}
     function prefetchHero(card) {{
@@ -3066,6 +3081,33 @@ def build_html(
       if (!card) return;
       if (card.classList.contains('collapsed')) return;
       card.querySelectorAll('.content img, .hero').forEach(img => attachSpinner(img));
+    }}
+    function preloadCardImages(card) {{
+      if (!card) return;
+      if (card.dataset.preloadDone === '1') return;
+      const urls = [];
+      card.querySelectorAll('.content img, .hero').forEach(img => {{
+        const src = img.getAttribute('src') || '';
+        if (src) urls.push(src);
+      }});
+      if (!urls.length) {{
+        card.dataset.preloadDone = '1';
+        card.classList.add('img-loaded');
+        return;
+      }}
+      let pending = urls.length;
+      urls.forEach(url => {{
+        const p = new Image();
+        p.onload = p.onerror = () => {{
+          pending -= 1;
+          if (pending <= 0) {{
+            card.dataset.preloadDone = '1';
+            card.classList.add('img-loaded');
+            ensureImageSpinners(card);
+          }}
+        }};
+        p.src = url;
+      }});
     }}
     function cleanupSpinners(card) {{
       if (!card) return;
@@ -3397,6 +3439,7 @@ def build_html(
         card.classList.add('focus');
         card.classList.remove('collapsed');
         markSeen(card);
+        preloadCardImages(card);
         ensureImageSpinners(card);
         focusPauseUntil = Date.now() + 2000;
         focusLockCard = card;
