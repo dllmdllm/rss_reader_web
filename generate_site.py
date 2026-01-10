@@ -45,6 +45,7 @@ DEFAULT_URLS = ",".join(
         "https://news.mingpao.com/rss/ins/s00005.xml",
         "https://news.mingpao.com/rss/ins/s00007.xml",
         "https://rss.cnbeta.com.tw/",
+        "https://rss.app/feed/AsoWbHsTbqH42fYQ",
         "https://hk.on.cc/hk/news/index.html",
         "https://hk.on.cc/hk/intnews/index.html",
         "https://hk.on.cc/hk/entertainment/index.html",
@@ -2923,6 +2924,7 @@ def build_html(
         <button class="chip" data-source="oncc" type="button">ON.cc</button>
         <button class="chip" data-source="singtao" type="button">Singtao</button>
         <button class="chip" data-source="hk01" type="button">HK01</button>
+        <button class="chip" data-source="weekendhk" type="button">WeekendHK</button>
       </div>
     </div>
   </div>
@@ -3578,6 +3580,9 @@ def fetch_all(urls: list[str], feed_cache: dict) -> list[Item]:
         elif "cnbeta" in url:
             source = "cnbeta"
             category = "tech"
+        elif "rss.app/feed/AsoWbHsTbqH42fYQ" in url:
+            source = "weekendhk"
+            category = "ent"
         elif "stheadline.com" in url:
             source = "singtao"
             if "realtime-china" in url or "realtime-world" in url:
