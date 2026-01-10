@@ -10,6 +10,7 @@ PROJECT_ROOT = os.path.dirname(__file__)
 IMAGES_DIR = os.path.join(PROJECT_ROOT, "images")
 INDEX_PATH = os.path.join(PROJECT_ROOT, "index.html")
 IMAGE_CACHE_PATH = os.path.join(PROJECT_ROOT, "data", "image_cache.json")
+COMPRESS_CACHE_PATH = os.path.join(PROJECT_ROOT, "data", "compress_cache.json")
 
 MAX_WIDTH = 720
 TARGET_BYTES = 200 * 1024
@@ -106,6 +107,7 @@ def main() -> int:
     with open(INDEX_PATH, "r", encoding="utf-8", errors="ignore") as handle:
         html_text = handle.read()
     cache = load_json(IMAGE_CACHE_PATH)
+    compress_cache = load_json(COMPRESS_CACHE_PATH)
 
     for name in os.listdir(IMAGES_DIR):
         path = os.path.join(IMAGES_DIR, name)
@@ -114,7 +116,13 @@ def main() -> int:
         ext = os.path.splitext(name)[1].lower()
         if ext not in (".jpg", ".jpeg", ".webp", ".png", ".gif"):
             continue
-        # Always re-compress on each run (ignore _OK short-circuit)
+        try:
+            stat = os.stat(path)
+            sig = f"{stat.st_size}:{int(stat.st_mtime)}"
+        except Exception:
+            sig = ""
+        if name in compress_cache and compress_cache.get(name) == sig:
+            continue
         compress_image(path)
         base = os.path.splitext(name)[0]
         base_no_ok = base[:-3] if base.endswith("_OK") else base
@@ -136,10 +144,13 @@ def main() -> int:
             if meta.get("path") in (name, f"{base_no_ok}{out_ext}"):
                 meta["path"] = new_name
                 cache[url] = meta
+        if sig:
+            compress_cache[new_name] = sig
 
     with open(INDEX_PATH, "w", encoding="utf-8") as handle:
         handle.write(html_text)
     save_json(IMAGE_CACHE_PATH, cache)
+    save_json(COMPRESS_CACHE_PATH, compress_cache)
     return 0
 
 

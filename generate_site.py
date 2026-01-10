@@ -306,7 +306,12 @@ def clean_content_text(text: str) -> str:
     return "\n".join(lines).strip()
 
 
-def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None = None) -> str:
+def clean_html_fragment(
+    fragment: str,
+    base_url: str,
+    image_cache: dict | None = None,
+    download_images: bool = True,
+) -> str:
     if not fragment:
         return ""
     try:
@@ -410,7 +415,7 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 src = img.get("src") or ""
                 if "sthlstatic.com/sthl/assets/icons" in src or "sthlstatic.com/sthl/assets/images/logo" in src:
                     img.drop_tag()
-        if image_cache is not None:
+        if image_cache is not None and download_images:
             for img in root.xpath(".//img[@src]"):
                 src = img.get("src")
                 if not src:
@@ -507,6 +512,31 @@ def normalize_image_url(base_url: str, raw_url: str) -> str:
     return urljoin(base_url, raw_url)
 
 
+def normalize_image_key(url: str) -> str:
+    if not url:
+        return ""
+    try:
+        parts = urlsplit(url)
+        if not parts.query:
+            return url.split("#", 1)[0]
+        keep_keys = (
+            "token",
+            "sig",
+            "signature",
+            "expires",
+            "exp",
+            "auth",
+            "x-amz",
+            "x-oss",
+        )
+        lowered = parts.query.lower()
+        if any(k in lowered for k in keep_keys):
+            return url.split("#", 1)[0]
+        return urlunsplit((parts.scheme, parts.netloc, parts.path, "", ""))
+    except Exception:
+        return url.split("#", 1)[0]
+
+
 def safe_fetch_url(url: str) -> str:
     if not url:
         return url
@@ -575,11 +605,12 @@ def download_image(url: str, cache: dict, referer: str | None = None, lock: Opti
         return ""
     now = time.time()
     prefix = get_image_prefix(referer or url)
+    cache_key = normalize_image_key(url) or url
     if lock:
         with lock:
-            entry = cache.get(url, {})
+            entry = cache.get(cache_key, {})
     else:
-        entry = cache.get(url, {})
+        entry = cache.get(cache_key, {})
     cached_path = entry.get("path", "")
     cached_ts = float(entry.get("timestamp", 0) or 0)
     if cached_path and (now - cached_ts) <= IMAGE_CACHE_TTL:
@@ -593,18 +624,26 @@ def download_image(url: str, cache: dict, referer: str | None = None, lock: Opti
                     )
                     if lock:
                         with lock:
-                            cache[url] = {"path": new_name, "timestamp": cached_ts}
+                            cache[cache_key] = {
+                                "path": new_name,
+                                "timestamp": cached_ts,
+                                "url": url,
+                            }
                     else:
-                        cache[url] = {"path": new_name, "timestamp": cached_ts}
+                        cache[cache_key] = {
+                            "path": new_name,
+                            "timestamp": cached_ts,
+                            "url": url,
+                        }
                     return new_name
                 except Exception:
                     return cached_path
             return cached_path
         if lock:
             with lock:
-                cache.pop(url, None)
+                cache.pop(cache_key, None)
         else:
-            cache.pop(url, None)
+            cache.pop(cache_key, None)
     def is_image_bytes(buf: bytes) -> bool:
         if not buf:
             return False
@@ -676,9 +715,9 @@ def download_image(url: str, cache: dict, referer: str | None = None, lock: Opti
             handle.write(data)
         if lock:
             with lock:
-                cache[url] = {"path": filename, "timestamp": now}
+                cache[cache_key] = {"path": filename, "timestamp": now, "url": url}
         else:
-            cache[url] = {"path": filename, "timestamp": now}
+            cache[cache_key] = {"path": filename, "timestamp": now, "url": url}
         return filename
     except Exception:
         return ""
@@ -903,6 +942,44 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
 def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) -> str:
     if not url:
         return ""
+
+
+def localize_images_in_html(html_text: str, base_url: str, image_cache: dict) -> tuple[str, list[str]]:
+    if not html_text:
+        return "", []
+    try:
+        from lxml import html as lxml_html
+    except Exception:
+        lxml_html = None
+    local_urls: list[str] = []
+    if lxml_html is None:
+        def repl(match: re.Match) -> str:
+            pre, src, suf = match.group(1), match.group(2), match.group(3)
+            full = normalize_image_url(base_url, src)
+            local_name = download_image(full, image_cache, base_url)
+            if local_name:
+                new_src = f"images/{local_name}"
+                local_urls.append(new_src)
+                return f"{pre}{new_src}{suf}"
+            return match.group(0)
+        new_html = re.sub(r'(<img[^>]+src=[\'"])([^\'"]+)([\'"])', repl, html_text)
+        return new_html, local_urls
+    try:
+        root = lxml_html.fragment_fromstring(html_text, create_parent="div")
+        for img in root.xpath(".//img[@src]"):
+            src = img.get("src") or ""
+            full = normalize_image_url(base_url, src)
+            local_name = download_image(full, image_cache, base_url)
+            if local_name:
+                new_src = f"images/{local_name}"
+                img.set("src", new_src)
+                local_urls.append(new_src)
+            img.set("loading", "lazy")
+            img.set("decoding", "async")
+        new_html = "".join(lxml_html.tostring(child, encoding="unicode") for child in root)
+        return new_html.strip(), local_urls
+    except Exception:
+        return html_text, local_urls
     now = time.time()
     entry = cache.get(url, {})
     cached_html = entry.get("html", "")
@@ -919,13 +996,13 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
             if "articleflag" in cached_html or "videoplayer_" in cached_html or "videospan_" in cached_html:
                 cached_html = ""
             else:
-                cleaned = clean_html_fragment(cached_html, url, image_cache)
+                cleaned = clean_html_fragment(cached_html, url, image_cache, download_images=False)
                 if cleaned and cleaned != cached_html:
                     cache[url] = {"html": cleaned, "timestamp": now}
                     return cleaned
         if cached_html:
             if "cnbeta.com.tw" in url and TRAD_CONVERTER is not None:
-                converted = clean_html_fragment(cached_html, url, image_cache)
+                converted = clean_html_fragment(cached_html, url, image_cache, download_images=False)
                 if converted and converted != cached_html:
                     cache[url] = {"html": converted, "timestamp": now}
                     return converted
@@ -994,7 +1071,7 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
                 best_len = length
         if best_node is not None and best_len >= 200:
             fragment = lxml_html.tostring(best_node, encoding="unicode")
-            fragment = clean_html_fragment(fragment, url, image_cache)
+            fragment = clean_html_fragment(fragment, url, image_cache, download_images=False)
             if fragment:
                 if "cnbeta.com.tw" in url and "<img" not in fragment:
                     fragment = ""
@@ -1007,7 +1084,7 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
 
             doc = Document(raw)
             summary_html = doc.summary(html_partial=True)
-            fragment = clean_html_fragment(summary_html, url, image_cache)
+            fragment = clean_html_fragment(summary_html, url, image_cache, download_images=False)
             if fragment:
                 cache[url] = {"html": fragment, "timestamp": now}
             return fragment
@@ -2042,9 +2119,10 @@ def build_html(
         for url, ref in prefetch_tasks:
             if not url:
                 continue
-            if url in seen:
+            key = normalize_image_key(url)
+            if key in seen:
                 continue
-            seen.add(url)
+            seen.add(key)
             dedup.append((url, ref))
         dl_lock = threading.Lock()
         with ThreadPoolExecutor(max_workers=DEFAULT_THREADS) as ex:
@@ -2065,6 +2143,11 @@ def build_html(
         hero_caption = ""
         hero_attr = ""
         prefetch_src = ""
+        localized_urls: list[str] = []
+        if content_html:
+            content_html, localized_urls = localize_images_in_html(
+                content_html, item.link, image_cache
+            )
         if item.source == "hk01" and extra_images:
             extra_html_parts: list[str] = []
             for img in extra_images:
@@ -2104,7 +2187,9 @@ def build_html(
             img_urls_raw.append(normalize_image_url(item.link, img))
         if hero_html:
             img_urls.append(hero_url)
-        if content_html:
+        if localized_urls:
+            img_urls.extend(localized_urls)
+        elif content_html:
             for m in re.finditer(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html):
                 img_urls.append(m.group(1))
         # de-dup while preserving order
