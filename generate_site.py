@@ -373,6 +373,12 @@ def clean_html_fragment(fragment: str, base_url: str, image_cache: dict | None =
                 parent = node.getparent()
                 if parent is not None:
                     parent.remove(node)
+            for node in root.xpath(
+                ".//articleflag | .//*[starts-with(@id,'videoplayer_')] | .//*[starts-with(@id,'videospan_')]"
+            ):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
             for link in root.xpath(".//a"):
                 # keep images, but remove text links
                 if link.xpath(".//img"):
@@ -871,6 +877,14 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
                 img_srcs = re.findall(r'<img[^>]+src=["\']([^"\']+)["\']', cached_html)
                 if img_srcs and all("cnbeta.com.tw/articles/" in s for s in img_srcs):
                     cached_html = ""
+        if "stheadline.com" in url and cached_html:
+            if "articleflag" in cached_html or "videoplayer_" in cached_html or "videospan_" in cached_html:
+                cached_html = ""
+            else:
+                cleaned = clean_html_fragment(cached_html, url, image_cache)
+                if cleaned and cleaned != cached_html:
+                    cache[url] = {"html": cleaned, "timestamp": now}
+                    return cleaned
         if cached_html:
             if "cnbeta.com.tw" in url and TRAD_CONVERTER is not None:
                 converted = clean_html_fragment(cached_html, url, image_cache)
@@ -2626,6 +2640,8 @@ def build_html(
       white-space: normal;
       position: relative;
       padding-bottom: 26px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }}
     .content h1, .content h2, .content h3 {{
       font-size: var(--content-font, 15px);
@@ -2681,6 +2697,10 @@ def build_html(
       opacity: 0;
       transform: translateY(8px);
       transition: opacity 0.5s ease, transform 0.5s ease;
+    }}
+    .content * {{
+      max-width: 100% !important;
+      box-sizing: border-box;
     }}
     .img-wrap {{
       width: 100%;
