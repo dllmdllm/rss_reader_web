@@ -1259,10 +1259,6 @@
     "path": "oncc_1b8152c7955889e9_OK.jpg",
     "timestamp": 1767967252.1012511
   },
-  "https://newsstatic.rthk.hk/frontend_images/social_icons/fc-webicon-facebook-s.png": {
-    "path": "rthk_f00ce7c6ea350759_OK.webp",
-    "timestamp": 1767967812.165919
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260109/photo/bkn-20260109213508665-0109_00822_001_01b.jpg?20260109220203": {
     "path": "oncc_b28900687216ec90_OK.jpg",
     "timestamp": 1767967840.150444
@@ -2367,269 +2363,13 @@
     "path": "hk01_ec78298e8d2f206a_OK.jpg",
     "timestamp": 1768011657.4970605
   },
-  "https://n.sinaimg.cn/tech/transform/65/w550h315/20260109/b57d-bc6cafb92d7295aa71f551e399ae33ca.png": {
-    "path": "cnbeta_18c9bdb73fd3bd28_OK.webp",
-    "timestamp": 1768012234.0258772
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/e6b3f9023773661.jpg": {
-    "path": "cnbeta_217654d8cba68186_OK.jpg",
-    "timestamp": 1768012236.1451442
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/37fc8e7872abc40.webp": {
-    "path": "cnbeta_4e9dbcc7f07f257f_OK.webp",
-    "timestamp": 1768012237.2410264
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/4b864fb056895cb.png": {
-    "path": "cnbeta_3ff99a53f219ce4c_OK.webp",
-    "timestamp": 1768012241.2532244
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/391fdcb3397aa19.jpg": {
-    "path": "cnbeta_6095a5014f3a34cb_OK.jpg",
-    "timestamp": 1768012241.6288528
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/5b4647480a56556.jpg": {
-    "path": "cnbeta_939e9eff93b81dea_OK.jpg",
-    "timestamp": 1768012244.2709317
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/38bcdfaf499ac9c.jpg": {
-    "path": "cnbeta_004d015d371a9536_OK.jpg",
-    "timestamp": 1768012244.3712533
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/eb897d56696d1b1.jpg": {
-    "path": "cnbeta_a56b09735448834b_OK.jpg",
-    "timestamp": 1768012244.4287856
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/edb7daaa0b9ea5e.jpg": {
-    "path": "cnbeta_6d93435eb32f6d76_OK.jpg",
-    "timestamp": 1768012244.8052316
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/03bb5e34a02640b.jpg": {
-    "path": "cnbeta_9871842d6358a0d4_OK.jpg",
-    "timestamp": 1768012244.8792672
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/7fc292ae9031b90.png": {
-    "path": "cnbeta_0a2b16b84a253195_OK.webp",
-    "timestamp": 1768012245.969884
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/611363d54ef5f49.png": {
-    "path": "cnbeta_e33e6e5475b233cb_OK.webp",
-    "timestamp": 1768012250.7254453
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/99069fb6483cfec.jpg": {
-    "path": "cnbeta_1448fcba7ac13cdc_OK.jpg",
-    "timestamp": 1768012250.7584043
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/e166d73488287f2.jpg": {
-    "path": "cnbeta_f1c8d1d22352d532_OK.jpg",
-    "timestamp": 1768012252.3757088
-  },
-  "https://n.sinaimg.cn/finance/transform/574/w550h824/20260109/ef79-d846ea5087e49add79d86ebfb99fdfee.png": {
-    "path": "cnbeta_3735afd7480fd224_OK.webp",
-    "timestamp": 1768012256.1656075
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/0a432e797c00a1d.png": {
-    "path": "cnbeta_856245f99f12b5e4_OK.webp",
-    "timestamp": 1768012256.958177
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921146_288463_png_r.webp": {
-    "path": "cnbeta_c310c9a72e379307_OK.webp",
-    "timestamp": 1768012261.2077477
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921291_128910_png_r.webp": {
-    "path": "cnbeta_e2de2776b84b0d28_OK.webp",
-    "timestamp": 1768012261.5242758
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767920686_492167.jpg": {
-    "path": "cnbeta_a903334df15fcad0_OK.jpg",
-    "timestamp": 1768012262.3524468
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767920703_382781_jpg_r.jpg": {
-    "path": "cnbeta_0135449fd5e91c9c_OK.jpg",
-    "timestamp": 1768012262.5959156
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767920711_570415_jpg_r.jpg": {
-    "path": "cnbeta_247aff81d8f49a6a_OK.jpg",
-    "timestamp": 1768012262.8187885
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767920711_182602_jpg_r.jpg": {
-    "path": "cnbeta_925645e915eb66eb_OK.jpg",
-    "timestamp": 1768012262.9944117
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922374_424024_jpg_r.jpg": {
-    "path": "cnbeta_d47672a38d2b17b4_OK.jpg",
-    "timestamp": 1768012264.105812
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922374_903136_jpg_r.jpg": {
-    "path": "cnbeta_e04daf5209a9bbb9_OK.jpg",
-    "timestamp": 1768012264.361269
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_626275_jpg_r.jpg": {
-    "path": "cnbeta_0b5e71001c2d68b8_OK.jpg",
-    "timestamp": 1768012264.6087277
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_942152_jpg_r.jpg": {
-    "path": "cnbeta_4e893b3ea48ba474_OK.jpg",
-    "timestamp": 1768012264.8801394
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_114945.jpg": {
-    "path": "cnbeta_668581d385ef2371_OK.jpg",
-    "timestamp": 1768012265.020618
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922670_911442_jpeg_r.jpeg": {
-    "path": "cnbeta_a53ad68d1182757d_OK.jpg",
-    "timestamp": 1768012265.5303886
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767922678_428312.png": {
-    "path": "cnbeta_6905b04f38128a03_OK.webp",
-    "timestamp": 1768012265.6604445
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767925319_247504.webp": {
-    "path": "cnbeta_1c5a9cc192bfb94b_OK.webp",
-    "timestamp": 1768012266.1976366
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767925319_833383.webp": {
-    "path": "cnbeta_4925beffd3aa24f1_OK.webp",
-    "timestamp": 1768012266.4177997
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767923791_977789.jpg": {
-    "path": "cnbeta_4a82e5e9a9a3bc29_OK.jpg",
-    "timestamp": 1768012266.8707693
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767923791_654098.webp": {
-    "path": "cnbeta_a32265eef575f544_OK.webp",
-    "timestamp": 1768012267.0737255
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_541378_jpg_r.jpg": {
-    "path": "cnbeta_e5bc65c678abc5f6_OK.jpg",
-    "timestamp": 1768012267.4794345
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_322594.jpg": {
-    "path": "cnbeta_2c586b0e5ab05fb8_OK.jpg",
-    "timestamp": 1768012267.6064384
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_359732_jpg_r.jpg": {
-    "path": "cnbeta_bfec6bc44b1020e4_OK.jpg",
-    "timestamp": 1768012267.7419758
-  },
-  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_769114_jpg_r.jpg": {
-    "path": "cnbeta_044e826ef22f92cd_OK.jpg",
-    "timestamp": 1768012267.8854713
-  },
-  "https://static.cnbetacdn.com/article/2026/0109/62c06e44aac3790.webp": {
-    "path": "cnbeta_274be72df9bafcfd_OK.webp",
-    "timestamp": 1768012272.2168946
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086595843781431296745603.jpeg/NRJUKej-cMsZ7YmhLPTAaqhEvWQoKs0KRbLyX0Wy8l8": {
-    "path": "hk01_64a481bd67b0a171_OK.jpg",
-    "timestamp": 1768012274.4541934
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086590866040033280315079.jpeg/PvxOntWjud5jtrwj9Dx8RGkB7KHQTjGabALvQGwC70A": {
-    "path": "hk01_b9412df19e98d016_OK.jpg",
-    "timestamp": 1768012274.4542782
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086595839360503808920348.jpeg/OY2Pc3YBOfrx014RsJLsAFKzcS-reYYIuVTkS7lU5Es": {
-    "path": "hk01_0dff40916face4bf_OK.jpg",
-    "timestamp": 1768012274.4537146
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110093950813-0110_00822_001_01b.jpg?20260110102216": {
     "path": "oncc_bcba3751c7815bc9_OK.jpg",
     "timestamp": 1768012274.622951
   },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110092155220-0110_00822_001_01b.jpg?20260110100905": {
-    "path": "oncc_a9615e868c1a18e9_OK.jpg",
-    "timestamp": 1768012274.7166448
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086338083420377088317268.jpeg/C79C0FJ-mRLaH08CiwOqRwWziYsg5XVhApbUvgKW1L4": {
-    "path": "hk01_01f61ed4d34c6221_OK.jpg",
-    "timestamp": 1768012274.6517258
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110091027772-0110_00822_001_01b.jpg?20260110100127": {
-    "path": "oncc_6d3c1ba12a43cdfe_OK.jpg",
-    "timestamp": 1768012274.7750356
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086417504164646912193570.jpeg/VUBmF7I9vfo-MaTbuaKKYpr4xQ4LmjBTvTHanb0x2p0": {
-    "path": "hk01_c03a5c843e874e95_OK.jpg",
-    "timestamp": 1768012274.79413
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20251218/1078297833242628096546978.jpeg/0E312PeM3pohGW7k1gkoeMTk79hQ_z6Av-VKFL_lShQ": {
-    "path": "hk01_9120bac98b2cf262_OK.jpg",
-    "timestamp": 1768012274.846125
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20251218/1078277301138886656648705.jpeg/JxQjsWTVHlvIBPAiKzwfmqk1mHuBA4x9_jgZTv44GU4": {
-    "path": "hk01_21d15ef40b571da6_OK.jpg",
-    "timestamp": 1768012274.8756313
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086362857915944960165397.jpeg/0VkHi7o0lmtEU_qUviDRL9cREfXgNKOd-yllqfspZak": {
-    "path": "hk01_9bcc585da3f0d42b_OK.jpg",
-    "timestamp": 1768012274.9655
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086362855541837824201948.jpeg/04Z8TpSPRxjveyIlcKG2pici_I3-OonvlHiJEpR4iRI": {
-    "path": "hk01_d5f43a4decb6cd41_OK.jpg",
-    "timestamp": 1768012274.979684
-  },
-  "https://newsstatic.rthk.hk/images/mfile_1839321_1_M_20260110101321.jpg": {
-    "path": "rthk_1d615fb8ae0d9a2c_OK.jpg",
-    "timestamp": 1768012274.4479284
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086361941472972800154673.png/OGUlLCRPvbdgIRJwx7ofMmpoJ5Itgkn2L0yX2i9Ml9o": {
-    "path": "hk01_8f5b7e581ccb9949_OK.jpg",
-    "timestamp": 1768012275.0030007
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086417352523780096801943.jpeg/8cy1Tkf-lktwQfotm1NV78hjhEiDeMpIvntS4r57UuI": {
-    "path": "hk01_50b203b7c4e6459e_OK.jpg",
-    "timestamp": 1768012275.0371833
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110082023738-0110_00822_001_01b.jpg?20260109170015": {
-    "path": "oncc_b830011712e5590d_OK.jpg",
-    "timestamp": 1768012275.0579343
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110081121392-0110_00822_001_01b.jpg?20260110085000": {
-    "path": "oncc_fb4777f51f82f1bb_OK.jpg",
-    "timestamp": 1768012275.0740724
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110080216961-0110_00822_001_01b.jpg?20260110080959": {
     "path": "oncc_8c8f8224f28e6ae0_OK.jpg",
     "timestamp": 1768012275.083576
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20211208/545306158508806144536948.jpeg/nS0oWADeiL8O75XgMxMRmnq0FIYnaBFNcQSks3EEpLM": {
-    "path": "hk01_fca864c54eab166d_OK.jpg",
-    "timestamp": 1768012275.129392
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20210907/511935728377401344075241.jpeg/xFvMgYmMRw3NHDjvczjRzOw-fVW-OpD9zWbhIc1m4SE": {
-    "path": "hk01_228f3d9d1dd24628_OK.jpg",
-    "timestamp": 1768012275.117528
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086306917694836736724391.jpeg/-xDitQkr87uPD4MymXq9NwF9SvnckTBFXfvtpV377aU": {
-    "path": "hk01_e6b6168aba8e1549_OK.jpg",
-    "timestamp": 1768012275.1334226
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260109/1086389467545079808089172.jpeg/iDcSsnl_or4CF-B3mi7lEFh3v7YACyt9_MHd0fzB3dE": {
-    "path": "hk01_921df4e4ad4a72e4_OK.jpg",
-    "timestamp": 1768012275.203881
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086558712664952832714526.jpeg/5hM80U3WTfGtXOb9CKT3YUem_w6Oilm4pyjoqqco6Ko": {
-    "path": "hk01_94a35d8d5cfd26d0_OK.jpg",
-    "timestamp": 1768012275.2367523
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110072116929-0110_00822_001_01b.jpg?20260110073929": {
-    "path": "oncc_d2a212538f5340a9_OK.jpg",
-    "timestamp": 1768012275.2866056
-  },
-  "https://newsstatic.rthk.hk/images/mfile_1839311_1_M_20260110065513.jpg": {
-    "path": "rthk_2a25897cbfb43c2a_OK.jpg",
-    "timestamp": 1768012275.3029325
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086547792513470464762530.jpeg/tkSUeYzlJv1dLhadCXACIWVIdxzw2QEGwdDN-sHQzfo": {
-    "path": "hk01_10b788d0a87757f4_OK.jpg",
-    "timestamp": 1768012275.4104764
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086548447365959680836052.jpeg/7Z86CFLMB89Y5rEO6rRfilP3PVAwS_FVlLzhIJS84SA": {
-    "path": "hk01_460ff9aa31902d62_OK.jpg",
-    "timestamp": 1768012275.342949
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110060847181-0110_00822_001_01b.jpg?20260110061026": {
-    "path": "oncc_d20491fb14e8d0db_OK.jpg",
-    "timestamp": 1768012275.4553196
   },
   "https://cdn.hk01.com/di/media/images/dw/20260110/1086536133359177728857019.jpeg/QuDK3YpjF5fQ0aC1yvH1_-CkpeKpbVjAbGvziFZr84g": {
     "path": "hk01_84958198a3e5d40d_OK.jpg",
@@ -2647,37 +2387,9 @@
     "path": "hk01_8a8b5ace654a5487_OK.jpg",
     "timestamp": 1768012275.6522806
   },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086526041914085376512479.png/g6qOtaQQ8KJTzt6DP5PtZdJ-Ci2cSTlzUK4_TFCuP0w": {
-    "path": "hk01_7212452187960503_OK.jpg",
-    "timestamp": 1768012275.7047668
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110055007643-0110_00822_001_01b.jpg?20260110055007": {
-    "path": "oncc_62ccff73692b6dff_OK.jpg",
-    "timestamp": 1768012275.6971672
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086526044728594432281967.png/UNI35rztMWJKdZcKgrTUxEVvaJ7xAA9jTGERW0xhEVs": {
-    "path": "hk01_be396d9f0f5fa2f7_OK.jpg",
-    "timestamp": 1768012275.7496052
-  },
-  "https://cdn.hk01.com/di/media/images/dw/20260110/1086527445143654400894231.png/tErMmigeA_q1IPc8UUMSRLRMct3ipIiVB1Tj9QdU4_U": {
-    "path": "hk01_9cdf16a9f6a2bde3_OK.jpg",
-    "timestamp": 1768012275.8118541
-  },
-  "https://newsstatic.rthk.hk/images/mfile_1839319_1_M_20260110092610.jpg": {
-    "path": "rthk_82914fddd915e7dd_OK.jpg",
-    "timestamp": 1768012274.6815743
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110043726304-0110_00822_001_01b.jpg?20260110083429": {
     "path": "oncc_a244bb5d2cbef9f5_OK.jpg",
     "timestamp": 1768012275.8462188
-  },
-  "https://newsstatic.rthk.hk/images/mfile_1839303_1_M_20260110061433.jpg": {
-    "path": "rthk_ffc4d07d1555f846_OK.jpg",
-    "timestamp": 1768012275.827471
-  },
-  "https://newsstatic.rthk.hk/images/mfile_1839314_1_M_20260110074056.jpg": {
-    "path": "rthk_76637c95e6d891b9_OK.jpg",
-    "timestamp": 1768012275.2085361
   },
   "https://static.cnbetacdn.com/article/2026/0110/d231727a4179465.webp": {
     "path": "cnbeta_0d3fe77968deb9fb_OK.webp",
@@ -2986,5 +2698,301 @@
   "https://cdn.hk01.com/di/media/images/dw/20260109/1086264506218188800923845.png/VV17KhTNbGoPi8wFP7qcnUcbypw9DCVEiy220ostttI": {
     "path": "hk01_6456a3d1bc203ab9_OK.jpg",
     "timestamp": 1768012865.6409993
+  },
+  "https://newsstatic.rthk.hk/frontend_images/social_icons/fc-webicon-facebook-s.png": {
+    "path": "rthk_f00ce7c6ea350759_OK.webp",
+    "timestamp": 1768013425.3350391
+  },
+  "https://n.sinaimg.cn/tech/transform/65/w550h315/20260109/b57d-bc6cafb92d7295aa71f551e399ae33ca.png": {
+    "path": "cnbeta_18c9bdb73fd3bd28_OK.webp",
+    "timestamp": 1768013438.3980813
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/e6b3f9023773661.jpg": {
+    "path": "cnbeta_217654d8cba68186_OK.jpg",
+    "timestamp": 1768013440.616388
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/37fc8e7872abc40.webp": {
+    "path": "cnbeta_4e9dbcc7f07f257f_OK.webp",
+    "timestamp": 1768013440.9650934
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/4b864fb056895cb.png": {
+    "path": "cnbeta_3ff99a53f219ce4c_OK.webp",
+    "timestamp": 1768013447.455503
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/391fdcb3397aa19.jpg": {
+    "path": "cnbeta_6095a5014f3a34cb_OK.jpg",
+    "timestamp": 1768013447.917834
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/5b4647480a56556.jpg": {
+    "path": "cnbeta_939e9eff93b81dea_OK.jpg",
+    "timestamp": 1768013450.446547
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/38bcdfaf499ac9c.jpg": {
+    "path": "cnbeta_004d015d371a9536_OK.jpg",
+    "timestamp": 1768013450.488926
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/eb897d56696d1b1.jpg": {
+    "path": "cnbeta_a56b09735448834b_OK.jpg",
+    "timestamp": 1768013450.5519693
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/edb7daaa0b9ea5e.jpg": {
+    "path": "cnbeta_6d93435eb32f6d76_OK.jpg",
+    "timestamp": 1768013450.9267733
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/03bb5e34a02640b.jpg": {
+    "path": "cnbeta_9871842d6358a0d4_OK.jpg",
+    "timestamp": 1768013450.9665213
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/7fc292ae9031b90.png": {
+    "path": "cnbeta_0a2b16b84a253195_OK.webp",
+    "timestamp": 1768013451.9535263
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/611363d54ef5f49.png": {
+    "path": "cnbeta_e33e6e5475b233cb_OK.webp",
+    "timestamp": 1768013456.4879699
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/99069fb6483cfec.jpg": {
+    "path": "cnbeta_1448fcba7ac13cdc_OK.jpg",
+    "timestamp": 1768013456.5224464
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/e166d73488287f2.jpg": {
+    "path": "cnbeta_f1c8d1d22352d532_OK.jpg",
+    "timestamp": 1768013458.0588496
+  },
+  "https://n.sinaimg.cn/finance/transform/574/w550h824/20260109/ef79-d846ea5087e49add79d86ebfb99fdfee.png": {
+    "path": "cnbeta_3735afd7480fd224_OK.webp",
+    "timestamp": 1768013461.69159
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/0a432e797c00a1d.png": {
+    "path": "cnbeta_856245f99f12b5e4_OK.webp",
+    "timestamp": 1768013463.0038433
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921146_288463_png_r.webp": {
+    "path": "cnbeta_c310c9a72e379307_OK.webp",
+    "timestamp": 1768013467.217193
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921291_128910_png_r.webp": {
+    "path": "cnbeta_e2de2776b84b0d28_OK.webp",
+    "timestamp": 1768013467.9203582
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767920686_492167.jpg": {
+    "path": "cnbeta_a903334df15fcad0_OK.jpg",
+    "timestamp": 1768013468.3395252
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767920703_382781_jpg_r.jpg": {
+    "path": "cnbeta_0135449fd5e91c9c_OK.jpg",
+    "timestamp": 1768013468.4811525
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767920711_570415_jpg_r.jpg": {
+    "path": "cnbeta_247aff81d8f49a6a_OK.jpg",
+    "timestamp": 1768013468.8746097
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767920711_182602_jpg_r.jpg": {
+    "path": "cnbeta_925645e915eb66eb_OK.jpg",
+    "timestamp": 1768013469.1368117
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922374_424024_jpg_r.jpg": {
+    "path": "cnbeta_d47672a38d2b17b4_OK.jpg",
+    "timestamp": 1768013470.3438005
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922374_903136_jpg_r.jpg": {
+    "path": "cnbeta_e04daf5209a9bbb9_OK.jpg",
+    "timestamp": 1768013470.5691805
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_626275_jpg_r.jpg": {
+    "path": "cnbeta_0b5e71001c2d68b8_OK.jpg",
+    "timestamp": 1768013470.7942884
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_942152_jpg_r.jpg": {
+    "path": "cnbeta_4e893b3ea48ba474_OK.jpg",
+    "timestamp": 1768013470.9685767
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922373_114945.jpg": {
+    "path": "cnbeta_668581d385ef2371_OK.jpg",
+    "timestamp": 1768013471.1007311
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922670_911442_jpeg_r.jpeg": {
+    "path": "cnbeta_a53ad68d1182757d_OK.jpg",
+    "timestamp": 1768013471.6461163
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767922678_428312.png": {
+    "path": "cnbeta_6905b04f38128a03_OK.webp",
+    "timestamp": 1768013471.778638
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767925319_247504.webp": {
+    "path": "cnbeta_1c5a9cc192bfb94b_OK.webp",
+    "timestamp": 1768013472.4601865
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767925319_833383.webp": {
+    "path": "cnbeta_4925beffd3aa24f1_OK.webp",
+    "timestamp": 1768013472.6885805
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767923791_977789.jpg": {
+    "path": "cnbeta_4a82e5e9a9a3bc29_OK.jpg",
+    "timestamp": 1768013473.1220508
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767923791_654098.webp": {
+    "path": "cnbeta_a32265eef575f544_OK.webp",
+    "timestamp": 1768013473.363234
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_541378_jpg_r.jpg": {
+    "path": "cnbeta_e5bc65c678abc5f6_OK.jpg",
+    "timestamp": 1768013473.8849394
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_322594.jpg": {
+    "path": "cnbeta_2c586b0e5ab05fb8_OK.jpg",
+    "timestamp": 1768013474.0471892
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_359732_jpg_r.jpg": {
+    "path": "cnbeta_bfec6bc44b1020e4_OK.jpg",
+    "timestamp": 1768013474.1591485
+  },
+  "https://img.3dmgame.com/uploads/images/news/20260109/1767921837_769114_jpg_r.jpg": {
+    "path": "cnbeta_044e826ef22f92cd_OK.jpg",
+    "timestamp": 1768013474.3164153
+  },
+  "https://static.cnbetacdn.com/article/2026/0109/62c06e44aac3790.webp": {
+    "path": "cnbeta_274be72df9bafcfd_OK.webp",
+    "timestamp": 1768013478.4389713
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839321_1_M_20260110101321.jpg": {
+    "path": "rthk_1d615fb8ae0d9a2c_OK.jpg",
+    "timestamp": 1768013480.6706889
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086595843781431296745603.jpeg/NRJUKej-cMsZ7YmhLPTAaqhEvWQoKs0KRbLyX0Wy8l8": {
+    "path": "hk01_64a481bd67b0a171_OK.jpg",
+    "timestamp": 1768013480.6818743
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086595839360503808920348.jpeg/OY2Pc3YBOfrx014RsJLsAFKzcS-reYYIuVTkS7lU5Es": {
+    "path": "hk01_0dff40916face4bf_OK.jpg",
+    "timestamp": 1768013480.6793532
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086338083420377088317268.jpeg/C79C0FJ-mRLaH08CiwOqRwWziYsg5XVhApbUvgKW1L4": {
+    "path": "hk01_01f61ed4d34c6221_OK.jpg",
+    "timestamp": 1768013480.8947663
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110092155220-0110_00822_001_01b.jpg?20260110100905": {
+    "path": "oncc_a9615e868c1a18e9_OK.jpg",
+    "timestamp": 1768013481.0012712
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086590866040033280315079.jpeg/PvxOntWjud5jtrwj9Dx8RGkB7KHQTjGabALvQGwC70A": {
+    "path": "hk01_b9412df19e98d016_OK.jpg",
+    "timestamp": 1768013480.7661593
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110091027772-0110_00822_001_01b.jpg?20260110100127": {
+    "path": "oncc_6d3c1ba12a43cdfe_OK.jpg",
+    "timestamp": 1768013481.053287
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839323_1_M_20260110103356.jpg": {
+    "path": "rthk_0523520e9fbce33d_OK.jpg",
+    "timestamp": 1768013480.663588
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086417504164646912193570.jpeg/VUBmF7I9vfo-MaTbuaKKYpr4xQ4LmjBTvTHanb0x2p0": {
+    "path": "hk01_c03a5c843e874e95_OK.jpg",
+    "timestamp": 1768013481.0666232
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086362857915944960165397.jpeg/0VkHi7o0lmtEU_qUviDRL9cREfXgNKOd-yllqfspZak": {
+    "path": "hk01_9bcc585da3f0d42b_OK.jpg",
+    "timestamp": 1768013481.1387572
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20251218/1078297833242628096546978.jpeg/0E312PeM3pohGW7k1gkoeMTk79hQ_z6Av-VKFL_lShQ": {
+    "path": "hk01_9120bac98b2cf262_OK.jpg",
+    "timestamp": 1768013481.1095405
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20251218/1078277301138886656648705.jpeg/JxQjsWTVHlvIBPAiKzwfmqk1mHuBA4x9_jgZTv44GU4": {
+    "path": "hk01_21d15ef40b571da6_OK.jpg",
+    "timestamp": 1768013481.135789
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086362855541837824201948.jpeg/04Z8TpSPRxjveyIlcKG2pici_I3-OonvlHiJEpR4iRI": {
+    "path": "hk01_d5f43a4decb6cd41_OK.jpg",
+    "timestamp": 1768013481.1786923
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086361941472972800154673.png/OGUlLCRPvbdgIRJwx7ofMmpoJ5Itgkn2L0yX2i9Ml9o": {
+    "path": "hk01_8f5b7e581ccb9949_OK.jpg",
+    "timestamp": 1768013481.1901824
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839319_1_M_20260110092610.jpg": {
+    "path": "rthk_82914fddd915e7dd_OK.jpg",
+    "timestamp": 1768013480.9760172
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086417352523780096801943.jpeg/8cy1Tkf-lktwQfotm1NV78hjhEiDeMpIvntS4r57UuI": {
+    "path": "hk01_50b203b7c4e6459e_OK.jpg",
+    "timestamp": 1768013481.2023501
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110082023738-0110_00822_001_01b.jpg?20260109170015": {
+    "path": "oncc_b830011712e5590d_OK.jpg",
+    "timestamp": 1768013481.2213984
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20210907/511935728377401344075241.jpeg/xFvMgYmMRw3NHDjvczjRzOw-fVW-OpD9zWbhIc1m4SE": {
+    "path": "hk01_228f3d9d1dd24628_OK.jpg",
+    "timestamp": 1768013481.2505352
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110081121392-0110_00822_001_01b.jpg?20260110085000": {
+    "path": "oncc_fb4777f51f82f1bb_OK.jpg",
+    "timestamp": 1768013481.247578
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20211208/545306158508806144536948.jpeg/nS0oWADeiL8O75XgMxMRmnq0FIYnaBFNcQSks3EEpLM": {
+    "path": "hk01_fca864c54eab166d_OK.jpg",
+    "timestamp": 1768013481.2809474
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110081438079-0110_00822_001_01b.jpg?20260110104317": {
+    "path": "oncc_bac7c3b031ddf232_OK.jpg",
+    "timestamp": 1768013481.2322977
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086306917694836736724391.jpeg/-xDitQkr87uPD4MymXq9NwF9SvnckTBFXfvtpV377aU": {
+    "path": "hk01_e6b6168aba8e1549_OK.jpg",
+    "timestamp": 1768013481.286195
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260109/1086389467545079808089172.jpeg/iDcSsnl_or4CF-B3mi7lEFh3v7YACyt9_MHd0fzB3dE": {
+    "path": "hk01_921df4e4ad4a72e4_OK.jpg",
+    "timestamp": 1768013481.2990043
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086558712664952832714526.jpeg/5hM80U3WTfGtXOb9CKT3YUem_w6Oilm4pyjoqqco6Ko": {
+    "path": "hk01_94a35d8d5cfd26d0_OK.jpg",
+    "timestamp": 1768013481.352003
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110072116929-0110_00822_001_01b.jpg?20260110073929": {
+    "path": "oncc_d2a212538f5340a9_OK.jpg",
+    "timestamp": 1768013481.367186
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086547792513470464762530.jpeg/tkSUeYzlJv1dLhadCXACIWVIdxzw2QEGwdDN-sHQzfo": {
+    "path": "hk01_10b788d0a87757f4_OK.jpg",
+    "timestamp": 1768013481.4298217
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086548447365959680836052.jpeg/7Z86CFLMB89Y5rEO6rRfilP3PVAwS_FVlLzhIJS84SA": {
+    "path": "hk01_460ff9aa31902d62_OK.jpg",
+    "timestamp": 1768013481.409656
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110060847181-0110_00822_001_01b.jpg?20260110061026": {
+    "path": "oncc_d20491fb14e8d0db_OK.jpg",
+    "timestamp": 1768013481.4909136
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086526041914085376512479.png/g6qOtaQQ8KJTzt6DP5PtZdJ-Ci2cSTlzUK4_TFCuP0w": {
+    "path": "hk01_7212452187960503_OK.jpg",
+    "timestamp": 1768013481.5432534
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839314_1_M_20260110074056.jpg": {
+    "path": "rthk_76637c95e6d891b9_OK.jpg",
+    "timestamp": 1768013481.3107646
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260110/photo/bkn-20260110055007643-0110_00822_001_01b.jpg?20260110055007": {
+    "path": "oncc_62ccff73692b6dff_OK.jpg",
+    "timestamp": 1768013481.5390143
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086527445143654400894231.png/tErMmigeA_q1IPc8UUMSRLRMct3ipIiVB1Tj9QdU4_U": {
+    "path": "hk01_9cdf16a9f6a2bde3_OK.jpg",
+    "timestamp": 1768013481.5992725
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086526044728594432281967.png/UNI35rztMWJKdZcKgrTUxEVvaJ7xAA9jTGERW0xhEVs": {
+    "path": "hk01_be396d9f0f5fa2f7_OK.jpg",
+    "timestamp": 1768013481.5886872
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839303_1_M_20260110061433.jpg": {
+    "path": "rthk_ffc4d07d1555f846_OK.jpg",
+    "timestamp": 1768013481.6127458
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839311_1_M_20260110065513.jpg": {
+    "path": "rthk_2a25897cbfb43c2a_OK.jpg",
+    "timestamp": 1768013481.404385
   }
 }
