@@ -2097,6 +2097,11 @@ def build_html(
                 prefetch_src = m.group(1)
                 hero_attr = f' data-hero-src="{html.escape(prefetch_src)}"'
         img_urls: list[str] = []
+        img_urls_raw: list[str] = []
+        if image_url:
+            img_urls_raw.append(normalize_image_url(item.link, image_url))
+        for img in extra_images:
+            img_urls_raw.append(normalize_image_url(item.link, img))
         if hero_html:
             img_urls.append(hero_url)
         if content_html:
@@ -2105,6 +2110,8 @@ def build_html(
         # de-dup while preserving order
         seen_img = set()
         img_urls = [u for u in img_urls if not (u in seen_img or seen_img.add(u))]
+        seen_raw = set()
+        img_urls_raw = [u for u in img_urls_raw if not (u in seen_raw or seen_raw.add(u))]
         if image_count == 0:
             image_count = len(img_urls)
         img_slots = ""
@@ -2115,7 +2122,7 @@ def build_html(
         seen_class = ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}" data-pubts="{pub_ts}" data-imgs="{img_list}"{hero_attr}>
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}" data-pubts="{pub_ts}" data-imgs="{img_list}" data-imgs-raw="{img_list_raw}"{hero_attr}>
         <header class="card-head">
           <div class="index-col">
             <span class="index">{idx:02d}</span>
@@ -2165,6 +2172,7 @@ def build_html(
                 seen_label="",
                 img_slots=img_slots,
                 img_list=html.escape("|".join(img_urls)),
+                img_list_raw=html.escape("|".join(img_urls_raw)),
             )
         )
 
@@ -3144,7 +3152,9 @@ def build_html(
         if (card) card.classList.add('img-loaded');
       }};
       const fail = () => {{
-        img.remove();
+        img.dataset.failed = '1';
+        img.classList.add('img-failed');
+        img.style.display = 'none';
         spinner.classList.add('hide');
         setTimeout(() => spinner.remove(), 250);
         const card = img.closest('.card');
@@ -3221,7 +3231,7 @@ def build_html(
       const imgs = Array.from(card.querySelectorAll('.content img, .hero'));
       let loaded = 0;
       imgs.forEach(img => {{
-        if (img.complete && img.naturalWidth > 0) loaded += 1;
+        if (img.complete && img.naturalWidth > 0 && !img.dataset.failed) loaded += 1;
       }});
       slots.forEach((slot, i) => {{
         if (i < loaded) slot.classList.add('filled');
@@ -3237,7 +3247,9 @@ def build_html(
       cards.forEach(card => {{
         const slots = Array.from(card.querySelectorAll('.img-slot'));
         if (!slots.length) return;
-        const list = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+        const listLocal = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+        const listRaw = (card.dataset.imgsRaw || '').split('|').map(s => s.trim()).filter(Boolean);
+        const list = listLocal.length ? listLocal : listRaw;
         if (!list.length) return;
         slots.forEach((slot, idx) => {{
           if (slot.querySelector('img')) return;
@@ -3252,18 +3264,23 @@ def build_html(
       }});
     }}
     function reloadMissingImages(card) {{
-      const list = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+      const listLocal = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+      const listRaw = (card.dataset.imgsRaw || '').split('|').map(s => s.trim()).filter(Boolean);
+      const list = listRaw.length ? listRaw : listLocal;
       if (!list.length) return;
       const existing = new Set(
         Array.from(card.querySelectorAll('.content img, .hero')).map(img => normSrc(img.getAttribute('src') || ''))
       );
+      // remove failed images so they can retry
+      card.querySelectorAll('.content img.img-failed, .hero.img-failed').forEach(img => img.remove());
       const content = card.querySelector('.content');
       if (!content) return;
       list.forEach(src => {{
         const key = normSrc(src);
         if (existing.has(key)) return;
         const img = document.createElement('img');
-        img.setAttribute('src', src);
+        const sep = src.includes('?') ? '&' : '?';
+        img.setAttribute('src', `${{src}}${{sep}}retry=${{Date.now()}}`);
         img.setAttribute('loading', 'lazy');
         img.setAttribute('decoding', 'async');
         content.appendChild(img);

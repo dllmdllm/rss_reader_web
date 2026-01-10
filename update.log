@@ -72076,3 +72076,13 @@ After doing this, you may fix the identity used for this commit with:
  create mode 100644 images/rthk_f1a41c2e4bd6f7b6_OK.jpg
 To https://github.com/dllmdllm/rss_reader_web.git
    93c2c0f..60108fb  main -> main
+Traceback (most recent call last):
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/generate_site.py", line 3854, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/generate_site.py", line 3835, in main
+    build_html(
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/generate_site.py", line 3283, in build_html
+    img.setAttribute('src', `${src}${sep}retry=${Date.now()}`);
+                               ^^^
+NameError: name 'src' is not defined
