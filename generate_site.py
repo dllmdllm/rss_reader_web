@@ -2096,17 +2096,26 @@ def build_html(
             if m:
                 prefetch_src = m.group(1)
                 hero_attr = f' data-hero-src="{html.escape(prefetch_src)}"'
+        img_urls: list[str] = []
+        if hero_html:
+            img_urls.append(hero_url)
+        if content_html:
+            for m in re.finditer(r"<img[^>]+src=['\"]([^'\"]+)['\"]", content_html):
+                img_urls.append(m.group(1))
+        # de-dup while preserving order
+        seen_img = set()
+        img_urls = [u for u in img_urls if not (u in seen_img or seen_img.add(u))]
         if image_count == 0:
-            try:
-                from lxml import html as lxml_html
-                root = lxml_html.fromstring(f"<div>{content_html}</div>")
-                image_count = len(root.xpath(".//img")) + (1 if hero_html else 0)
-            except Exception:
-                image_count = (1 if hero_html else 0)
+            image_count = len(img_urls)
+        img_slots = ""
+        if image_count > 0:
+            img_slots = "<div class='img-slots'>" + "".join(
+                "<div class='img-slot'></div>" for _ in range(image_count)
+            ) + "</div>"
         seen_class = ""
         cards.append(
             """
-      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}" data-pubts="{pub_ts}"{hero_attr}>
+      <article id="item-{idx:02d}" class="card{seen_class} category-{category} {age_class}" data-source="{source}" data-category="{category}" data-title="{title}" data-link="{link}" data-imgcount="{imgcount}" data-pubts="{pub_ts}" data-imgs="{img_list}"{hero_attr}>
         <header class="card-head">
           <div class="index-col">
             <span class="index">{idx:02d}</span>
@@ -2119,13 +2128,14 @@ def build_html(
               <button class="share-btn" aria-label="分享">↗</button>
               <span class="cat cat-{category}">{category_label}</span>
               <span class="{date_class}">{pub}</span>
-              {img_count}
+              {img_count} {img_retry}
             </div>
           </div>
         </header>
         {hero}
         {hero_note}
         <div class="content">{content}</div>
+        {img_slots}
         <button class="collapse-btn left" aria-label="收起">▴</button>
         <button class="collapse-btn" aria-label="收起">▴</button>
       </article>
@@ -2148,10 +2158,13 @@ def build_html(
                 ),
                 age_class=age_class,
                 img_count=(f"<span class='img-count'>🖼️{image_count}</span>"),
+                img_retry=("<button class='img-retry' title='重試載入圖片'>↻</button>" if image_count > 0 else ""),
                 imgcount=image_count,
                 hero_attr=hero_attr,
                 pub_ts=(int(item.pub_dt.timestamp()) if item.pub_dt else 0),
                 seen_label="",
+                img_slots=img_slots,
+                img_list=html.escape("|".join(img_urls)),
             )
         )
 
@@ -2603,6 +2616,38 @@ def build_html(
       display: inline-flex;
       align-items: center;
       gap: 4px;
+    }}
+    .img-retry {{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--accent);
+      border-radius: 999px;
+      padding: 0 6px;
+      font-size: 11px;
+      line-height: 18px;
+      height: 18px;
+      cursor: pointer;
+      touch-action: manipulation;
+    }}
+    .img-slots {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+    }}
+    .img-slot {{
+      border: 1px dashed var(--border);
+      border-radius: 10px;
+      min-height: 60px;
+      background: #fafafa;
+      position: relative;
+    }}
+    .img-slot.filled {{
+      border-style: solid;
+      background: #f3f7ff;
+    }}
+    .card.img-all-loaded .img-slots {{
+      display: none;
     }}
     .collapse-btn {{
       position: absolute;
@@ -3120,6 +3165,7 @@ def build_html(
       if (!card) return;
       if (card.classList.contains('collapsed')) return;
       card.querySelectorAll('.content img, .hero').forEach(img => attachSpinner(img));
+      updateSlots(card);
     }}
     function preloadCardImages(card) {{
       if (!card) return;
@@ -3151,6 +3197,48 @@ def build_html(
     function cleanupSpinners(card) {{
       if (!card) return;
       card.querySelectorAll('.img-spinner').forEach(sp => sp.remove());
+    }}
+    function normSrc(s) {{
+      if (!s) return '';
+      return s.split('#')[0].split('?')[0];
+    }}
+    function updateSlots(card) {{
+      const slots = Array.from(card.querySelectorAll('.img-slot'));
+      if (!slots.length) return;
+      const imgs = Array.from(card.querySelectorAll('.content img, .hero'));
+      let loaded = 0;
+      imgs.forEach(img => {{
+        if (img.complete && img.naturalWidth > 0) loaded += 1;
+      }});
+      slots.forEach((slot, i) => {{
+        if (i < loaded) slot.classList.add('filled');
+        else slot.classList.remove('filled');
+      }});
+      if (loaded >= slots.length) {{
+        card.classList.add('img-all-loaded');
+      }} else {{
+        card.classList.remove('img-all-loaded');
+      }}
+    }}
+    function reloadMissingImages(card) {{
+      const list = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+      if (!list.length) return;
+      const existing = new Set(
+        Array.from(card.querySelectorAll('.content img, .hero')).map(img => normSrc(img.getAttribute('src') || ''))
+      );
+      const content = card.querySelector('.content');
+      if (!content) return;
+      list.forEach(src => {{
+        const key = normSrc(src);
+        if (existing.has(key)) return;
+        const img = document.createElement('img');
+        img.setAttribute('src', src);
+        img.setAttribute('loading', 'lazy');
+        img.setAttribute('decoding', 'async');
+        content.appendChild(img);
+      }});
+      ensureImageSpinners(card);
+      setTimeout(() => updateSlots(card), 200);
     }}
     cards.forEach(card => ensureImageSpinners(card));
     const newsSources = document.getElementById('news-sources');
@@ -3466,7 +3554,7 @@ def build_html(
     cards.forEach(card => {{
       card.addEventListener('click', (e) => {{
         if (!card.classList.contains('collapsed')) return;
-        if (e.target.closest('a, button, input, .tag, .share-btn, .collapse-btn')) return;
+        if (e.target.closest('a, button, input, .tag, .share-btn, .collapse-btn, .img-retry')) return;
         const beforeTop = card.getBoundingClientRect().top;
         cards.forEach(other => {{
           if (other !== card) {{
@@ -3488,6 +3576,14 @@ def build_html(
         requestAnimationFrame(() => {{
           scrollToCard(card);
         }});
+      }});
+    }});
+    document.querySelectorAll('.img-retry').forEach(btn => {{
+      btn.addEventListener('click', (e) => {{
+        const card = btn.closest('.card');
+        if (!card) return;
+        reloadMissingImages(card);
+        e.stopPropagation();
       }});
     }});
     document.querySelectorAll('.collapse-btn').forEach(btn => {{
