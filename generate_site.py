@@ -2531,6 +2531,9 @@ def build_html(
       font-size: 12px;
       color: #8a6d3b;
     }}
+    .card.seen .index {{
+      font-weight: 400;
+    }}
     h2 {{
       margin: 0 0 6px;
       font-size: var(--content-font, 15px);
