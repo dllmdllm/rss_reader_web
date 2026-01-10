@@ -117,13 +117,11 @@ def main() -> int:
         # Always re-compress on each run (ignore _OK short-circuit)
         compress_image(path)
         base = os.path.splitext(name)[0]
+        base_no_ok = base[:-3] if base.endswith("_OK") else base
         out_ext = ext
         if ext == ".png":
             out_ext = ".webp"
-        if base.endswith("_OK"):
-            new_name = f"{base}{out_ext}"
-        else:
-            new_name = f"{base}_OK{out_ext}"
+        new_name = f"{base_no_ok}_OK{out_ext}"
         new_path = os.path.join(IMAGES_DIR, new_name)
         try:
             if os.path.exists(new_path):
@@ -132,8 +130,10 @@ def main() -> int:
         except Exception:
             continue
         html_text = html_text.replace(f"images/{name}", f"images/{new_name}")
+        if base_no_ok != base:
+            html_text = html_text.replace(f"images/{base_no_ok}{out_ext}", f"images/{new_name}")
         for url, meta in list(cache.items()):
-            if meta.get("path") == name:
+            if meta.get("path") in (name, f"{base_no_ok}{out_ext}"):
                 meta["path"] = new_name
                 cache[url] = meta
 

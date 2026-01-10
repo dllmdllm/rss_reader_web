@@ -71659,3 +71659,12 @@ After doing this, you may fix the identity used for this commit with:
  delete mode 100644 images/rthk_f1a41c2e4bd6f7b6_OK.jpg
 To https://github.com/dllmdllm/rss_reader_web.git
    2a2a882..f9a7e13  main -> main
+Traceback (most recent call last):
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/compress_images.py", line 147, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/compress_images.py", line 142, in main
+    save_json(IMAGE_CACHE_PATH, cache)
+  File "/mnt/c/Users/Nary/PY_Project/rss_reader_web/compress_images.py", line 42, in save_json
+    os.replace(tmp, path)
+FileNotFoundError: [Errno 2] No such file or directory: '/mnt/c/Users/Nary/PY_Project/rss_reader_web/data/image_cache.json.tmp' -> '/mnt/c/Users/Nary/PY_Project/rss_reader_web/data/image_cache.json'

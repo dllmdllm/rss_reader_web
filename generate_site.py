@@ -605,31 +605,68 @@ def download_image(url: str, cache: dict, referer: str | None = None, lock: Opti
                 cache.pop(url, None)
         else:
             cache.pop(url, None)
-    headers = {"User-Agent": "Mozilla/5.0"}
+    def is_image_bytes(buf: bytes) -> bool:
+        if not buf:
+            return False
+        sigs = (
+            buf.startswith(b"\xFF\xD8\xFF"),  # jpg
+            buf.startswith(b"\x89PNG\r\n\x1a\n"),
+            buf.startswith(b"GIF87a") or buf.startswith(b"GIF89a"),
+            buf.startswith(b"RIFF") and b"WEBP" in buf[:16],
+        )
+        return any(sigs)
+
+    def site_referer(u: str) -> str:
+        host = urlparse(u).netloc
+        if "hk01" in host:
+            return "https://www.hk01.com/"
+        if "on.cc" in host or "oncc" in host:
+            return "https://hk.on.cc/"
+        if "rthk" in host:
+            return "https://news.rthk.hk/"
+        if "stheadline" in host or "singtao" in host:
+            return "https://www.stheadline.com/"
+        if "mingpao" in host:
+            return "https://news.mingpao.com/"
+        if "cnbeta" in host:
+            return "https://www.cnbeta.com.tw/"
+        return f"{urlparse(u).scheme}://{host}/" if host else ""
+
+    candidates = []
     if referer:
-        headers["Referer"] = referer
-    try:
-        req = urllib.request.Request(url, headers=headers)
-        with urllib.request.urlopen(req, timeout=20) as resp:
-            data = resp.read()
-            content_type = resp.headers.get("Content-Type", "")
-    except Exception:
-        if "cnbeta.com.tw" in url:
-            try:
-                headers = {
-                    "User-Agent": "Mozilla/5.0",
-                    "Referer": "https://www.cnbeta.com.tw/",
-                    "Origin": "https://www.cnbeta.com.tw",
-                    "Accept": "image/avif,image/webp,image/*,*/*;q=0.8",
-                }
-                req = urllib.request.Request(url, headers=headers)
-                with urllib.request.urlopen(req, timeout=30) as resp:
-                    data = resp.read()
-                    content_type = resp.headers.get("Content-Type", "")
-            except Exception:
-                return ""
-        else:
-            return ""
+        candidates.append(referer)
+        try:
+            r = urlparse(referer)
+            if r.scheme and r.netloc:
+                candidates.append(f"{r.scheme}://{r.netloc}/")
+        except Exception:
+            pass
+    candidates.append(site_referer(url))
+    candidates = [c for c in candidates if c]
+    if not candidates:
+        candidates = [""]
+
+    data = b""
+    content_type = ""
+    last_err = None
+    for ref in candidates:
+        headers = {"User-Agent": "Mozilla/5.0", "Accept": "image/avif,image/webp,image/*,*/*;q=0.8"}
+        if ref:
+            headers["Referer"] = ref
+            if "cnbeta.com.tw" in url:
+                headers["Origin"] = "https://www.cnbeta.com.tw"
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                data = resp.read()
+                content_type = resp.headers.get("Content-Type", "")
+            if ("image" in (content_type or "").lower()) or is_image_bytes(data):
+                break
+        except Exception as exc:
+            last_err = exc
+            continue
+    if not data:
+        return ""
     name = hashlib.sha1(url.encode("utf-8")).hexdigest()
     ext = guess_image_ext(url, content_type)
     filename = f"{prefix}{name[:16]}{ext}"
