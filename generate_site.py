@@ -2470,8 +2470,8 @@ def build_html(
       box-shadow: 0 0 0 6px rgba(255, 184, 0, 0.18);
     }}
     .card.focus {{
-      outline: 3px solid rgba(52, 120, 255, 0.65);
-      box-shadow: 0 0 0 6px rgba(52, 120, 255, 0.15);
+      outline: 3px solid rgba(255, 184, 0, 0.85);
+      box-shadow: 0 0 0 6px rgba(255, 184, 0, 0.2);
     }}
     html, body {{
       scroll-snap-type: none;
@@ -3422,36 +3422,8 @@ def build_html(
     }});
     let lastFocus = null;
     function updateFocusByScroll() {{
-      const now = Date.now();
-      if (now < focusPauseUntil) return;
-      if (focusLockCard && now < focusLockUntil) {{
-        const dy = Math.abs(window.scrollY - focusLockScrollY);
-        if (dy < 120) {{
-          document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
-          focusLockCard.classList.add('focus');
-          return;
-        }}
-      }}
-      const headerH = headerEl ? headerEl.getBoundingClientRect().height : 0;
-      if (window.scrollY < (headerH - 6)) return;
-      const anchorY = headerH + 8;
-      let best = null;
-      let bestDist = Infinity;
-      cards.forEach(card => {{
-        if (card.style.display === 'none') return;
-        const rect = card.getBoundingClientRect();
-        if (rect.bottom <= anchorY) return;
-        const dist = Math.abs(rect.top - anchorY);
-        if (dist < bestDist) {{
-          bestDist = dist;
-          best = card;
-        }}
-      }});
-      if (best) {{
-        lastFocus = best;
-        document.querySelectorAll('.card.focus').forEach(c => c.classList.remove('focus'));
-        best.classList.add('focus');
-      }}
+      // focus stays on last clicked card only
+      return;
     }}
     // focus only updates on click; no scroll-based focus updates
     window.addEventListener('scroll', () => {{
