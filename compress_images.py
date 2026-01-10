@@ -114,14 +114,7 @@ def main() -> int:
         ext = os.path.splitext(name)[1].lower()
         if ext not in (".jpg", ".jpeg", ".webp", ".png", ".gif"):
             continue
-        size_ok = os.path.getsize(path) <= TARGET_BYTES
-        try:
-            img_probe = Image.open(path)
-            w_ok = img_probe.width <= MAX_WIDTH
-        except Exception:
-            w_ok = True
-        if "_OK." in name and size_ok and w_ok:
-            continue
+        # Always re-compress on each run (ignore _OK short-circuit)
         compress_image(path)
         base = os.path.splitext(name)[0]
         out_ext = ext
