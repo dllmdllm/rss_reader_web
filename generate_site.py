@@ -2768,6 +2768,19 @@ def build_html(
     .card.collapsed .img-spinner {{
       display: none;
     }}
+    .card.collapsed .img-slots {{
+      display: grid;
+    }}
+    .card:not(.collapsed) .img-slots {{
+      display: none;
+    }}
+    .img-slot img {{
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 8px;
+      display: block;
+    }}
     .content img {{
       display: block;
       margin-left: auto;
@@ -3220,6 +3233,24 @@ def build_html(
         card.classList.remove('img-all-loaded');
       }}
     }}
+    function initSlotThumbs() {{
+      cards.forEach(card => {{
+        const slots = Array.from(card.querySelectorAll('.img-slot'));
+        if (!slots.length) return;
+        const list = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
+        if (!list.length) return;
+        slots.forEach((slot, idx) => {{
+          if (slot.querySelector('img')) return;
+          const src = list[idx];
+          if (!src) return;
+          const img = document.createElement('img');
+          img.setAttribute('src', src);
+          img.setAttribute('loading', 'lazy');
+          img.setAttribute('decoding', 'async');
+          slot.appendChild(img);
+        }});
+      }});
+    }}
     function reloadMissingImages(card) {{
       const list = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
       if (!list.length) return;
@@ -3241,6 +3272,7 @@ def build_html(
       setTimeout(() => updateSlots(card), 200);
     }}
     cards.forEach(card => ensureImageSpinners(card));
+    initSlotThumbs();
     const newsSources = document.getElementById('news-sources');
     let activeCategory = 'all';
     let activeSource = 'all';
