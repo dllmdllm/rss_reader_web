@@ -426,9 +426,7 @@ def clean_html_fragment(
                 img.set("loading", "lazy")
                 img.set("decoding", "async")
         if "cnbeta.com.tw" in base_url:
-            imgs = root.xpath(".//img")
-            if len(imgs) > 1:
-                imgs[0].drop_tag()
+            pass
         if "stheadline.com" in base_url:
             imgs = list(root.xpath(".//img"))
             seen_src: set[str] = set()
@@ -584,19 +582,6 @@ def guess_image_ext(url: str, content_type: str) -> str:
 
 
 def get_image_prefix(referer: str | None) -> str:
-    ref = (referer or "").lower()
-    if "hk01" in ref:
-        return "hk01_"
-    if "on.cc" in ref or "oncc" in ref:
-        return "oncc_"
-    if "rthk" in ref:
-        return "rthk_"
-    if "stheadline" in ref or "singtao" in ref:
-        return "singtao_"
-    if "mingpao" in ref:
-        return "mingpao_"
-    if "cnbeta" in ref:
-        return "cnbeta_"
     return ""
 
 
@@ -944,7 +929,9 @@ def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) ->
         return ""
 
 
-def localize_images_in_html(html_text: str, base_url: str, image_cache: dict) -> tuple[str, list[str]]:
+def localize_images_in_html(
+    html_text: str, base_url: str, image_cache: dict, allow_remote: bool = True
+) -> tuple[str, list[str]]:
     if not html_text:
         return "", []
     try:
@@ -961,7 +948,7 @@ def localize_images_in_html(html_text: str, base_url: str, image_cache: dict) ->
                 new_src = f"images/{local_name}"
                 local_urls.append(new_src)
                 return f"{pre}{new_src}{suf}"
-            return match.group(0)
+            return match.group(0) if allow_remote else ""
         new_html = re.sub(r'(<img[^>]+src=[\'"])([^\'"]+)([\'"])', repl, html_text)
         return new_html, local_urls
     try:
@@ -974,8 +961,11 @@ def localize_images_in_html(html_text: str, base_url: str, image_cache: dict) ->
                 new_src = f"images/{local_name}"
                 img.set("src", new_src)
                 local_urls.append(new_src)
-            img.set("loading", "lazy")
-            img.set("decoding", "async")
+                img.set("loading", "lazy")
+                img.set("decoding", "async")
+            else:
+                if not allow_remote:
+                    img.drop_tag()
         new_html = "".join(lxml_html.tostring(child, encoding="unicode") for child in root)
         return new_html.strip(), local_urls
     except Exception:
@@ -2145,8 +2135,9 @@ def build_html(
         prefetch_src = ""
         localized_urls: list[str] = []
         if content_html:
+            allow_remote = item.source not in ("singtao",)
             content_html, localized_urls = localize_images_in_html(
-                content_html, item.link, image_cache
+                content_html, item.link, image_cache, allow_remote=allow_remote
             )
         if item.source == "hk01" and extra_images:
             extra_html_parts: list[str] = []

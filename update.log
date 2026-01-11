@@ -72170,3 +72170,1545 @@ After doing this, you may fix the identity used for this commit with:
  create mode 100644 images/singtao_d280fd033f140d38_OK.webp
 To https://github.com/dllmdllm/rss_reader_web.git
    770c51a..6b29267  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 32ee08a] Update site 2026-01-10 17:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 60 files changed, 316 insertions(+), 391 deletions(-)
+ delete mode 100644 images/cnbeta_00dabf7572c2fdfc.jpg
+ delete mode 100644 images/cnbeta_0170b17dc4216014.jpg
+ delete mode 100644 images/cnbeta_0d3fe77968deb9fb.webp
+ delete mode 100644 images/cnbeta_1630b4fec417dcd6.webp
+ delete mode 100644 images/cnbeta_18c9bdb73fd3bd28.webp
+ delete mode 100644 images/cnbeta_196dcf45828caefe.jpg
+ delete mode 100644 images/cnbeta_1a65e0f9f8280066.webp
+ delete mode 100644 images/cnbeta_1d902dc95a724f60.webp
+ delete mode 100644 images/cnbeta_1da0cc4628ad7aa4.webp
+ delete mode 100644 images/cnbeta_1f7b6dc47d404c17.jpg
+ delete mode 100644 images/cnbeta_20207495e1ed1671.jpg
+ delete mode 100644 images/cnbeta_217654d8cba68186.jpg
+ delete mode 100644 images/cnbeta_28388bb114a523d3.jpg
+ delete mode 100644 images/cnbeta_28c4f7d4b5296918.jpg
+ delete mode 100644 images/cnbeta_2bd7938bb8068e67.webp
+ delete mode 100644 images/cnbeta_2d1defca835853b9.webp
+ delete mode 100644 images/cnbeta_2d6b7da05d7d7cab.jpg
+ delete mode 100644 images/cnbeta_2eb9c605470c3b53.webp
+ delete mode 100644 images/cnbeta_33b71eea81b04480.webp
+ delete mode 100644 images/cnbeta_33f68eedfec6be60.jpg
+ delete mode 100644 images/cnbeta_358df7f818724643.jpg
+ delete mode 100644 images/cnbeta_4e9dbcc7f07f257f.webp
+ delete mode 100644 images/cnbeta_4ed3d151d90e538c.jpg
+ delete mode 100644 images/cnbeta_648deec33a43cfee.jpg
+ delete mode 100644 images/cnbeta_66cc2d4ca68865f5.jpg
+ delete mode 100644 images/cnbeta_6c69ad369d7d66d7.webp
+ delete mode 100644 images/cnbeta_6e972cd5b35820af.jpg
+ delete mode 100644 images/cnbeta_720a95c75ef52212.webp
+ delete mode 100644 images/cnbeta_74b97806cc49b4fb.jpg
+ delete mode 100644 images/cnbeta_771ffb6d07583bd3.jpg
+ delete mode 100644 images/cnbeta_87e98051abf80921.webp
+ delete mode 100644 images/cnbeta_9325cb6f7c83d3f8.webp
+ delete mode 100644 images/cnbeta_962ac6fdec83d156.webp
+ delete mode 100644 images/cnbeta_98644a77ea30f5d7.webp
+ delete mode 100644 images/cnbeta_9ef39028c962e0da.webp
+ delete mode 100644 images/cnbeta_a04d27a8e4bb15de.jpg
+ delete mode 100644 images/cnbeta_a3b9b2bf9d775eee.webp
+ delete mode 100644 images/cnbeta_a5745e967397ee87.webp
+ delete mode 100644 images/cnbeta_a8dc77099c1dd0e7.jpg
+ delete mode 100644 images/cnbeta_b2e350521c61e0c6.jpg
+ delete mode 100644 images/cnbeta_b88b2e6e6d9c5ed8.webp
+ delete mode 100644 images/cnbeta_c75f0f5aa941351d.jpg
+ delete mode 100644 images/cnbeta_d93fe18a04051d02.webp
+ delete mode 100644 images/cnbeta_dc4ff5addf92fa9a.jpg
+ delete mode 100644 images/cnbeta_dd0ea2725420bd90.jpg
+ delete mode 100644 images/cnbeta_de4df88bd102e5d5.webp
+ delete mode 100644 images/cnbeta_e191ea465780adb6.jpg
+ delete mode 100644 images/cnbeta_e5ab6ae6c4fded82.webp
+ delete mode 100644 images/cnbeta_eccf1ad76ee7ffc0.jpg
+ delete mode 100644 images/cnbeta_fd2dc0294ba40b48.jpg
+ delete mode 100644 images/hk01_230bf4f11bb6faf4.jpg
+ delete mode 100644 images/hk01_253048022d25d7ec.jpg
+ delete mode 100644 images/hk01_312551763b78e1a5.jpg
+ delete mode 100644 images/hk01_cf4186b98061fd79.jpg
+ delete mode 100644 images/mingpao_244e6418cb998d86.webp
+ delete mode 100644 images/mingpao_2eda1671e14de345.webp
+ delete mode 100644 images/singtao_041a38b5dcb83320.jpg
+ delete mode 100644 images/singtao_df21b88f206eb4b9.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   1e2130c..32ee08a  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 7a2d3ac] Update site 2026-01-10 17:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 583 insertions(+), 498 deletions(-)
+ create mode 100644 images/oncc_43bd68dce41b17c4.jpg
+ create mode 100644 images/singtao_c800740a4c9846d2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   32ee08a..7a2d3ac  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 86943e1] Update site 2026-01-10 17:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 399 insertions(+), 424 deletions(-)
+ delete mode 100644 images/singtao_7bdad967e9effc5d_OK.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   7a2d3ac..86943e1  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 37c5b73] Update site 2026-01-10 17:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 15 files changed, 540 insertions(+), 585 deletions(-)
+ delete mode 100644 images/hk01_0857f9d1b95a6959.jpg
+ delete mode 100644 images/hk01_4371fbd097ecd47f.jpg
+ create mode 100644 images/hk01_439c472fd0b6e4d6.jpg
+ delete mode 100644 images/hk01_6a6168856e0d75ac.jpg
+ delete mode 100644 images/hk01_6bac24aa5d76e26b.jpg
+ delete mode 100644 images/hk01_824178d8b8368954.jpg
+ create mode 100644 images/hk01_cdfa32c47f7c2042.jpg
+ delete mode 100644 images/hk01_e56bc0b842b6acf7.jpg
+ create mode 100644 images/hk01_f229af630c941c1e.jpg
+ delete mode 100644 images/hk01_fed991f3dc533dc9_OK.jpg
+ delete mode 100644 images/mingpao_18de1cc21ec1393a.jpg
+ create mode 100644 images/rthk_3982fbdb0d2e4277.jpg
+ delete mode 100644 images/rthk_a029e2f4f25894e4.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   86943e1..37c5b73  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 7559ed3] Update site 2026-01-10 17:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 424 insertions(+), 474 deletions(-)
+ delete mode 100644 images/rthk_a3a803a8647395a6_OK.jpg
+ delete mode 100644 images/singtao_d280fd033f140d38_OK.webp
+To https://github.com/dllmdllm/rss_reader_web.git
+   37c5b73..7559ed3  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 3ce1622] Update site 2026-01-10 17:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 295 insertions(+), 345 deletions(-)
+ delete mode 100644 images/mingpao_730e540004620f4a.jpg
+ delete mode 100644 images/mingpao_b51f8b3542f3a8de.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   7559ed3..3ce1622  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 2383262] Update site 2026-01-10 18:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 242 insertions(+), 242 deletions(-)
+To https://github.com/dllmdllm/rss_reader_web.git
+   3ce1622..2383262  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 30c41f1] Update site 2026-01-10 18:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 550 insertions(+), 455 deletions(-)
+ delete mode 100644 images/mingpao_02e60e5d6df9b8f9.jpg
+ delete mode 100644 images/mingpao_6d5c58255e087030.jpg
+ create mode 100644 images/oncc_096e7b0167d8c18a.jpg
+ create mode 100644 images/singtao_344ed7f1b42694a2.jpg
+ create mode 100644 images/singtao_99a112f0fb104c06.jpg
+ create mode 100644 images/singtao_d968026365c61f05.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   2383262..30c41f1  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 8c02d66] Update site 2026-01-10 18:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 419 insertions(+), 494 deletions(-)
+ delete mode 100644 images/hk01_a8af4053647a2445.jpg
+ delete mode 100644 images/hk01_b518239f84d5940b.jpg
+ delete mode 100644 images/hk01_d525e30be7e522f2.jpg
+ delete mode 100644 images/hk01_e6dff61aa3e36a77.jpg
+ delete mode 100644 images/rthk_2659e66af18a7a75.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   30c41f1..8c02d66  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 85357d3] Update site 2026-01-10 18:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 307 insertions(+), 382 deletions(-)
+ delete mode 100644 images/hk01_23ba552aabac4fb6.jpg
+ delete mode 100644 images/hk01_386e970ef4f2b369.jpg
+ delete mode 100644 images/hk01_574b4eb1f4569920.jpg
+ delete mode 100644 images/hk01_6da3af720f871edd.jpg
+ delete mode 100644 images/mingpao_0ce58166fcae5dae.jpg
+ delete mode 100644 images/mingpao_e1f4b2621d49b8ad.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   8c02d66..85357d3  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main f7e8915] Update site 2026-01-10 18:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 385 insertions(+), 380 deletions(-)
+ delete mode 100644 images/hk01_38459e907f749d31_OK.jpg
+ delete mode 100644 images/hk01_5b51c238b9b145ab.jpg
+ delete mode 100644 images/hk01_9c14baae41c9d312.jpg
+ create mode 100644 images/hk01_aca32ec5e0f23b59.jpg
+ delete mode 100644 images/mingpao_944678f4237e2e4f_OK.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   85357d3..f7e8915  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 0c5643c] Update site 2026-01-10 18:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 10 files changed, 535 insertions(+), 510 deletions(-)
+ delete mode 100644 images/hk01_6b77ebd2d307399a.jpg
+ delete mode 100644 images/hk01_bf83bdde0e423d2a.jpg
+ delete mode 100644 images/hk01_dbfd1adb48349b2f.jpg
+ delete mode 100644 images/mingpao_cc7815bd5ae64818.jpg
+ create mode 100644 images/oncc_bae9b2c2a3c4d68c.jpg
+ create mode 100644 images/oncc_bb30bcbea3943655.jpg
+ create mode 100644 images/oncc_d760f2fe122e3caa.jpg
+ delete mode 100644 images/singtao_5ebc489309e358ac.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   f7e8915..0c5643c  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 15d1454] Update site 2026-01-10 19:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 441 insertions(+), 406 deletions(-)
+ delete mode 100644 images/hk01_6e6138266857ff1c_OK.jpg
+ delete mode 100644 images/hk01_dc8ab4950948b13c.jpg
+ delete mode 100644 images/hk01_efd3bab5e67d682f.jpg
+ create mode 100644 images/oncc_1756eacfbba87210.jpg
+ create mode 100644 images/singtao_a84cbb4d0aca0186.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   0c5643c..15d1454  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main dcc4d62] Update site 2026-01-10 19:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 344 insertions(+), 369 deletions(-)
+ delete mode 100644 images/hk01_34665adeb3616f3b_OK.jpg
+ delete mode 100644 images/hk01_cbf2f99978734d77.jpg
+ delete mode 100644 images/singtao_c800740a4c9846d2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   15d1454..dcc4d62  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main c3da2cc] Update site 2026-01-10 19:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 393 insertions(+), 413 deletions(-)
+ delete mode 100644 images/hk01_24ec4f8562fd6696_OK.jpg
+ delete mode 100644 images/hk01_ef4d6eb3d0372b10.jpg
+ delete mode 100644 images/mingpao_4ff4e5ffca207e3f_OK.jpg
+ create mode 100644 images/oncc_cf9dc90e949be284.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   dcc4d62..c3da2cc  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 4333129] Update site 2026-01-10 19:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 12 files changed, 337 insertions(+), 462 deletions(-)
+ delete mode 100644 images/hk01_0ffbba4e3353de18.jpg
+ delete mode 100644 images/hk01_6e7b7b8fbde9f260.jpg
+ delete mode 100644 images/hk01_73644fbf45025984.jpg
+ delete mode 100644 images/hk01_a5133ee7a4b71fa5.jpg
+ delete mode 100644 images/hk01_a6ceee29e1b10d3b.jpg
+ delete mode 100644 images/hk01_aa7e8fb2d026738d.jpg
+ delete mode 100644 images/hk01_beae8b400b9fc398.jpg
+ delete mode 100644 images/hk01_e3597f21fb466b7e.jpg
+ delete mode 100644 images/rthk_7a537f74913a2f82.jpg
+ delete mode 100644 images/rthk_f1a41c2e4bd6f7b6_OK.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   c3da2cc..4333129  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 128ba75] Update site 2026-01-10 19:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 13 files changed, 475 insertions(+), 480 deletions(-)
+ delete mode 100644 images/hk01_559421283f079c0e.jpg
+ create mode 100644 images/hk01_64a481bd67b0a171.jpg
+ delete mode 100644 images/hk01_73b813c0f683c4d2.jpg
+ delete mode 100644 images/hk01_888fa5aaeb965348.jpg
+ delete mode 100644 images/hk01_90c62287d76a562a.jpg
+ delete mode 100644 images/hk01_996b6599d2a35d1e_OK.jpg
+ delete mode 100644 images/hk01_9b6a6e0d49c317c7.jpg
+ create mode 100644 images/oncc_733d27a3e0182210.jpg
+ create mode 100644 images/oncc_a27db70ef0cacb7a.jpg
+ create mode 100644 images/oncc_b0175bbbf0115181.jpg
+ delete mode 100644 images/oncc_fb021d9e78d3749e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4333129..128ba75  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 128da36] Update site 2026-01-10 19:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 381 insertions(+), 371 deletions(-)
+ delete mode 100644 images/mingpao_9c9116ee2847982d.jpg
+ delete mode 100644 images/oncc_43bd68dce41b17c4.jpg
+ create mode 100644 images/oncc_e6b1fc7306d37176.jpg
+ create mode 100644 images/oncc_fb021d9e78d3749e.jpg
+ delete mode 100644 images/rthk_edf0bf23ac60cac1.jpg
+ create mode 100644 images/singtao_fc60f238bde091ad.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   128ba75..128da36  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 014b30e] Update site 2026-01-10 20:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 292 insertions(+), 342 deletions(-)
+ delete mode 100644 images/mingpao_3482c5fa396fe5d6_OK.jpg
+ delete mode 100644 images/mingpao_f1fbfd60eb2aec43.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   128da36..014b30e  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 1f718f8] Update site 2026-01-10 20:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 14 files changed, 393 insertions(+), 488 deletions(-)
+ delete mode 100644 images/hk01_06537c195d7b086d_OK.jpg
+ delete mode 100644 images/hk01_0a383c5d5af11c8c_OK.jpg
+ delete mode 100644 images/hk01_3246b0b29eb85f4d.jpg
+ delete mode 100644 images/hk01_3ec1f7e59ae557d8.jpg
+ delete mode 100644 images/hk01_53331b70a461e6ee.jpg
+ delete mode 100644 images/hk01_6e5632d4b7abf4bb.jpg
+ delete mode 100644 images/oncc_096e7b0167d8c18a.jpg
+ create mode 100644 images/oncc_1d83bbdc9d9876e5.jpg
+ create mode 100644 images/oncc_43bd68dce41b17c4.jpg
+ delete mode 100644 images/singtao_344ed7f1b42694a2.jpg
+ delete mode 100644 images/singtao_99a112f0fb104c06.jpg
+ delete mode 100644 images/singtao_d968026365c61f05.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   014b30e..1f718f8  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main ce7e5c9] Update site 2026-01-10 20:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 9 files changed, 356 insertions(+), 376 deletions(-)
+ delete mode 100644 images/hk01_01e6bd2ee1364bd7_OK.jpg
+ delete mode 100644 images/hk01_437b8e0c9d846783.jpg
+ delete mode 100644 images/hk01_ae57a68733950a74.jpg
+ delete mode 100644 images/hk01_c6fe77e97b303833.jpg
+ delete mode 100644 images/hk01_c791f88e0b0ae8d2.jpg
+ delete mode 100644 images/hk01_e0b35a85ee385754.jpg
+ create mode 100644 images/singtao_9480e742673a8958.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   1f718f8..ce7e5c9  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main d0c7dbf] Update site 2026-01-10 20:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 263 insertions(+), 253 deletions(-)
+ create mode 100644 images/hk01_0641319b323f3529.jpg
+ create mode 100644 images/hk01_6c8c5d4330f63161.jpg
+ delete mode 100644 images/hk01_e03450141036b2bf.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   ce7e5c9..d0c7dbf  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main b384768] Update site 2026-01-10 20:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 394 insertions(+), 364 deletions(-)
+ delete mode 100644 images/hk01_109e18af75073d47_OK.jpg
+ delete mode 100644 images/hk01_3d2abe789a7fe883.jpg
+ delete mode 100644 images/hk01_aa780f538949c8c6.jpg
+ create mode 100644 images/oncc_096e7b0167d8c18a.jpg
+ delete mode 100644 images/oncc_1756eacfbba87210.jpg
+ create mode 100644 images/oncc_ac0f28e659e1107b.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   d0c7dbf..b384768  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 99b74ca] Update site 2026-01-10 20:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 260 insertions(+), 285 deletions(-)
+ delete mode 100644 images/hk01_7d2be8df591b129e.jpg
+ delete mode 100644 images/hk01_9c66070ae8220502.jpg
+ delete mode 100644 images/hk01_bb0e8dd1086f6bee.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   b384768..99b74ca  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 5d8c968] Update site 2026-01-10 21:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 305 insertions(+), 355 deletions(-)
+ delete mode 100644 images/singtao_a84cbb4d0aca0186.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   99b74ca..5d8c968  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 066c3d6] Update site 2026-01-10 21:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 368 insertions(+), 333 deletions(-)
+ delete mode 100644 images/hk01_27a4ac1ac8ec478e.jpg
+ delete mode 100644 images/hk01_447aa1894f7c6285.jpg
+ delete mode 100644 images/hk01_5832309a9781554a.jpg
+ create mode 100644 images/mingpao_1650ce6ca726f607.jpg
+ create mode 100644 images/singtao_cbf11e32e3187da2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   5d8c968..066c3d6  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 3087b6b] Update site 2026-01-10 21:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 266 insertions(+), 291 deletions(-)
+ delete mode 100644 images/hk01_49093d82430404dd.jpg
+ delete mode 100644 images/hk01_5065edf0e01ed1ad.jpg
+ delete mode 100644 images/hk01_82c972c5a06101e4.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   066c3d6..3087b6b  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 198fadf] Update site 2026-01-10 21:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 196 insertions(+), 196 deletions(-)
+To https://github.com/dllmdllm/rss_reader_web.git
+   3087b6b..198fadf  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 4582e55] Update site 2026-01-10 21:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 254 insertions(+), 304 deletions(-)
+ delete mode 100644 images/hk01_0f8a9820ff0dc512.jpg
+ delete mode 100644 images/hk01_1634752f72c09b1c.jpg
+ delete mode 100644 images/hk01_2543c6f38efac9b7.jpg
+ delete mode 100644 images/hk01_2aaffb3e4f137e8a_OK.jpg
+ delete mode 100644 images/hk01_6df48759c69c19f3.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   198fadf..4582e55  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 65a1a52] Update site 2026-01-10 21:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 319 insertions(+), 344 deletions(-)
+ delete mode 100644 images/singtao_fc60f238bde091ad.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4582e55..65a1a52  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 3b9cacb] Update site 2026-01-10 22:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 14 files changed, 394 insertions(+), 429 deletions(-)
+ delete mode 100644 images/hk01_5b79361a131cb591.jpg
+ delete mode 100644 images/hk01_5cf59210e6029c0a.jpg
+ delete mode 100644 images/hk01_681462c2dca1e1dd.jpg
+ delete mode 100644 images/hk01_c303a4aa9e0bf5ce.jpg
+ delete mode 100644 images/hk01_d3c451417736793e.jpg
+ delete mode 100644 images/hk01_f47ccaa603fa661a.jpg
+ delete mode 100644 images/mingpao_677fd55fe20649c3_OK.jpg
+ create mode 100644 images/oncc_1756eacfbba87210.jpg
+ create mode 100644 images/oncc_7bc3a2eecb7e651d.jpg
+ delete mode 100644 images/oncc_cf9dc90e949be284.jpg
+ delete mode 100644 images/rthk_3982fbdb0d2e4277.jpg
+ create mode 100644 images/rthk_ec255b8338aa2eef.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   65a1a52..3b9cacb  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main ab4f42e] Update site 2026-01-10 22:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 479 insertions(+), 354 deletions(-)
+ create mode 100644 images/oncc_33ce5228ea01a3c4.jpg
+ delete mode 100644 images/oncc_bb30bcbea3943655.jpg
+ create mode 100644 images/oncc_c8460886d5a943a4.jpg
+ delete mode 100644 images/oncc_fb021d9e78d3749e.jpg
+ create mode 100644 images/singtao_f861a729886307ea.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   3b9cacb..ab4f42e  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 6d5eb0d] Update site 2026-01-10 22:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 325 insertions(+), 340 deletions(-)
+ create mode 100644 images/hk01_43a430ff34dcf213.jpg
+ delete mode 100644 images/mingpao_469b2f3b363254ea.jpg
+ create mode 100644 images/singtao_573cdfe73011524b.jpg
+ delete mode 100644 images/singtao_9480e742673a8958.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   ab4f42e..6d5eb0d  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main b931d3e] Update site 2026-01-10 22:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 383 insertions(+), 348 deletions(-)
+ create mode 100644 images/oncc_474be7fc69713ef0.jpg
+ delete mode 100644 images/oncc_bae9b2c2a3c4d68c.jpg
+ create mode 100644 images/oncc_bb30bcbea3943655.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   6d5eb0d..b931d3e  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main fdba9ee] Update site 2026-01-10 22:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 308 insertions(+), 288 deletions(-)
+ delete mode 100644 images/hk01_46927dcb342367f4.jpg
+ create mode 100644 images/hk01_94a35d8d5cfd26d0.jpg
+ create mode 100644 images/hk01_bfa1444c59997ccb.jpg
+ create mode 100644 images/hk01_c20a5c7b8f512e41.jpg
+ delete mode 100644 images/hk01_c4f7608ed2ff2f2b.jpg
+ create mode 100644 images/singtao_7d8a0dda4ccfba6e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   b931d3e..fdba9ee  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main d08a6b8] Update site 2026-01-10 22:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 366 insertions(+), 386 deletions(-)
+ create mode 100644 images/singtao_0862693c1e1f1028.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   fdba9ee..d08a6b8  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 02783e7] Update site 2026-01-10 23:01
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 497 insertions(+), 442 deletions(-)
+ delete mode 100644 images/oncc_43bd68dce41b17c4.jpg
+ create mode 100644 images/singtao_b8d0428a8cab5fb2.jpg
+ create mode 100644 images/singtao_ee1f105bffea3c9e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   d08a6b8..02783e7  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main a2b97bd] Update site 2026-01-10 23:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 405 insertions(+), 370 deletions(-)
+ create mode 100644 images/oncc_a2a994c1e9c6ba38.jpg
+ delete mode 100644 images/oncc_b0175bbbf0115181.jpg
+ create mode 100644 images/oncc_bae9b2c2a3c4d68c.jpg
+ delete mode 100644 images/singtao_cbf11e32e3187da2.jpg
+ create mode 100644 images/singtao_f7381f04ecaf9a9a.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   02783e7..a2b97bd  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 6002f66] Update site 2026-01-10 23:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 278 insertions(+), 273 deletions(-)
+ delete mode 100644 images/hk01_439c472fd0b6e4d6.jpg
+ delete mode 100644 images/hk01_cdfa32c47f7c2042.jpg
+ delete mode 100644 images/hk01_f229af630c941c1e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   a2b97bd..6002f66  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 4ba3430] Update site 2026-01-10 23:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 2 files changed, 200 insertions(+), 200 deletions(-)
+To https://github.com/dllmdllm/rss_reader_web.git
+   6002f66..4ba3430  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main d8828a1] Update site 2026-01-10 23:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 438 insertions(+), 348 deletions(-)
+ create mode 100644 images/hk01_c762dc72c473a844.jpg
+ create mode 100644 images/singtao_1d03dfeffe4c4e81.jpg
+ create mode 100644 images/singtao_d861ed133f58c5b2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4ba3430..d8828a1  main -> main
+/mnt/c/Users/Nary/.venv/rss_reader_web/lib/python3.12/site-packages/PIL/Image.py:1034: UserWarning: Palette images with Transparency expressed in bytes should be converted to RGBA images
+  warnings.warn(
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main d3d31e7] Update site 2026-01-10 23:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 3 files changed, 390 insertions(+), 360 deletions(-)
+ create mode 100644 images/singtao_5813d1cd1f45b0b6.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   d8828a1..d3d31e7  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 5608677] Update site 2026-01-11 00:01
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 311 insertions(+), 426 deletions(-)
+ create mode 100644 images/hk01_7deb241e085172cd.jpg
+ delete mode 100644 images/hk01_aca32ec5e0f23b59.jpg
+ delete mode 100644 images/mingpao_1650ce6ca726f607.jpg
+ create mode 100644 images/singtao_8ae3d32d524f5a8f.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   d3d31e7..5608677  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main e7ebbd0] Update site 2026-01-11 00:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 16 files changed, 491 insertions(+), 421 deletions(-)
+ create mode 100644 images/hk01_4b3d74b0d23529f6.jpg
+ create mode 100644 images/hk01_925d7cfa165dabb2.jpg
+ create mode 100644 images/hk01_a3e2c469944d7695.jpg
+ create mode 100644 images/hk01_f47778089b3cd2e0.jpg
+ delete mode 100644 images/oncc_096e7b0167d8c18a.jpg
+ create mode 100644 images/oncc_16ae7e223bc72d3d.jpg
+ delete mode 100644 images/oncc_733d27a3e0182210.jpg
+ create mode 100644 images/oncc_b0175bbbf0115181.jpg
+ delete mode 100644 images/oncc_bae9b2c2a3c4d68c.jpg
+ delete mode 100644 images/oncc_bb30bcbea3943655.jpg
+ create mode 100644 images/singtao_6ab75b6d6f668cbb.jpg
+ delete mode 100644 images/singtao_8ae3d32d524f5a8f.jpg
+ create mode 100644 images/singtao_f3ed4d5036e501a2.jpg
+ delete mode 100644 images/singtao_f861a729886307ea.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   5608677..e7ebbd0  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 4339a5d] Update site 2026-01-11 00:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 4 files changed, 324 insertions(+), 374 deletions(-)
+ delete mode 100644 images/oncc_d760f2fe122e3caa.jpg
+ delete mode 100644 images/singtao_573cdfe73011524b.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   e7ebbd0..4339a5d  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 6df4ed3] Update site 2026-01-11 00:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 5 files changed, 317 insertions(+), 442 deletions(-)
+ delete mode 100644 images/hk01_7deb241e085172cd.jpg
+ delete mode 100644 images/oncc_1756eacfbba87210.jpg
+ delete mode 100644 images/oncc_c8460886d5a943a4.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4339a5d..6df4ed3  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main ebef6e2] Update site 2026-01-11 00:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 7 files changed, 228 insertions(+), 208 deletions(-)
+ create mode 100644 images/hk01_78c29a3b65d0845c.jpg
+ create mode 100644 images/hk01_a3e14a3fe60215aa.jpg
+ create mode 100644 images/hk01_bc6ec8a6a069254a.jpg
+ create mode 100644 images/hk01_c02aba9cf0b36eb1.jpg
+ delete mode 100644 images/singtao_7d8a0dda4ccfba6e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   6df4ed3..ebef6e2  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 920dc32] Update site 2026-01-11 00:50
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 9 files changed, 420 insertions(+), 375 deletions(-)
+ create mode 100644 images/hk01_05a84554efd9d11b.jpg
+ create mode 100644 images/hk01_fc882e896a687250.jpg
+ create mode 100644 images/oncc_733d27a3e0182210.jpg
+ delete mode 100644 images/oncc_a27db70ef0cacb7a.jpg
+ create mode 100644 images/oncc_d34ef20b8cbd9016.jpg
+ delete mode 100644 images/singtao_0862693c1e1f1028.jpg
+ create mode 100644 images/singtao_f316d450ff0b2038.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   ebef6e2..920dc32  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 4cbff0e] Update site 2026-01-11 01:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 6 files changed, 295 insertions(+), 280 deletions(-)
+ create mode 100644 images/singtao_5aa0d2a501b7effd.jpg
+ delete mode 100644 images/singtao_b8d0428a8cab5fb2.jpg
+ create mode 100644 images/singtao_e1f557edb4550d45.jpg
+ delete mode 100644 images/singtao_ee1f105bffea3c9e.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   920dc32..4cbff0e  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main ee6915f] Update site 2026-01-11 01:10
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 16 files changed, 616 insertions(+), 346 deletions(-)
+ create mode 100644 images/hk01_21c9a4793a07dc2e.jpg
+ create mode 100644 images/hk01_40704fe19570592d.jpg
+ create mode 100644 images/hk01_6074861dab037479.jpg
+ create mode 100644 images/hk01_817f4fef66a22c7b.jpg
+ create mode 100644 images/hk01_99be0b2d182df62f.jpg
+ create mode 100644 images/hk01_bc91946a51466319.jpg
+ create mode 100644 images/hk01_e77c3dc9edcfe8ff.jpg
+ create mode 100644 images/mingpao_818216634a6c0887.jpg
+ create mode 100644 images/rthk_46cda1bbdc875f89.jpg
+ create mode 100644 images/rthk_5cb0323360f746db.jpg
+ create mode 100644 images/singtao_327ff637cf6bd3d6.jpg
+ create mode 100644 images/singtao_42b82d3742b8e48b.jpg
+ create mode 100644 images/singtao_bbcd2bfede837aad.jpg
+ delete mode 100644 images/singtao_f7381f04ecaf9a9a.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   4cbff0e..ee6915f  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 974265d] Update site 2026-01-11 01:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 9 files changed, 554 insertions(+), 404 deletions(-)
+ create mode 100644 images/oncc_58b869d3a9248796.jpg
+ create mode 100644 images/oncc_647455ce0ff6dd18.jpg
+ create mode 100644 images/oncc_a27db70ef0cacb7a.jpg
+ delete mode 100644 images/oncc_ac0f28e659e1107b.jpg
+ create mode 100644 images/oncc_fa1b097301927822.jpg
+ create mode 100644 images/singtao_5029cd932aaf58b9.jpg
+ create mode 100644 images/singtao_bf02657b2fa37fa7.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   ee6915f..974265d  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main c540722] Update site 2026-01-11 01:30
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 432 insertions(+), 447 deletions(-)
+ delete mode 100644 images/hk01_43a430ff34dcf213.jpg
+ delete mode 100644 images/hk01_64a481bd67b0a171.jpg
+ delete mode 100644 images/oncc_733d27a3e0182210.jpg
+ delete mode 100644 images/oncc_b0175bbbf0115181.jpg
+ delete mode 100644 images/singtao_6ab75b6d6f668cbb.jpg
+ create mode 100644 images/singtao_d5a5537967b2ea24.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   974265d..c540722  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 9aed2e6] Update site 2026-01-11 01:40
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 13 files changed, 473 insertions(+), 403 deletions(-)
+ create mode 100644 images/hk01_2a1c833e9f58fa54.jpg
+ create mode 100644 images/hk01_507b30e007ae20e8.jpg
+ create mode 100644 images/hk01_53e0bfda09661822.jpg
+ create mode 100644 images/hk01_55d988defb2e48a7.jpg
+ create mode 100644 images/hk01_5de3c11039d31703.jpg
+ create mode 100644 images/hk01_77c1a1131e930743.jpg
+ create mode 100644 images/hk01_a1ef67cb791a9003.jpg
+ delete mode 100644 images/oncc_a27db70ef0cacb7a.jpg
+ delete mode 100644 images/singtao_1d03dfeffe4c4e81.jpg
+ delete mode 100644 images/singtao_d861ed133f58c5b2.jpg
+ create mode 100644 images/singtao_f8c3c599e29a60ca.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   c540722..9aed2e6  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main b13ba40] Update site 2026-01-11 01:51
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 16 files changed, 558 insertions(+), 473 deletions(-)
+ delete mode 100644 images/hk01_6074861dab037479.jpg
+ create mode 100644 images/hk01_7f70dbf0ed93913a.jpg
+ delete mode 100644 images/hk01_99be0b2d182df62f.jpg
+ delete mode 100644 images/hk01_e77c3dc9edcfe8ff.jpg
+ create mode 100644 images/hk01_e81867264f3d3cd1.jpg
+ create mode 100644 images/hk01_fd88094dcf14c57b.jpg
+ delete mode 100644 images/oncc_7bc3a2eecb7e651d.jpg
+ create mode 100644 images/oncc_8e9e7d7485b6bfc0.jpg
+ create mode 100644 images/oncc_ac0f28e659e1107b.jpg
+ delete mode 100644 images/oncc_e6b1fc7306d37176.jpg
+ create mode 100644 images/singtao_0b731c3f0177e398.jpg
+ delete mode 100644 images/singtao_5813d1cd1f45b0b6.jpg
+ create mode 100644 images/singtao_cd3998fc544d7709.jpg
+ create mode 100644 images/singtao_f4ee220d3d5173ce.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   9aed2e6..b13ba40  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 87a406c] Update site 2026-01-11 02:00
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 588 insertions(+), 403 deletions(-)
+ create mode 100644 images/hk01_52c6ba2bf4e2b6a2.jpg
+ create mode 100644 images/hk01_f96154900d335c8b.jpg
+ create mode 100644 images/singtao_0b6a7f6ae2d83a8f.jpg
+ create mode 100644 images/singtao_5a6c5851904dc8cc.jpg
+ create mode 100644 images/singtao_6dfbe558ff034638.jpg
+ create mode 100644 images/singtao_cbf11e32e3187da2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   b13ba40..87a406c  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 8f3ece3] Update site 2026-01-11 02:11
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 8 files changed, 521 insertions(+), 476 deletions(-)
+ delete mode 100644 images/oncc_1d83bbdc9d9876e5.jpg
+ delete mode 100644 images/oncc_474be7fc69713ef0.jpg
+ create mode 100644 images/oncc_7bc3a2eecb7e651d.jpg
+ create mode 100644 images/oncc_a1ef68a1a0055529.jpg
+ create mode 100644 images/singtao_039cccc00970da65.jpg
+ delete mode 100644 images/singtao_f3ed4d5036e501a2.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   87a406c..8f3ece3  main -> main
