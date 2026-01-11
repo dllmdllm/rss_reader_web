@@ -57,6 +57,10 @@ def save_with_quality(img_obj: Image.Image, q: int, ext: str) -> str:
         if img_obj.mode not in ("RGB", "RGBA"):
             img_obj = img_obj.convert("RGB")
         img_obj.save(tmp_path, format="WEBP", quality=q, method=6)
+    elif ext == ".png":
+        if img_obj.mode not in ("RGB", "RGBA"):
+            img_obj = img_obj.convert("RGB")
+        img_obj.save(tmp_path, format="PNG", optimize=True)
     else:
         if img_obj.mode not in ("RGB", "RGBA"):
             img_obj = img_obj.convert("RGB")
@@ -68,16 +72,16 @@ def compress_image(path: str) -> None:
     ext = os.path.splitext(path)[1].lower()
     tmp_path = ""
     try:
+        if ext == ".gif":
+            return
         img = Image.open(path)
         img.load()
         if img.width > MAX_WIDTH:
             new_h = max(1, int(img.height * (MAX_WIDTH / img.width)))
             img = img.resize((MAX_WIDTH, new_h), Image.LANCZOS)
-        if ext in (".gif", ".png"):
-            ext = ".webp"
         q = QUALITY_JPG if ext in (".jpg", ".jpeg") else QUALITY_WEBP
         tmp_path = save_with_quality(img, q, ext)
-        if ext in (".jpg", ".jpeg", ".webp"):
+        if ext in (".jpg", ".jpeg", ".webp", ".png"):
             while os.path.getsize(tmp_path) > TARGET_BYTES and q > 30:
                 os.remove(tmp_path)
                 q -= 5
@@ -126,8 +130,6 @@ def main() -> int:
         compress_image(path)
         base = os.path.splitext(name)[0]
         out_ext = ext
-        if ext == ".png":
-            out_ext = ".webp"
         new_name = f"{base}{out_ext}"
         new_path = os.path.join(IMAGES_DIR, new_name)
         try:
