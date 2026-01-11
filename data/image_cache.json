@@ -8469,11 +8469,6 @@
     "timestamp": 1768120817.0286686,
     "url": "https://cdn.hk01.com/di/media/images/dw/20251203/1072971690339864576360751.jpeg/o7V05ShpFNb81qObk_CyW9v6CemBsM_NpWM3r4BjN68"
   },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111163107853-0111_00822_001_01b.jpg": {
-    "path": "cb2cdbf6e2a768dc.jpg",
-    "timestamp": 1768120817.9761755,
-    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111163107853-0111_00822_001_01b.jpg?20260111163524"
-  },
   "https://cdn.hk01.com/di/media/images/dw/20241119/935496798196338688632780.jpeg/_izQX5HPaeWyFZctt7U1WfYbIfig3cf8FKulJDGrpSQ": {
     "path": "f80eb76353af1673.jpg",
     "timestamp": 1768120817.0334108,
@@ -11678,5 +11673,25 @@
     "path": "e38fe9f66a15ee4c.jpg",
     "timestamp": 1768130421.7984862,
     "url": "https://image.hkhl.hk/f/1024p0/0x0/lr/sthl_square/288629f52d5a4a04ed52076775abc2eb/2026-01/176812944195979.jpg"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111181514627-0111_00822_001_01b.jpg": {
+    "path": "0a746b5e2428319f.jpg",
+    "timestamp": 1768131020.463877,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111181514627-0111_00822_001_01b.jpg?20260111192502"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111163107853-0111_00822_001_01b.jpg": {
+    "path": "cb2cdbf6e2a768dc.jpg",
+    "timestamp": 1768131020.548536,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111163107853-0111_00822_001_01b.jpg?20260111192156"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/2ada8770e87e0f52bf3f680b60166e0a/2026-01/013.png": {
+    "path": "b3d4af99ec0ac301.png",
+    "timestamp": 1768131020.6755235,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/2ada8770e87e0f52bf3f680b60166e0a/2026-01/013.png"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/a16b33888df68e186300d7d7431bd505/2026-01/photo-output_9.jpeg": {
+    "path": "2808668a8693226a.jpg",
+    "timestamp": 1768131021.601984,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/a16b33888df68e186300d7d7431bd505/2026-01/photo-output_9.jpeg"
   }
 }
