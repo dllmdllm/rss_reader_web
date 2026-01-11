@@ -73712,3 +73712,85 @@ After doing this, you may fix the identity used for this commit with:
  delete mode 100644 images/singtao_f3ed4d5036e501a2.jpg
 To https://github.com/dllmdllm/rss_reader_web.git
    87a406c..8f3ece3  main -> main
+The following paths are ignored by one of your .gitignore files:
+data
+hint: Use -f if you really want to add them.
+hint: Turn this message off by running
+hint: "git config advice.addIgnoredFile false"
+[main 1005647] Update site 2026-01-11 02:20
+ Committer: NM <nary@NMWindows365.localdomain>
+Your name and email address were configured automatically based
+on your username and hostname. Please check that they are accurate.
+You can suppress this message by setting them explicitly:
+
+    git config --global user.name "Your Name"
+    git config --global user.email you@example.com
+
+After doing this, you may fix the identity used for this commit with:
+
+    git commit --amend --reset-author
+
+ 63 files changed, 184 insertions(+), 184 deletions(-)
+ delete mode 100644 images/00dabf7572c2fdfc.jpg
+ delete mode 100644 images/0170b17dc4216014.jpg
+ delete mode 100644 images/0d3fe77968deb9fb.webp
+ delete mode 100644 images/0fc7412a73291545.webp
+ delete mode 100644 images/1630b4fec417dcd6.webp
+ delete mode 100644 images/196dcf45828caefe.jpg
+ delete mode 100644 images/1a65e0f9f8280066.webp
+ delete mode 100644 images/1d902dc95a724f60.webp
+ delete mode 100644 images/1da0cc4628ad7aa4.webp
+ delete mode 100644 images/1f7b6dc47d404c17.jpg
+ delete mode 100644 images/20207495e1ed1671.jpg
+ delete mode 100644 images/28388bb114a523d3.jpg
+ delete mode 100644 images/28c4f7d4b5296918.jpg
+ delete mode 100644 images/2bd7938bb8068e67.webp
+ delete mode 100644 images/2d1defca835853b9.webp
+ delete mode 100644 images/2d6b7da05d7d7cab.jpg
+ delete mode 100644 images/2eb9c605470c3b53.webp
+ delete mode 100644 images/33f68eedfec6be60.jpg
+ delete mode 100644 images/358df7f818724643.jpg
+ delete mode 100644 images/43d2268b518a3881.webp
+ delete mode 100644 images/48c65aec8d7b4cd1.webp
+ delete mode 100644 images/4ed3d151d90e538c.jpg
+ delete mode 100644 images/5cab36e0dc7d3c9d.webp
+ delete mode 100644 images/648deec33a43cfee.jpg
+ delete mode 100644 images/66cc2d4ca68865f5.jpg
+ delete mode 100644 images/6c69ad369d7d66d7.webp
+ delete mode 100644 images/6e972cd5b35820af.jpg
+ delete mode 100644 images/720a95c75ef52212.webp
+ delete mode 100644 images/74b97806cc49b4fb.jpg
+ delete mode 100644 images/75fcd1b82ff1373a.webp
+ delete mode 100644 images/771ffb6d07583bd3.jpg
+ delete mode 100644 images/7dd2176cbf5bb744.webp
+ delete mode 100644 images/87e98051abf80921.webp
+ delete mode 100644 images/9325cb6f7c83d3f8.webp
+ delete mode 100644 images/962ac6fdec83d156.webp
+ delete mode 100644 images/98644a77ea30f5d7.webp
+ delete mode 100644 images/9ef39028c962e0da.webp
+ delete mode 100644 images/a04d27a8e4bb15de.jpg
+ delete mode 100644 images/a34b65be22370a5e.webp
+ delete mode 100644 images/a3b9b2bf9d775eee.webp
+ delete mode 100644 images/a5745e967397ee87.webp
+ delete mode 100644 images/a8dc77099c1dd0e7.jpg
+ delete mode 100644 images/b2e350521c61e0c6.jpg
+ delete mode 100644 images/b88b2e6e6d9c5ed8.webp
+ delete mode 100644 images/c1da02116b9d2164.webp
+ delete mode 100644 images/c4c7cc5d19ff4cff.webp
+ delete mode 100644 images/c75f0f5aa941351d.jpg
+ delete mode 100644 images/d1ac191af6019818.webp
+ delete mode 100644 images/d93fe18a04051d02.webp
+ delete mode 100644 images/dd0ea2725420bd90.jpg
+ delete mode 100644 images/de4df88bd102e5d5.webp
+ delete mode 100644 images/e191ea465780adb6.jpg
+ delete mode 100644 images/e5ab6ae6c4fded82.webp
+ delete mode 100644 images/e9c102315e581a12.webp
+ delete mode 100644 images/ea4c290167c14196.webp
+ delete mode 100644 images/eccf1ad76ee7ffc0.jpg
+ delete mode 100644 images/ef92477da1958b10.webp
+ delete mode 100644 images/f691e77644c92421.jpg
+ delete mode 100644 images/hk01_0641319b323f3529.jpg
+ delete mode 100644 images/hk01_6c8c5d4330f63161.jpg
+ delete mode 100644 images/oncc_33ce5228ea01a3c4.jpg
+To https://github.com/dllmdllm/rss_reader_web.git
+   5cef989..1005647  main -> main

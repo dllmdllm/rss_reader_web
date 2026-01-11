@@ -927,49 +927,6 @@ def extract_fulltext_and_image(url: str, cache: dict) -> tuple[str, str]:
 def extract_full_html(url: str, cache: dict, image_cache: dict | None = None) -> str:
     if not url:
         return ""
-
-
-def localize_images_in_html(
-    html_text: str, base_url: str, image_cache: dict, allow_remote: bool = True
-) -> tuple[str, list[str]]:
-    if not html_text:
-        return "", []
-    try:
-        from lxml import html as lxml_html
-    except Exception:
-        lxml_html = None
-    local_urls: list[str] = []
-    if lxml_html is None:
-        def repl(match: re.Match) -> str:
-            pre, src, suf = match.group(1), match.group(2), match.group(3)
-            full = normalize_image_url(base_url, src)
-            local_name = download_image(full, image_cache, base_url)
-            if local_name:
-                new_src = f"images/{local_name}"
-                local_urls.append(new_src)
-                return f"{pre}{new_src}{suf}"
-            return match.group(0) if allow_remote else ""
-        new_html = re.sub(r'(<img[^>]+src=[\'"])([^\'"]+)([\'"])', repl, html_text)
-        return new_html, local_urls
-    try:
-        root = lxml_html.fragment_fromstring(html_text, create_parent="div")
-        for img in root.xpath(".//img[@src]"):
-            src = img.get("src") or ""
-            full = normalize_image_url(base_url, src)
-            local_name = download_image(full, image_cache, base_url)
-            if local_name:
-                new_src = f"images/{local_name}"
-                img.set("src", new_src)
-                local_urls.append(new_src)
-                img.set("loading", "lazy")
-                img.set("decoding", "async")
-            else:
-                if not allow_remote:
-                    img.drop_tag()
-        new_html = "".join(lxml_html.tostring(child, encoding="unicode") for child in root)
-        return new_html.strip(), local_urls
-    except Exception:
-        return html_text, local_urls
     now = time.time()
     entry = cache.get(url, {})
     cached_html = entry.get("html", "")
@@ -1082,6 +1039,74 @@ def localize_images_in_html(
             return ""
     except Exception:
         return cached_html
+
+
+def localize_images_in_html(
+    html_text: str, base_url: str, image_cache: dict, allow_remote: bool = True
+) -> tuple[str, list[str]]:
+    if not html_text:
+        return "", []
+    try:
+        from lxml import html as lxml_html
+    except Exception:
+        lxml_html = None
+    local_urls: list[str] = []
+    if lxml_html is None:
+        def repl(match: re.Match) -> str:
+            pre, src, suf = match.group(1), match.group(2), match.group(3)
+            full = normalize_image_url(base_url, src)
+            local_name = download_image(full, image_cache, base_url)
+            if local_name:
+                new_src = f"images/{local_name}"
+                local_urls.append(new_src)
+                return f"{pre}{new_src}{suf}"
+            return match.group(0) if allow_remote else ""
+        new_html = re.sub(r'(<img[^>]+src=[\'"])([^\'"]+)([\'"])', repl, html_text)
+        return new_html, local_urls
+    try:
+        root = lxml_html.fragment_fromstring(html_text, create_parent="div")
+        for img in root.xpath(".//img[@src]"):
+            src = img.get("src") or ""
+            full = normalize_image_url(base_url, src)
+            local_name = download_image(full, image_cache, base_url)
+            if local_name:
+                new_src = f"images/{local_name}"
+                img.set("src", new_src)
+                local_urls.append(new_src)
+                img.set("loading", "lazy")
+                img.set("decoding", "async")
+            else:
+                if not allow_remote:
+                    img.drop_tag()
+        new_html = "".join(lxml_html.tostring(child, encoding="unicode") for child in root)
+        return new_html.strip(), local_urls
+    except Exception:
+        return html_text, local_urls
+
+
+def extract_image_urls_from_html(html_text: str, base_url: str) -> list[str]:
+    if not html_text:
+        return []
+    urls: list[str] = []
+    try:
+        from lxml import html as lxml_html
+    except Exception:
+        for m in re.finditer(r"<img[^>]+(?:src|data-src|data-original)=['\"]([^'\"]+)['\"]", html_text):
+            urls.append(normalize_image_url(base_url, m.group(1)))
+        return urls
+    try:
+        root = lxml_html.fragment_fromstring(html_text, create_parent="div")
+        for img in root.xpath(".//img"):
+            src = img.get("src") or img.get("data-src") or img.get("data-original") or ""
+            if not src:
+                srcset = img.get("srcset") or img.get("data-srcset") or ""
+                if srcset:
+                    src = srcset.split(",")[0].strip().split(" ")[0]
+            if src:
+                urls.append(normalize_image_url(base_url, src))
+    except Exception:
+        return urls
+    return urls
 
 
 def parse_items(payload: bytes | str, source: str, category: str = "") -> list[Item]:
@@ -2041,6 +2066,7 @@ def build_html(
         keyword_texts.append((item.title, content))
         if not content_html:
             content_html = "<br>".join(html.escape(content).splitlines())
+        raw_imgs = extract_image_urls_from_html(content_html, item.link)
         image_count = 0
         extra_images = item.extra_images[:] if item.extra_images else []
         if item.source == "hk01" and extra_images:
@@ -2100,6 +2126,7 @@ def build_html(
                 "age_class": age_class,
                 "category": category,
                 "image_count": image_count,
+                "raw_imgs": raw_imgs,
             }
         )
 
@@ -2124,6 +2151,7 @@ def build_html(
         content_html = row["content_html"]
         image_url = row["image_url"]
         extra_images = row["extra_images"]
+        raw_imgs = row.get("raw_imgs", [])
         pub_text = row["pub_text"]
         date_class = row["date_class"]
         age_class = row["age_class"]
@@ -2176,6 +2204,8 @@ def build_html(
             img_urls_raw.append(normalize_image_url(item.link, image_url))
         for img in extra_images:
             img_urls_raw.append(normalize_image_url(item.link, img))
+        if raw_imgs:
+            img_urls_raw.extend(raw_imgs)
         if hero_html:
             img_urls.append(hero_url)
         if localized_urls:
@@ -2189,7 +2219,7 @@ def build_html(
         seen_raw = set()
         img_urls_raw = [u for u in img_urls_raw if not (u in seen_raw or seen_raw.add(u))]
         if image_count == 0:
-            image_count = len(img_urls)
+            image_count = max(len(img_urls), len(img_urls_raw))
         img_slots = ""
         if image_count > 0:
             img_slots = "<div class='img-slots'>" + "".join(
