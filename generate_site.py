@@ -2760,6 +2760,9 @@ def build_html(
       background: #fafafa;
       position: relative;
     }}
+    .card.no-slots .img-slots {{
+      display: none !important;
+    }}
     .img-slot.filled {{
       border-style: solid;
       background: #f3f7ff;
@@ -3366,7 +3369,10 @@ def build_html(
         if ((card.dataset.source || '') === 'singtao' && !listLocal.length) {{
           list = [];
         }}
-        if (!list.length) return;
+        if (!list.length) {{
+          card.classList.add('no-slots');
+          return;
+        }}
         slots.forEach((slot, idx) => {{
           if (slot.querySelector('img')) return;
           const src = list[idx];
