@@ -2349,11 +2349,6 @@
     "timestamp": 1768105211.5605938,
     "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111121025061-0111_00822_001_01b.jpg?20260111121025"
   },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111112152053-0111_00822_001_01b.jpg": {
-    "path": "2d8d1c9bc4d19232.jpg",
-    "timestamp": 1768105211.666398,
-    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111112152053-0111_00822_001_01b.jpg?20260111121848"
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111090743768-0111_00822_001_01b.jpg": {
     "path": "d1c388f449705789.jpg",
     "timestamp": 1768105211.7842135,
@@ -5758,5 +5753,55 @@
     "path": "476ea1d02e332594.jpg",
     "timestamp": 1768110615.790508,
     "url": "https://image.hkhl.hk/f/1024p0/0x0/ur/sthl_square/246456b26ce2a5a027975459426580a1/2026-01/r1_2.jpg"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg": {
+    "path": "1747d680a2570464.jpg",
+    "timestamp": 1768111225.2019026,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg?20260111135157"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111112152053-0111_00822_001_01b.jpg": {
+    "path": "2d8d1c9bc4d19232.jpg",
+    "timestamp": 1768111225.3958526,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111112152053-0111_00822_001_01b.jpg?20260111121848"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111093600541-0111_00822_001_01b.jpg": {
+    "path": "f904e68b0f26e8b6.jpg",
+    "timestamp": 1768111225.5652907,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111093600541-0111_00822_001_01b.jpg?20260111135552"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260107/1085569522926227456276905.jpeg/8aicQFg6ineRTUpwlzt_Cdb46k7xD6FZNgqsLTYKrC0": {
+    "path": "5041f3d5401cf9f9.jpg",
+    "timestamp": 1768111225.3966641,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260107/1085569522926227456276905.jpeg/8aicQFg6ineRTUpwlzt_Cdb46k7xD6FZNgqsLTYKrC0"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086737108413976576216094.jpeg/epl9WfChqxVnv-A_9rs9Nrx4_dNdhhn9cYdoTXGHaE0": {
+    "path": "2ef90d6a4c2fa08f.jpg",
+    "timestamp": 1768111225.39831,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260110/1086737108413976576216094.jpeg/epl9WfChqxVnv-A_9rs9Nrx4_dNdhhn9cYdoTXGHaE0"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086737579916660736023716.png/K2_HFCeCZ8Aq5bQS9V-xhhHT01hyisaP_uLr7_7i6-8": {
+    "path": "0395a84416fa8e2d.jpg",
+    "timestamp": 1768111225.401076,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260110/1086737579916660736023716.png/K2_HFCeCZ8Aq5bQS9V-xhhHT01hyisaP_uLr7_7i6-8"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260111/1087015014285447168985032.jpeg/fIQABRK3sghcMbL3ykGzq4gVyAYhaxkYyaNFcMmjRXA": {
+    "path": "5d9377a9efec5422.jpg",
+    "timestamp": 1768111225.2396622,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260111/1087015014285447168985032.jpeg/fIQABRK3sghcMbL3ykGzq4gVyAYhaxkYyaNFcMmjRXA"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260111/1087007033149886464327698.png/sV57eV8MYG8YyxpqFqwBrv8FXfg26NUu9UUeGfVFHhk": {
+    "path": "7613dea260392b2e.jpg",
+    "timestamp": 1768111225.4030588,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260111/1087007033149886464327698.png/sV57eV8MYG8YyxpqFqwBrv8FXfg26NUu9UUeGfVFHhk"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20260110/1086742458588467200849701.jpeg/EckCkOzqxKGRIVKuOcKe-lfgh3dgl2BOgBpuAKUabgA": {
+    "path": "017d1230b6bdf165.jpg",
+    "timestamp": 1768111225.4006019,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20260110/1086742458588467200849701.jpeg/EckCkOzqxKGRIVKuOcKe-lfgh3dgl2BOgBpuAKUabgA"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/ul/sthl_square/77360614527ebce4bfc4b47661446455/2026-01/KakaoTalk_20260111_133643465_11.jpg": {
+    "path": "c37788de144b9af7.jpg",
+    "timestamp": 1768111226.3460886,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/ul/sthl_square/77360614527ebce4bfc4b47661446455/2026-01/KakaoTalk_20260111_133643465_11.jpg"
   }
 }
