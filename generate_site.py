@@ -2890,6 +2890,9 @@ def build_html(
       display: grid;
     }}
     .card:not(.collapsed) .img-slots {{
+      display: grid;
+    }}
+    .card:not(.collapsed).img-all-loaded .img-slots {{
       display: none;
     }}
     .img-slot img {{
@@ -3734,6 +3737,9 @@ def build_html(
         markSeen(card);
         preloadCardImages(card);
         ensureImageSpinners(card);
+        if (!card.querySelector('.content img, .hero')) {{
+          reloadMissingImages(card);
+        }}
         focusPauseUntil = Date.now() + 2000;
         focusLockCard = card;
         focusLockUntil = Date.now() + 2500;
