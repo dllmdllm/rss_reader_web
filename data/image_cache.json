@@ -8434,11 +8434,6 @@
     "timestamp": 1768120229.2688985,
     "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111151301021-0111_00822_001_01b.jpg?20260111162525"
   },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg": {
-    "path": "13983ad4d152dd90.jpg",
-    "timestamp": 1768120229.2681906,
-    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg?20260111162508"
-  },
   "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg": {
     "path": "1747d680a2570464.jpg",
     "timestamp": 1768120229.4151504,
@@ -9163,5 +9158,20 @@
     "path": "049c731ff48bf10b.jpg",
     "timestamp": 1768121421.844231,
     "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/87e0ce90e692a119530c8140f64d5b25/2026-01/KF_KIWI.jpg"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111165410098-0111_00822_001_01b.jpg": {
+    "path": "5046f9089c1cbe9b.jpg",
+    "timestamp": 1768122012.8402236,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111165410098-0111_00822_001_01b.jpg?20260111165410"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg": {
+    "path": "13983ad4d152dd90.jpg",
+    "timestamp": 1768122012.9854875,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg?20260111162508"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/ur/sthl_square/da194e80c17c4856ab955a17193202a6/2026-01/r8_0.jpg": {
+    "path": "44429d34e7946d59.jpg",
+    "timestamp": 1768122013.1629813,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/ur/sthl_square/da194e80c17c4856ab955a17193202a6/2026-01/r8_0.jpg"
   }
 }
