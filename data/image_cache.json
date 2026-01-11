@@ -4699,11 +4699,6 @@
     "timestamp": 1768105898.7898064,
     "url": "https://cdn.hk01.com/di/media/images/dw/20251204/1073160830129803264874526.jpeg/DGGA9_xFZrkMbnayCz1Cu_NrTv3dmoSGDWAnzA1gJ8w"
   },
-  "https://cdn.hk01.com/di/media/images/dw/20251123/1069379679632232448859213.jpeg/D9OhaX3ikXa6PB_v6yPEMfqvqgLsaFLoUO7NlVDuzZU": {
-    "path": "4dba8bfa88c73a5e.jpg",
-    "timestamp": 1768105898.2559924,
-    "url": "https://cdn.hk01.com/di/media/images/dw/20251123/1069379679632232448859213.jpeg/D9OhaX3ikXa6PB_v6yPEMfqvqgLsaFLoUO7NlVDuzZU"
-  },
   "https://cdn.hk01.com/di/media/images/dw/20260109/1086281914739855360042875.png/Y097RrRfQMb36qsPiG8iEz9vFJuBE7-hPR3lDD0d5Qw": {
     "path": "ee35d0543fc90665.jpg",
     "timestamp": 1768105899.0762284,
@@ -4783,5 +4778,25 @@
     "path": "f00ce7c6ea350759.png",
     "timestamp": 1768105899.8261194,
     "url": "https://newsstatic.rthk.hk/frontend_images/social_icons/fc-webicon-facebook-s.png"
+  },
+  "https://cdn.hk01.com/di/media/images/dw/20251123/1069379679632232448859213.jpeg/D9OhaX3ikXa6PB_v6yPEMfqvqgLsaFLoUO7NlVDuzZU": {
+    "path": "4dba8bfa88c73a5e.jpg",
+    "timestamp": 1768106247.2106063,
+    "url": "https://cdn.hk01.com/di/media/images/dw/20251123/1069379679632232448859213.jpeg/D9OhaX3ikXa6PB_v6yPEMfqvqgLsaFLoUO7NlVDuzZU"
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839403_1_M_20260111123454.jpg": {
+    "path": "57b0331f48d926a9.jpg",
+    "timestamp": 1768106247.2110577,
+    "url": "https://newsstatic.rthk.hk/images/mfile_1839403_1_M_20260111123454.jpg"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/607d097b3bbdc160d2a726dd38598c3c/2026-01/c4f50052-db30-455d-8694-07056ae90b5d.jpg": {
+    "path": "3ee31094a5a755df.jpg",
+    "timestamp": 1768106249.186147,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/607d097b3bbdc160d2a726dd38598c3c/2026-01/c4f50052-db30-455d-8694-07056ae90b5d.jpg"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/c8d35bfe0eb6b5211cbffaced0ad8864/2026-01/2024_1200_x_675_px_11_.png": {
+    "path": "b70a36f27552f7a7.png",
+    "timestamp": 1768106249.729999,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/c8d35bfe0eb6b5211cbffaced0ad8864/2026-01/2024_1200_x_675_px_11_.png"
   }
 }
