@@ -5319,16 +5319,6 @@
     "timestamp": 1768109412.6128025,
     "url": "https://cdn.hk01.com/di/media/images/dw/20260104/1084474415623704576290614.jpeg/sE66phg0lgh5V7gywt-q5K2khWinOyiaVqwfjXOsH40"
   },
-  "https://image.hkhl.hk/f/1024p0/0x0/100/none/ce7a05d0aa106e51fd8a8ac270f56f6b/2026-01/New_Project_28_.jpg": {
-    "path": "2579340bb3fbf9f1.jpg",
-    "timestamp": 1768109413.5967913,
-    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/ce7a05d0aa106e51fd8a8ac270f56f6b/2026-01/New_Project_28_.jpg"
-  },
-  "https://image.hkhl.hk/f/1024p0/0x0/100/none/0e40bbf884b55a4850a09b97425f9dd4/2026-01/Clipboard03_5.jpg": {
-    "path": "c5d1c2b44cce4117.jpg",
-    "timestamp": 1768109414.1956792,
-    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/0e40bbf884b55a4850a09b97425f9dd4/2026-01/Clipboard03_5.jpg"
-  },
   "https://image.hkhl.hk/f/1024p0/0x0/100/none/a8d7a209f1620ac5623b2b251d3f53e9/2026-01/KF_-_2026-01-11T132100_636.png": {
     "path": "707605bf979e384e.png",
     "timestamp": 1768109414.9381251,
@@ -5593,11 +5583,6 @@
     "path": "476ea1d02e332594.jpg",
     "timestamp": 1768110615.790508,
     "url": "https://image.hkhl.hk/f/1024p0/0x0/ur/sthl_square/246456b26ce2a5a027975459426580a1/2026-01/r1_2.jpg"
-  },
-  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg": {
-    "path": "1747d680a2570464.jpg",
-    "timestamp": 1768111225.2019026,
-    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg?20260111135157"
   },
   "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111112152053-0111_00822_001_01b.jpg": {
     "path": "2d8d1c9bc4d19232.jpg",
@@ -8463,5 +8448,105 @@
     "path": "5ec3c48aba97201a.jpg",
     "timestamp": 1768119619.7109284,
     "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/db6be1be50c020bb20989f3775efc86f/2026-01/New_Project_454154516.jpg"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111151301021-0111_00822_001_01b.jpg": {
+    "path": "1086a8e648d8a5b8.jpg",
+    "timestamp": 1768120229.2688985,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111151301021-0111_00822_001_01b.jpg?20260111162525"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg": {
+    "path": "13983ad4d152dd90.jpg",
+    "timestamp": 1768120229.2681906,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111152228585-0111_00822_001_01b.jpg?20260111162508"
+  },
+  "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg": {
+    "path": "1747d680a2570464.jpg",
+    "timestamp": 1768120229.4151504,
+    "url": "https://hk.on.cc/hk/bkn/cnt/news/20260111/photo/bkn-20260111133516367-0111_00822_001_01b.jpg?20260111135157"
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839413_1_M_20260111162017.jpg": {
+    "path": "a7529fb29b9939ed.jpg",
+    "timestamp": 1768120229.2756207,
+    "url": "https://newsstatic.rthk.hk/images/mfile_1839413_1_M_20260111162017.jpg"
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839420_1_M_20260111162939.jpg": {
+    "path": "aab87ae028e9096f.jpg",
+    "timestamp": 1768120229.2157395,
+    "url": "https://newsstatic.rthk.hk/images/mfile_1839420_1_M_20260111162939.jpg"
+  },
+  "https://newsstatic.rthk.hk/images/mfile_1839403_2_M_20260111162135.jpg": {
+    "path": "c7f374c6bcf946e1.jpg",
+    "timestamp": 1768120229.4674737,
+    "url": "https://newsstatic.rthk.hk/images/mfile_1839403_2_M_20260111162135.jpg"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/ed9779188b5cc6d76d5fa833e67685e3/2026-01/KF_-_2026-01-11T162331_039.png": {
+    "path": "41d1626dae2582ba.png",
+    "timestamp": 1768120231.3210375,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/ed9779188b5cc6d76d5fa833e67685e3/2026-01/KF_-_2026-01-11T162331_039.png"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/ce7a05d0aa106e51fd8a8ac270f56f6b/2026-01/New_Project_28_.jpg": {
+    "path": "2579340bb3fbf9f1.jpg",
+    "timestamp": 1768120231.866482,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/ce7a05d0aa106e51fd8a8ac270f56f6b/2026-01/New_Project_28_.jpg"
+  },
+  "https://image.hkhl.hk/f/1024p0/0x0/100/none/0e40bbf884b55a4850a09b97425f9dd4/2026-01/Clipboard03_5.jpg": {
+    "path": "c5d1c2b44cce4117.jpg",
+    "timestamp": 1768120231.91228,
+    "url": "https://image.hkhl.hk/f/1024p0/0x0/100/none/0e40bbf884b55a4850a09b97425f9dd4/2026-01/Clipboard03_5.jpg"
+  },
+  "https://static.cnbetacdn.com/topics/c70ecec2e11b4d0.png": {
+    "path": "f1b1e5002d43f9e6.png",
+    "timestamp": 1768120233.5176156,
+    "url": "https://static.cnbetacdn.com/topics/c70ecec2e11b4d0.png"
+  },
+  "https://static.cnbetacdn.com/topics/eb652e15b6e20ff.png": {
+    "path": "c71fba2929a532ce.png",
+    "timestamp": 1768120233.685104,
+    "url": "https://static.cnbetacdn.com/topics/eb652e15b6e20ff.png"
+  },
+  "https://static.cnbetacdn.com/topics/09c5bb2e2aef160.png": {
+    "path": "f5a59531d37e49c8.png",
+    "timestamp": 1768120233.821173,
+    "url": "https://static.cnbetacdn.com/topics/09c5bb2e2aef160.png"
+  },
+  "https://static.cnbetacdn.com/topics/d876659702b19e6.png": {
+    "path": "4d1cb63bd1d38568.png",
+    "timestamp": 1768120233.9727864,
+    "url": "https://static.cnbetacdn.com/topics/d876659702b19e6.png"
+  },
+  "https://static.cnbetacdn.com/topics/370fc2611e10cd8.png": {
+    "path": "ed16ac5a7e0777ee.png",
+    "timestamp": 1768120234.0580285,
+    "url": "https://static.cnbetacdn.com/topics/370fc2611e10cd8.png"
+  },
+  "https://static.cnbetacdn.com/topics/8e9ec912added66.png": {
+    "path": "7160be1204a38cb9.png",
+    "timestamp": 1768120234.1127207,
+    "url": "https://static.cnbetacdn.com/topics/8e9ec912added66.png"
+  },
+  "https://static.cnbetacdn.com/topics/618a8b5806e6636.png": {
+    "path": "a9efebb70f99e58f.png",
+    "timestamp": 1768120234.1915689,
+    "url": "https://static.cnbetacdn.com/topics/618a8b5806e6636.png"
+  },
+  "https://static.cnbetacdn.com/topics/5dd843c05db2d84.png": {
+    "path": "5a045654a3cb488a.png",
+    "timestamp": 1768120234.2562368,
+    "url": "https://static.cnbetacdn.com/topics/5dd843c05db2d84.png"
+  },
+  "https://static.cnbetacdn.com/topics/70c10177c17df4e.png": {
+    "path": "381f3463ced3434e.png",
+    "timestamp": 1768120234.292243,
+    "url": "https://static.cnbetacdn.com/topics/70c10177c17df4e.png"
+  },
+  "https://static.cnbetacdn.com/topics/0a650ccf6b9da27.png": {
+    "path": "643a0c4f4c2d6bb5.png",
+    "timestamp": 1768120234.6339848,
+    "url": "https://static.cnbetacdn.com/topics/0a650ccf6b9da27.png"
+  },
+  "https://static.cnbetacdn.com/topics/81a15bee9fceeaa.png": {
+    "path": "0feb0fe4de052403.png",
+    "timestamp": 1768120234.6720295,
+    "url": "https://static.cnbetacdn.com/topics/81a15bee9fceeaa.png"
   }
 }
