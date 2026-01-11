@@ -3325,7 +3325,10 @@ def build_html(
         if (!slots.length) return;
         const listLocal = (card.dataset.imgs || '').split('|').map(s => s.trim()).filter(Boolean);
         const listRaw = (card.dataset.imgsRaw || '').split('|').map(s => s.trim()).filter(Boolean);
-        const list = listLocal.length ? listLocal : listRaw;
+        let list = listLocal.length ? listLocal : listRaw;
+        if ((card.dataset.source || '') === 'singtao' && !listLocal.length) {{
+          list = [];
+        }}
         if (!list.length) return;
         slots.forEach((slot, idx) => {{
           if (slot.querySelector('img')) return;
@@ -3335,6 +3338,10 @@ def build_html(
           img.setAttribute('src', src);
           img.setAttribute('loading', 'lazy');
           img.setAttribute('decoding', 'async');
+          img.addEventListener('error', () => {{
+            img.style.display = 'none';
+            slot.classList.remove('filled');
+          }}, {{ once: true }});
           slot.appendChild(img);
         }});
       }});
