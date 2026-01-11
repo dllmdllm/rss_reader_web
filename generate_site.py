@@ -2152,6 +2152,7 @@ def build_html(
         image_url = row["image_url"]
         extra_images = row["extra_images"]
         raw_imgs = row.get("raw_imgs", [])
+        content_text = row.get("content", "")
         pub_text = row["pub_text"]
         date_class = row["date_class"]
         age_class = row["age_class"]
@@ -2167,6 +2168,9 @@ def build_html(
             content_html, localized_urls = localize_images_in_html(
                 content_html, item.link, image_cache, allow_remote=allow_remote
             )
+        if (not content_html) or (len(strip_html(content_html).strip()) < 20):
+            if content_text:
+                content_html = "<br>".join(html.escape(content_text).splitlines())
         if item.source == "hk01" and extra_images:
             extra_html_parts: list[str] = []
             for img in extra_images:
