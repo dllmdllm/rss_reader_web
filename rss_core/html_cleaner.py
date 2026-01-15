@@ -89,11 +89,12 @@ def inject_stheadline_galleries(fragment: str, galleries: dict) -> str:
         return new_fragment
     return fragment # TODO: LXML impl if needed, but regex is usually sufficient for these gallery tags
 
-def clean_html_fragment(
+async def clean_html_fragment(
     fragment: str,
     base_url: str,
     fetcher=None,
     download_images: bool = True,
+    hero_img: str = None,
 ) -> str:
     if not fragment:
         return ""
@@ -109,6 +110,17 @@ def clean_html_fragment(
         else:
             for node in root.xpath(".//ad | .//*[starts-with(name(),'gallery-')]"):
                 node.getparent().remove(node)
+        
+        # Remove Hero Image duplicate if it's the first image in content (User Request)
+        if hero_img:
+            hero_fname = hero_img.split('/')[-1].split('?')[0].lower()
+            if hero_fname and len(hero_fname) > 5:
+                for img in root.xpath(".//img"):
+                    src = img.get("src") or ""
+                    fname = src.split('/')[-1].split('?')[0].lower()
+                    if fname == hero_fname:
+                        img.drop_tree()
+                        break 
         
         if "rthk.hk" in base_url:
             # Remove "Share Tools" and social icons
@@ -303,14 +315,23 @@ def clean_html_fragment(
                 src = img.get("src")
                 if not src:
                     continue
-                # Download using fetcher
-                local_name = fetcher.download_image(src, referer=base_url)
+                # Download using fetcher (properly awaited)
+                if hasattr(fetcher, 'download_image'):
+                    import inspect
+                    if inspect.iscoroutinefunction(fetcher.download_image):
+                        local_name = await fetcher.download_image(src, referer=base_url)
+                    else:
+                        local_name = fetcher.download_image(src, referer=base_url)
+                else:
+                    local_name = None
+                    
                 if local_name:
                     img.set("src", f"images/{local_name}")
                 img.set("loading", "lazy")
                 img.set("decoding", "async")
-        # cnbeta: remove duplicate paragraphs (normalized)
-        if "cnbeta.com.tw" in base_url:
+        # cnbeta: remove duplicate paragraphs and images
+        if "cnbeta" in base_url.lower():
+            # 1. Paragraph Dedup
             seen_para: set[str] = set()
             for p in list(root.xpath(".//p")):
                 raw_txt = (p.text_content() or "").strip()
@@ -325,6 +346,18 @@ def clean_html_fragment(
                         parent.remove(p)
                     continue
                 seen_para.add(norm)
+            
+            # 2. Image Dedup (Filename-based)
+            seen_fnames = set()
+            for img in root.xpath(".//img"):
+                src = img.get("src") or ""
+                if not src: continue
+                fname = src.split('/')[-1].split('?')[0].lower()
+                if not fname or len(fname) < 5: continue # skip icons/tiny
+                if fname in seen_fnames:
+                    img.drop_tree()
+                else:
+                    seen_fnames.add(fname)
         if "stheadline.com" in base_url:
             imgs = list(root.xpath(".//img"))
             seen_src: set[str] = set()
@@ -365,15 +398,43 @@ def clean_html_fragment(
             patterns = [
                "相关文章", "相關文章", "访问:", "訪問:", "來源：", "来源：", 
                "话题：", "話題：", "更多：", "更多:", "分享到：", "分享到:",
-               "相关连结", "相關連結"
+               "相关连结", "相關連結", "相關新聞", "相关新闻", "延伸閱讀", "延伸阅读",
+               "訪問：", "访问：", "相關閲讀", "相关阅读"
             ]
-            for node in root.xpath(".//*"):
+            
+            # If we find a node that has one of these patterns, 
+            # and it's in the bottom half of the article, we can be more aggressive.
+            all_nodes = list(root.xpath(".//*"))
+            total_nodes = len(all_nodes)
+            
+            for idx, node in enumerate(all_nodes):
                 txt = (node.text_content() or "").strip()
-                if any(p in txt for p in patterns) and len(txt) < 100:
-                    try:
-                        node.drop_tree()
-                    except Exception:
-                        pass
+                if not txt: continue
+                
+                matched_pattern = None
+                for p in patterns:
+                    if p in txt:
+                        matched_pattern = p
+                        break
+                
+                if matched_pattern and len(txt) < 150:
+                    # If this "Related" header is in the last 60% of nodes, 
+                    # we often want to drop EVERYTHING from here to the end.
+                    if idx > total_nodes * 0.4:
+                        # Drop this node and all following siblings
+                        parent = node.getparent()
+                        if parent is not None:
+                            # Drop all following siblings of this node
+                            for sib in list(node.itersiblings()):
+                                sib.getparent().remove(sib)
+                            # Finally drop the node itself
+                            node.getparent().remove(node)
+                    else:
+                        # Just drop the node itself if it's early (extra safety)
+                        try:
+                            node.drop_tree()
+                        except Exception:
+                            pass
             
             # Remove images that look like "Recommended" thumbnails or ads
             for img in root.xpath(".//img"):

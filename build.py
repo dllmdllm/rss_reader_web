@@ -157,7 +157,7 @@ async def main():
                 try: 
                     # Parsing can be thread-pooled if very heavy
                     c_html, main_img, all_imgs = p.parse(html_text, item.link)
-                    c_html = p.clean_html(c_html, item.link)
+                    c_html = await p.clean_html(c_html, item.link, main_img=main_img)
                     if c_html:
                         item.content_html = c_html
                         if all_imgs: pass # already in list

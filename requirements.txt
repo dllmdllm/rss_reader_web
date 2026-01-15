@@ -6,3 +6,4 @@ readability-lxml
 argostranslate
 stanza
 tzdata
+httpx

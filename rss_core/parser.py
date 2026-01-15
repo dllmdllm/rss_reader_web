@@ -11,6 +11,7 @@ import opencc
 
 from .model import Item
 from .utils import strip_html, normalize_image_url, is_generic_image, normalize_link
+from .html_cleaner import clean_html_fragment
 
 # Global converter
 _CONVERTER = None
@@ -173,46 +174,10 @@ class BaseParser:
         imgs = node.xpath(".//img/@src")
         return html_str, imgs
 
-    def clean_html(self, html_fragment: str, base_url: str) -> str:
-        """Heavily cleans extraction result."""
+    async def clean_html(self, html_fragment: str, base_url: str, main_img: str = None) -> str:
+        """Heavily cleans extraction result using consolidated cleaner."""
         if not html_fragment: return ""
-        try:
-            root = lxml.html.fragment_fromstring(html_fragment, create_parent="div")
-            
-            # Remove bad tags
-            for tag in root.xpath(".//script | .//style | .//noscript | .//iframe | .//button | .//ad | .//video"):
-                tag.drop_tree()
-                
-            # Remove inline styles (fixes spinning animations driven by style="")
-            for el in root.xpath(".//*[@style]"):
-                del el.attrib["style"]
-
-            # Remove loading indicators and interactive placeholders
-            for node in root.xpath(".//*[contains(@class,'loading') or contains(@class,'spinner') or contains(@class,'videoHolder') or contains(@class,'audioPlayer')]"):
-                node.drop_tree()
-                
-            # Remove empty links or social share
-            for node in root.xpath(".//*[contains(@class,'share') or contains(@class,'social') or contains(@class,'related')]"):
-                node.drop_tree()
-
-            # Fix Images
-            for img in root.xpath(".//img"):
-                src = img.get("src") or img.get("data-src") or img.get("data-original")
-                if src and "loading" not in src.lower() and "spinner" not in src.lower() and "waiting.gif" not in src.lower() and "prev.png" not in src.lower() and "next.png" not in src.lower():
-                    img.set("src", normalize_image_url(base_url, src))
-                    # Remove loading/srcset to avoid browser confusion in static file
-                    if img.get("srcset"): del img.attrib["srcset"]
-                    if img.get("loading"): del img.attrib["loading"]
-                else:
-                    img.drop_tag()
-
-            # Fix Links (open in new tab)
-            for a in root.xpath(".//a"):
-                a.set("target", "_blank")
-                
-            return lxml.html.tostring(root, encoding="unicode")
-        except Exception:
-            return html_fragment
+        return await clean_html_fragment(html_fragment, base_url, fetcher=self.fetcher, hero_img=main_img)
 
 
 class RTHKParser(BaseParser):
@@ -313,21 +278,10 @@ class CNBetaParser(BaseParser):
         nodes = root.xpath(xpath_union(XPATHS["cnbeta_fullhtml"]))
         if not nodes: return "", []
         
-        # Extract content first
+        # NOTE: We NO LONGER inject a hero image here because the template handles it separately,
+        # and it often leads to duplicates if the image is already in the article body.
         html_str = lxml.html.tostring(nodes[0], encoding="unicode")
-        
-        # structural images
         imgs = root.xpath(xpath_union(XPATHS["cnbeta_images"]))
-        
-        # Inject Hero Image at Top for visual order - ONLY if not already in content
-        if imgs:
-            first_img_url = imgs[0]
-            # check if url or just filename is already in the html
-            fname = first_img_url.split('/')[-1].split('?')[0].lower()
-            if fname not in html_str.lower():
-                hero_html = f'<figure class="cnbeta-hero"><img src="{first_img_url}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
-                html_str = hero_html + html_str
-
         return html_str, imgs
 
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
