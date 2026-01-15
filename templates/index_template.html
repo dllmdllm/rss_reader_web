@@ -991,11 +991,12 @@
 
         // Helper to scroll to the start of news list
         function scrollToListTop() {
-            const el = document.getElementById('newsList');
-            const nav = document.querySelector('.top-nav-wrapper');
-            if (el && nav) {
-                const navHeight = nav.offsetHeight;
-                const y = el.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
+            const wrapper = document.querySelector('.top-nav-wrapper');
+            const marquee = document.querySelector('.marquee');
+            if (wrapper && marquee) {
+                const mHeight = marquee.offsetHeight;
+                // Scroll so the wrapper (Search bar) is right under the marquee
+                const y = wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight;
                 window.scrollTo({ top: y, behavior: 'smooth' });
             }
         }
@@ -1044,10 +1045,21 @@
 
                 // Scroll to card top for better reading
                 setTimeout(() => {
-                    const nav = document.querySelector('.top-nav-wrapper');
-                    const navHeight = nav ? nav.offsetHeight : 120;
-                    const y = cardEl.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
+                    const marquee = document.querySelector('.marquee');
+                    const mHeight = marquee ? marquee.offsetHeight : 50;
+                    const wrapper = document.querySelector('.top-nav-wrapper');
+
+                    // targetY for the card
+                    const targetY = cardEl.getBoundingClientRect().top + window.pageYOffset - mHeight - 10;
+
+                    // wrapperY is the top of the search bar
+                    const wrapperY = wrapper ? (wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight) : 0;
+
+                    // Never scroll past the search bar top if it means hiding it unnecessarily
+                    // This fixes the "jumping up a bit" for the first card.
+                    const finalY = Math.max(targetY, wrapperY);
+
+                    window.scrollTo({ top: finalY, behavior: 'smooth' });
                 }, 100);
             }
         }
@@ -1199,10 +1211,13 @@
                     if (item) toggleCard(card, item);
                 } else {
                     // Already expanded, just scroll to it
-                    const nav = document.querySelector('.top-nav-wrapper');
-                    const navHeight = nav ? nav.offsetHeight : 120;
-                    const y = card.getBoundingClientRect().top + window.pageYOffset - navHeight - 10;
-                    window.scrollTo({ top: y, behavior: 'smooth' });
+                    const marquee = document.querySelector('.marquee');
+                    const mHeight = marquee ? marquee.offsetHeight : 50;
+                    const wrapper = document.querySelector('.top-nav-wrapper');
+                    const targetY = card.getBoundingClientRect().top + window.pageYOffset - mHeight - 10;
+                    const wrapperY = wrapper ? (wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight) : 0;
+                    const finalY = Math.max(targetY, wrapperY);
+                    window.scrollTo({ top: finalY, behavior: 'smooth' });
                 }
             } else {
                 alert('該新聞不在列表顯示範圍 (可能被過濾)');
