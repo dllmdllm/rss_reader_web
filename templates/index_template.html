@@ -128,25 +128,30 @@
 
         .chips-row {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            /* Wrap to next line */
+            gap: 4px;
+            /* Tighter gap */
+            overflow-x: auto;
+            /* Allow scroll if needed */
+            flex-wrap: nowrap;
+            /* Single line */
             padding-bottom: 4px;
-            justify-content: center;
-            /* Center align items */
+            justify-content: flex-start;
+            /* Align left to allow scroll */
+            scrollbar-width: none;
         }
 
-        /* Scrollbar hidden (legacy) - kept just in case but unused with wrap */
         .chips-row::-webkit-scrollbar {
             display: none;
         }
 
         .chip {
-            padding: 6px 14px;
-            border-radius: 16px;
+            padding: 4px 10px;
+            /* Compact padding */
+            border-radius: 12px;
             background: #fff;
             border: 1px solid var(--border);
-            font-size: 13px;
+            font-size: 11px;
+            /* Smaller font */
             white-space: nowrap;
             cursor: pointer;
             user-select: none;
