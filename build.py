@@ -76,7 +76,19 @@ def main():
         content, meta = fetcher.fetch_url(u)
         if not content: return []
         # Parse
-        return parse_items(content, u)
+        items = parse_items(content, u)
+        
+        # RTHK Category Override based on Feed URL
+        if "rthk" in u:
+            r_cat = "news"
+            if "cinternational" in u or "greaterchina" in u:
+                r_cat = "intl"
+            # clocal defaults to news
+            
+            for i in items:
+                i.category = r_cat
+                
+        return items
 
     with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(fetch_job, u): u for u in urls}
@@ -211,8 +223,9 @@ def main():
         # 0. Clean Source
         item.source = clean_source_name(item.source)
         
-        # 1. Assign Category
-        item.category = map_cat(item.link)
+        # 1. Assign Category (if not pre-assigned by fetch_job)
+        if not item.category:
+            item.category = map_cat(item.link)
         
         # 1.5 Translate Title if CNBeta
         if "cnbeta" in item.link or "cnbeta" in item.source:
