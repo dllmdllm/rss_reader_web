@@ -279,6 +279,9 @@ def main():
         for i in final_data_list[:20]
     ]
     
+    import random
+    random.shuffle(marquee_items)
+    
     # Serialize Data safely
     json_data = json.dumps(final_data_list, ensure_ascii=False)
     
