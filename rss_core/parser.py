@@ -313,12 +313,55 @@ class CNBetaParser(BaseParser):
         nodes = root.xpath(xpath_union(XPATHS["cnbeta_fullhtml"]))
         if not nodes: return "", []
         
+        # Extract content first
         html_str = lxml.html.tostring(nodes[0], encoding="unicode")
-        # Convert to Traditional Chinese
-        html_str = to_trad(html_str)
         
+        # structural images
         imgs = root.xpath(xpath_union(XPATHS["cnbeta_images"]))
+        
+        # Inject Hero Image at Top for visual order
+        if imgs:
+            hero_html = f'<figure class="cnbeta-hero"><img src="{imgs[0]}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
+            html_str = hero_html + html_str
+
         return html_str, imgs
+
+    def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
+        # 1. Base extraction
+        c, m, i = super().parse(html_content, url)
+        
+        # 2. Regex Scan for ALL CDN images (Dual Grabbing)
+        import re
+        # Pattern for common CNBeta CDN images
+        matches = re.findall(r'https?://static\.cnbetacdn\.com/[^\s"\'>]+\.(?:jpg|png|gif|jpeg)', html_content)
+        
+        if matches:
+            unique_new_imgs = []
+            seen = set(i)
+            for img_url in matches:
+                # Basic filter for tracking pixels or tiny icons
+                if img_url not in seen and not "icon" in img_url.lower():
+                    unique_new_imgs.append(img_url)
+                    seen.add(img_url)
+            
+            if unique_new_imgs:
+                # Add to lists
+                i.extend(unique_new_imgs)
+                if not m: m = unique_new_imgs[0]
+                
+                # Inject missing images into content
+                gallery_html = ""
+                for img_url in unique_new_imgs:
+                    if img_url not in c:
+                        gallery_html += f'<figure class="cnbeta-item"><img src="{img_url}" style="width:100\%; height:auto; display:block; margin: 10px 0;"/></figure>'
+                
+                if gallery_html:
+                    c = c + gallery_html # Append to end if not already in text
+        
+        # 3. Final Conversion to Traditional Chinese (Very Important)
+        c = to_trad(c)
+        
+        return c, m, i
         
 
 class HK01Parser(BaseParser):
