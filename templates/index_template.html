@@ -336,7 +336,8 @@
             left: -3px;
             right: -3px;
             bottom: -3px;
-            background: linear-gradient(90deg, #FFD700, #FFFF00, #FFA500, #FFD700);
+            /* Siri Gradient */
+            background: linear-gradient(90deg, #33ccff, #007aff, #ff00cc, #33ccff);
             background-size: 300% 300%;
             border-radius: 15px;
             z-index: 2;
@@ -790,13 +791,18 @@
         function toggleCard(cardEl, item) {
             const isExpanded = cardEl.classList.contains('expanded');
 
+            // Collapse all other cards (Accordion Effect)
+            document.querySelectorAll('.card.expanded').forEach(other => {
+                if (other !== cardEl) {
+                    other.classList.remove('expanded', 'focus-glow');
+                }
+            });
+
             if (isExpanded) {
                 cardEl.classList.remove('expanded');
                 cardEl.classList.remove('focus-glow');
             } else {
-                // Collapse others? Optional. But makes glow stand out.
-                // For now just toggle this one.
-                cardEl.classList.add('focus-glow');
+                cardEl.classList.add('expanded', 'focus-glow');
 
                 // Mark as Read
                 if (!item.read) {
