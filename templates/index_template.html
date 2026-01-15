@@ -260,6 +260,7 @@
             font-weight: 700;
             /* Bold by default */
             transition: all 0.2s;
+            cursor: pointer;
         }
 
         .marquee-item.read {
@@ -335,8 +336,8 @@
             left: -3px;
             right: -3px;
             bottom: -3px;
-            /* Sharp Siri Gradient */
-            background: linear-gradient(90deg, #33ccff, #007aff, #ff00cc, #33ccff);
+            /* Yellow Gold Glow */
+            background: linear-gradient(90deg, #FFD700, #FFFF00, #FFA500, #FFD700);
             background-size: 300% 300%;
             border-radius: 15px;
             z-index: -1;
@@ -652,11 +653,13 @@
     <div class="marquee">
         <div class="marquee-content">
             {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}">{{ item.text }}</span>
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
+                }}</span>
             {% endfor %}
             <!-- Duplicate for loop -->
             {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}">{{ item.text }}</span>
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
+                }}</span>
             {% endfor %}
         </div>
     </div>
@@ -735,6 +738,7 @@
                 // Add distinct category class for background coloring
                 card.className = `card ${item.read ? 'read' : ''} ${item.category}`;
                 card.dataset.id = item.id;
+                card.dataset.link = item.link;
 
                 // Thumb logic
                 // Provide a transparent pixel or verify broken images if needed, 
@@ -942,6 +946,23 @@
         window.addEventListener('scroll', () => {
             document.getElementById('backTop').classList.toggle('show', window.scrollY > 300);
         });
+
+        // Marquee Interaction
+        function focusCard(link) {
+            const card = document.querySelector(`.card[data-link="${link}"]`);
+            if (card) {
+                // Scroll to center
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Highlight/Expand
+                if (!card.classList.contains('expanded')) {
+                    const item = newsItems.find(i => i.link === link);
+                    if (item) toggleCard(card, item);
+                }
+            } else {
+                alert('該新聞不在列表顯示範圍 (可能被過濾)');
+            }
+        }
 
         // Auto Refresh
         setTimeout(() => location.reload(), {{ refresh_seconds }} * 1000);

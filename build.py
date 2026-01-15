@@ -276,7 +276,7 @@ def main():
     # Get top 20 items, format: "[time] Title", pass as dict with link for ID
     marquee_items = [
         {
-            "text": f"[{i['pub_fmt']}] {i['title']}", 
+            "text": f"✦ [{i['pub_fmt']}] {i['title']}", 
             "link": i['link']
         } 
         for i in final_data_list[:20]
