@@ -45,13 +45,20 @@
         }
 
         /* --- Header & Search --- */
-        .site-header {
+        .top-nav-wrapper {
             position: sticky;
             top: 0;
-            background: rgba(245, 245, 247, 0.95);
+            z-index: 2000;
+            background: rgba(245, 245, 247, 0.98);
             backdrop-filter: blur(10px);
-            z-index: 1000;
+            padding-top: max(4px, env(safe-area-inset-top));
+            /* Dynamic Island Space */
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .site-header {
+            max-width: var(--max-width);
+            margin: 0 auto;
             padding: 8px 12px 12px;
         }
 
@@ -237,11 +244,11 @@
 
         /* --- Marquee --- */
         .marquee {
-            background: #fff;
+            background: transparent;
             color: var(--text-main);
             font-size: 13px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
             white-space: nowrap;
             overflow: hidden;
             position: relative;
@@ -675,42 +682,46 @@
 
 <body>
 
-    <header class="site-header">
-        <div class="search-row">
-            <div class="title">即時焦點</div>
-            <div class="search-input-wrap">
-                <input type="text" id="searchInput" placeholder="搜尋標題或內容...">
-                <button class="clear-btn" id="clearBtn">✕</button>
+    <div class="top-nav-wrapper">
+        <div class="marquee">
+            <div class="marquee-content">
+                {% for item in marquee_list %}
+                <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                    item.text
+                    }}</span>
+                {% endfor %}
+                <!-- Duplicate for loop -->
+                {% for item in marquee_list %}
+                <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                    item.text
+                    }}</span>
+                {% endfor %}
             </div>
         </div>
-        <div class="filter-section">
-            <!-- Level 1: Categories -->
-            <div class="chips-row" id="catFilters">
-                <div class="chip active" data-cat="all">全部 <span class="count"></span></div>
-                <div class="chip" data-cat="news">新聞 <span class="count"></span></div>
-                <div class="chip" data-cat="intl">國際 <span class="count"></span></div>
-                <div class="chip" data-cat="ent">娛樂 <span class="count"></span></div>
-                <div class="chip" data-cat="tech">科技 <span class="count"></span></div>
-            </div>
-            <!-- Level 2: Sources (Hidden by default) -->
-            <div class="chips-row sub-filters" id="sourceFilters">
-                <!-- Populated by JS -->
-            </div>
-        </div>
-    </header>
 
-    <div class="marquee">
-        <div class="marquee-content">
-            {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
-                }}</span>
-            {% endfor %}
-            <!-- Duplicate for loop -->
-            {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
-                }}</span>
-            {% endfor %}
-        </div>
+        <header class="site-header">
+            <div class="search-row">
+                <div class="title">即時焦點</div>
+                <div class="search-input-wrap">
+                    <input type="text" id="searchInput" placeholder="搜尋標題或內容...">
+                    <button class="clear-btn" id="clearBtn">✕</button>
+                </div>
+            </div>
+            <div class="filter-section">
+                <!-- Level 1: Categories -->
+                <div class="chips-row" id="catFilters">
+                    <div class="chip active" data-cat="all">全部 <span class="count"></span></div>
+                    <div class="chip" data-cat="news">新聞 <span class="count"></span></div>
+                    <div class="chip" data-cat="intl">國際 <span class="count"></span></div>
+                    <div class="chip" data-cat="ent">娛樂 <span class="count"></span></div>
+                    <div class="chip" data-cat="tech">科技 <span class="count"></span></div>
+                </div>
+                <!-- Level 2: Sources (Hidden by default) -->
+                <div class="chips-row sub-filters" id="sourceFilters">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </header>
     </div>
 
     <main id="newsList">
