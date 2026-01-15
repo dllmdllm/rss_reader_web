@@ -296,7 +296,7 @@
             background: var(--bg-card);
             border-radius: var(--radius);
             box-shadow: var(--shadow);
-            overflow: hidden;
+            /* overflow: hidden; -- Removed to allow external glow */
             cursor: pointer;
             transition: box-shadow 0.2s, background 0.2s;
             position: relative;
@@ -305,6 +305,44 @@
         .card.read .card-title {
             color: #888;
             font-weight: 400;
+        }
+
+        /* Siri Glow Effect */
+        @keyframes flow-glow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .card.focus-glow {
+            transform: scale(1.01);
+            /* Subtle pop */
+            z-index: 10;
+        }
+
+        .card.focus-glow::after {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: linear-gradient(90deg, #00C6FF, #0072FF, #FF00FF, #00C6FF);
+            background-size: 300% 300%;
+            border-radius: 16px;
+            /* slightly larger than card */
+            z-index: -1;
+            animation: flow-glow 3s linear infinite;
+            filter: blur(6px);
+            opacity: 0.8;
         }
 
         /* Collapsed View */
@@ -746,7 +784,12 @@
 
             if (isExpanded) {
                 cardEl.classList.remove('expanded');
+                cardEl.classList.remove('focus-glow');
             } else {
+                // Collapse others? Optional. But makes glow stand out.
+                // For now just toggle this one.
+                cardEl.classList.add('focus-glow');
+
                 // Mark as Read
                 if (!item.read) {
                     item.read = true;
