@@ -16,7 +16,16 @@
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             --radius: 12px;
             --max-width: 700px;
+        }
 
+        @media (min-width: 1024px) {
+            :root {
+                --max-width: 1100px;
+                /* Wider on Desktop */
+            }
+        }
+
+        :root {
             /* Category Colors (Button) */
             --col-news: #007aff;
             --col-intl: #ff9500;
@@ -744,6 +753,20 @@
         .source-tag:hover {
             opacity: 0.7;
         }
+
+        .index-num {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-right: 8px;
+            vertical-align: text-bottom;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
     </style>
 </head>
 
@@ -892,7 +915,7 @@
                     
                     <!-- Right Col -->
                     <div class="right-col">
-                        <h3 class="card-title-new"><span class="index-num" style="color:var(--accent); font-weight:700; margin-right:4px;">${idx + 1}.</span>${item.title}</h3>
+                        <h3 class="card-title-new"><span class="index-num">${idx + 1}</span>${item.title}</h3>
                         <div class="meta-tags-row">
                             <span class="cat-badge ${item.category}">${catLabel}</span>
                             <a href="${item.link}" target="_blank" class="source-tag" onclick="event.stopPropagation()">${item.source}</a>
