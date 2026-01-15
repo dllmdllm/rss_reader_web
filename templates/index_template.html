@@ -60,8 +60,8 @@
             background: var(--bg-body);
             color: var(--text-main);
             padding-bottom: 80px;
-            /* Precise offset for Fixed Marquee (31px) + Fixed Nav (approx 105px) */
-            padding-top: calc(136px + env(safe-area-inset-top));
+            /* Offset only for Fixed Marquee (31px + safe area) */
+            padding-top: calc(31px + env(safe-area-inset-top));
             /* Support for hardware acceleration */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -70,16 +70,12 @@
 
         /* --- Header & Search --- */
         .top-nav-wrapper {
-            position: fixed;
-            top: calc(31px + env(safe-area-inset-top));
-            /* Flush with marquee */
-            left: 0;
-            right: 0;
-            z-index: 2400;
+            position: relative;
+            /* Not fixed, scrolls with content */
+            z-index: 1000;
             background: rgba(245, 245, 247, 0.98);
-            backdrop-filter: blur(10px);
-            padding-top: 4px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            width: 100%;
         }
 
         .site-header {
