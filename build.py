@@ -170,32 +170,10 @@ def main():
     print(">>> [Build] Enriching items (Fulltext & Images)...")
     
     def process_image_url(url):
-        if not url: return None
-        if url in image_cache: return image_cache[url]
-        try:
-            data, _ = fetcher.fetch_url(url)
-        except Exception: return None
-        if not data: return None
-        try:
-            from PIL import Image
-            import io
-            img_hash = hashlib.md5(url.encode()).hexdigest()
-            ext = "jpg"
-            filename = f"{img_hash}.{ext}"
-            rel_path = f"images/{filename}"
-            full_path = os.path.join(SITE_DIR, "images", filename)
-            os.makedirs(os.path.dirname(full_path), exist_ok=True)
-            if not os.path.exists(full_path):
-                img = Image.open(io.BytesIO(data))
-                img = img.convert("RGB")
-                if img.width > 1200:
-                    ratio = 1200 / img.width
-                    new_h = int(img.height * ratio)
-                    img = img.resize((1200, new_h), Image.Resampling.LANCZOS)
-                img.save(full_path, "JPEG", quality=75, optimize=True)
-            image_cache[url] = rel_path
-            return rel_path
-        except Exception: return None
+        # Hotlinking Mode: Return original URL directly.
+        # This avoids downloading images locally and fixes the 404 issue on GitHub Pages
+        # since the local 'images/' folder is gitignored.
+        return url
 
     final_data_list = []
     
