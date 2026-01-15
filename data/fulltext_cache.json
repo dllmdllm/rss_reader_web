@@ -2747,5 +2747,105 @@
       "../image/grey.gif"
     ],
     "ts": 1768489779
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840067-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t美國費城地區1月製造業活動出乎預期重新擴張。費城聯儲銀行1月製造業指數大幅回升至正12.6，大幅扭轉上月的負10.2，亦遠好過預期的負1。<br>\r\n<br>\r\n期內，就業指數由上月的正12.9，降至1月的正9.7。投入物價指數由正43.6升至46.9。新訂單指數由正5，升至14.4。<br>\r\n<br>\r\n數據顯示，製造業6個月狀況指數由正41.6，降至正25.5。6個月資本支出展望指數維持正30.3。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840067_1_L_20260115220832.jpg"
+    ],
+    "ts": 1768490130
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840069-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t美國上周新申領失業援助人數意外跌至19.8萬人，少過預期。<br>\r\n<br>\r\n美國芝加哥聯邦儲備銀行總裁古爾斯比表示，對於失業援助人數減少並不意外，認為就業市場保持穩定，整體增長保持良好，當前最重要是確保通脹回落至2%的目標水平。<br>\r\n<br>\r\n古爾斯比關注，若央行獨立性受干預，可能會再次推高通脹，雖然目前數據反映，關稅對通脹的影響可能已經減弱，但服務通脹仍未受控。不過，他指，利率仍有略為下調空間，但要確保數據合乎預期。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840069_1_L_20260115225020.jpg"
+    ],
+    "ts": 1768490130
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840068-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t美股初段上升。<br>\r\n<br>\r\n道瓊斯指數較早時報49358點，升209點，升幅0.43%。<br>\r\n<br>\r\n納斯達克指數報23672點，升200點，升幅0.86%。<br>\r\n<br>\r\n標準普爾500指數報6962點，升35點，升幅0.52%。 <br>\r\n<br>\r\n高盛及摩根士丹利上季業績好過市場預期，較早時分別升逾2%和近4%。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840068_1_L_20260115224542.jpg"
+    ],
+    "ts": 1768490131
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840065-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t美國上周新申領失業援助人數按周意外減少9千人，降至19.8萬人，市場原先預期升至21.5萬人；四周平均新申領失業援助人數減少6500人。<br>\r\n<br>\r\n截至1月3日，持續申領失業援助人數減少1萬9千人，降至188.4萬人，少過市場預期的189.3萬人。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840065_1_L_20260115214513.jpg"
+    ],
+    "ts": 1768490131
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840064-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t人民銀行宣布，下星期一開始，將各類結構性貨幣政策工具減息0.25厘；各類再貸款一年期利率由目前的1.5厘下調至1.25厘，其他期限檔次利率同步調整。<br>\r\n<br>\r\n資深投資銀行及金融專家溫天納表示，人行已預先透露有空間降準減息，所以今日宣布下周一減息，市場並不意外。<br>\r\n<br>\r\n下星期一起，除了內地減息之外，內地滬深北三間交易所調整融資保證金比例，將投資者融資買入股票時的融資保證金最低比例，由80%上調至100%，此舉只適用於新開立融資合約，調整實施前已存續的融資合約及其展期，仍然按照調整前的相關規定執行。<br>\r\n<br>\r\n溫天納接受本台節目《財經新思維》訪問時表示，相信中央政府會維持積極的「慢牛」速度，當有大量投資者持重倉，期望坐上「十五五」順風車在股票市場獲利時，中央會先將過度投機資金抽起，能夠付出100%融資保證金的投資者可以繼續留在場內，對散戶影響會較大。外資方面，相信仍會加大力度購入股價較低及板塊選擇較多的A股。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840064_1_L_20260115213702.jpg"
+    ],
+    "ts": 1768490131
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840062-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t國家金融監管總局召開2026年監管工作會議，局長李雲澤出席並發表講話。<br>\r\n<br>\r\n會議要求，持續加大對重大戰略、重點領域和薄弱環節的支持力度；強化促消費、擴投資的金融供應，服務擴大內需戰略，積極培育耐心資本，協助新質生產力發展。此外，需要加強應急救災、養老健康、鄉村全面振興等民生領域金融支持，發揮支持小微企業融資協調工作機制作用，優化新就業群體金融服務，著力促進穩企業、穩就業。<br>\r\n<br>\r\n當局指，要有力有序推進中小型金融機構風險化解，著力處置存量風險，遏制增量風險，牢牢守住不「爆雷」底線；推動城市房地產融資協調機制常態化運行，協助建立房地產發展新模式，依法合規支持融資平台債務風險化解，嚴防非法金融活動。<br>\r\n<br>\r\n當局又指，要穩妥推動中小型金融機構「減量提質」，合理優化機構佈局，深入整治無序競爭，持續規範行業秩序，督促銀行保險機構專注主業、錯位發展，推動金融高水平對外開放。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840062_1_L_20260115212403.jpg"
+    ],
+    "ts": 1768490132
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840059-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t高盛公布，上季盈利近43.8億美元，按年升12%，按季升14%。每股經調整盈利14.01美元，按年及按季分別升17%和14%，高於預期的11.67美元。<br>\r\n<br>\r\n淨收入134.5億美元，按年跌3%，按季跌11%，差過市場預期。<br>\r\n<br>\r\n另外，摩根士丹利公布，上季盈利近44億美元，按年升逾18%。每股經調整盈利2.68美元，按年升近21%，高過市場預期的2.44美元。<br>\r\n<br>\r\n淨收入178.9億美元，按年升逾10%，好過市場預期。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840059_1_L_20260115210431.jpg",
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840059_2_L_20260115210431.jpg",
+      "https://news.rthk.hk/rthk/media/system/js/custom/unslider/prev.png",
+      "https://news.rthk.hk/rthk/media/system/js/custom/unslider/next.png"
+    ],
+    "ts": 1768490132
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840050-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t貝萊德公布，上季盈利11.27億美元，按年跌33%。每股經調整盈利13.16美元，按年升10%，好過市場預期。收入70.1億美元，按年升23%。<br>\r\n<br>\r\n去年全年盈利55.5億美元，按年跌13%。每股經調整盈利48.09美元，按年升10%。收入242.2億美元，按年升19%。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840050_1_L_20260115200249.jpg"
+    ],
+    "ts": 1768490133
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840047-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t人民銀行副行長鄒瀾表示，去年各項公開市場操作累計淨投放6萬億元人民幣，當中，買斷式回購操作淨投放3.8萬億元，淨買入國債1200億元。<br>\r\n<br>\r\n他又指，近年中國實施積極財政政策，政府債券發行規模增多。去年發行國債16萬億元，全年淨增加6.6萬億元，去年底餘額約40萬億元。<br>\r\n<br>\r\n鄒瀾說，國債買賣操作有利發揮國債收益率曲線定價基準作用，防止市場急升急跌風險。去年初債市供不應求，人行暫停買債操作，不與市場搶債；直至下半年供求趨於平衡，人行上季才恢復操作，保障債市平穩運行。<br>\r\n<br>\r\n他表示，人行將綜合考慮基礎貨幣投放需要、債市供求、收益率曲線變化等，靈活開展國債買賣操作，並與其他流動性工具一起，保持流動性充裕，為政府債順利發行創造適宜的貨幣金融環境。<br>\r\n<br>\r\n另外，鄒瀾提到，近期內地物價水平已出現積極變化，上月居民消費物價指數(CPI)按年升0.8%，已回升至2023年3月以來最高，反映居民消費結構不斷優化升級，但多個領域供給仍有較大提升空間。他又指，政策協同效應不斷強化，實施提振消費專項行動等，將進一步提升市場信心，對物價繼續產生積極影響。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840047_1_L_20260115192958.jpg"
+    ],
+    "ts": 1768490133
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840041-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t人民銀行新聞發言人、調查統計司司長閆先東表示，去年貨幣信貸呈現總量增長、結構優化的特徵，信貸總量保持平穩增長，全年新增貸款16.27萬億元人民幣，顯示金融體系對實體經濟支持仍在較高水平，貸款行業結構亦持續優化。<br>\r\n<br>\r\n他指出，截至去年底，金融機構人民幣各項貸款餘額271.91萬億元，按年增長6.4%。若還原地方專項債置換對貸款的影響，增速則是約7%。<br>\r\n<br>\r\n閆先東指，至去年底，廣義貨幣供應量(M2)按年增長8.5%，增速按月加快0.5個百分點，按年亦加快1.2個百分點，持續為經濟回升向好創造適宜的貨幣金融環境。<br>\r\n<br>\r\n他說，存款是M2主要組成部分，去年各項人民幣存款新增26.4萬億元。資產管理對存款結構亦帶來一定影響，去年底資產管理產品總資產達119.9萬億元，按年增長13.1%，推動非銀行金融機構存款增加。<br>\r\n<br>\r\n他又提到，去年社會融資規模保持合理增長，較好滿足實體經濟資金需求。去年社融增量35.6萬億元，直接融資達16.7萬億元，佔比46.9%，比「十三五」最後一年，亦即2020年提高7.8個百分點。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840041_1_L_20260115190558.jpg"
+    ],
+    "ts": 1768490133
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840028-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t人民銀行上海總部數據顯示，截至去年底，境外機構持有3.46萬億元人民幣中國銀行間市場債券，約佔總託管量2%。外電測算外資上月減持約1500億元銀行間債券，連續8個月減持。<br>\r\n<br>\r\n數據顯示，境外機構持有國債2.01萬億元，佔比逾58%；同業存單5800億元，佔比近17%；政策性金融債7400億元，佔比逾21%。<br>\r\n<br>\r\n另外，上月境外機構在銀行間債市現券交易量約1.07萬億元，日均交投約464億元。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840028_1_L_20260115173539.jpg"
+    ],
+    "ts": 1768490134
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840030-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t人民銀行宣布下調各類結構性貨幣政策工具利率0.25厘。東亞銀行財富管理處高級投資策略師陳偉聰指出，今次並非全面寬鬆，相關工具涵蓋再貸款及再貼現利率，屬定向支持高新科技等領域，不是所有行業受惠，對股市僅屬輕微利好。<br>\r\n<br>\r\n高級投資策略師黃燕娥亦認為，今次下調結構性貨幣政策工具利率對匯率影響不大，又指現時內地息口已相對較低，加上內地經濟正逐步改善，相信不會引導央行有大幅減息意向，未來減息空間不大。她相信，人民幣走勢仍取決於刺激政策能否兌現為高質量增長，若美元出現貶值速度加快，將為人民幣提供額外支持，預計今季人民幣兌美元將於6.96至7.06波動。<br>\r\n<br>\r\n對於美國利率前景，投資策略師吳永強認為，美國就業市場依然疲弱，通脹持續回落，加上聯儲局熱門主席人選立場偏鴿派，相信美國今年最快於3月減息，全年減息3次，減幅0.75厘至1厘。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840030_1_L_20260115185716.jpg"
+    ],
+    "ts": 1768490134
   }
 }

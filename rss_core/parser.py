@@ -18,9 +18,12 @@ def get_converter():
     global _CONVERTER
     if _CONVERTER is None:
         try:
-            _CONVERTER = opencc.OpenCC('s2t.json')
+            _CONVERTER = opencc.OpenCC('s2t')
         except Exception:
-            _CONVERTER = None
+            try:
+                _CONVERTER = opencc.OpenCC('s2t.json')
+            except Exception:
+                _CONVERTER = None
     return _CONVERTER
 
 def to_trad(text: str) -> str:
@@ -196,6 +199,12 @@ class RTHKParser(BaseParser):
         imgs = root.xpath(xpath_union(XPATHS["rthk_images"]))
         
         html_str = lxml.html.tostring(nodes[0], encoding="unicode")
+        
+        # Inject Hero Image at Top (User Request: Follow visual order)
+        if imgs:
+            hero_html = f'<figure class="rthk-hero"><img src="{imgs[0]}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
+            html_str = hero_html + html_str
+            
         return html_str, imgs
 
 
