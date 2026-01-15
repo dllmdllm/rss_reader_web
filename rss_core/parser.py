@@ -164,8 +164,16 @@ class BaseParser:
             root = lxml.html.fragment_fromstring(html_fragment, create_parent="div")
             
             # Remove bad tags
-            for tag in root.xpath(".//script | .//style | .//noscript | .//iframe | .//button | .//ad"):
+            for tag in root.xpath(".//script | .//style | .//noscript | .//iframe | .//button | .//ad | .//video"):
                 tag.drop_tree()
+                
+            # Remove inline styles (fixes spinning animations driven by style="")
+            for el in root.xpath(".//*[@style]"):
+                del el.attrib["style"]
+
+            # Remove loading indicators and interactive placeholders
+            for node in root.xpath(".//*[contains(@class,'loading') or contains(@class,'spinner') or contains(@class,'videoHolder') or contains(@class,'audioPlayer')]"):
+                node.drop_tree()
                 
             # Remove empty links or social share
             for node in root.xpath(".//*[contains(@class,'share') or contains(@class,'social') or contains(@class,'related')]"):
@@ -174,7 +182,7 @@ class BaseParser:
             # Fix Images
             for img in root.xpath(".//img"):
                 src = img.get("src") or img.get("data-src") or img.get("data-original")
-                if src:
+                if src and "loading" not in src.lower() and "spinner" not in src.lower():
                     img.set("src", normalize_image_url(base_url, src))
                     # Remove loading/srcset to avoid browser confusion in static file
                     if img.get("srcset"): del img.attrib["srcset"]
