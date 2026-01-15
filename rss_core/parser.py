@@ -226,24 +226,46 @@ class RTHKParser(BaseParser):
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
         c, m, i = super().parse(html_content, url)
         
-        # Regex Fallback for RTHK Images (often hidden in JS/Meta)
-        if not m:
-             import re
-             # Find RTHK static images (mfile_...jpg)
-             # Prefer Large (L.jpg)
-             matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[L]\.jpg', html_content)
-             if not matches:
-                 # Fallback to any size if no L found
-                 matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[A-Z]+\.jpg', html_content)
+        # Regex Fallback for RTHK Images (Slider/Hidden)
+        # Find ALL Large images (L.jpg) to capture full gallery
+        import re
+        matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[L]\.jpg', html_content)
+        
+        if not matches:
+             matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[A-Z]+\.jpg', html_content)
+             
+        if matches:
+             # Deduplicate and Filter existing
+             unique_new_imgs = []
+             seen = set(i) # Existing images from xpath
+             
+             for img_url in matches:
+                 if img_url not in seen:
+                     unique_new_imgs.append(img_url)
+                     seen.add(img_url)
+             
+             # If we found new images via regex
+             if unique_new_imgs:
+                 # 1. Update List
+                 i.extend(unique_new_imgs)
                  
-             if matches:
-                 m = matches[0]
-                 if m not in i:
-                     i.insert(0, m)
-                     # Inject into content if not already there
-                     if '<figure class="rthk-hero">' not in c:
-                         hero_html = f'<figure class="rthk-hero"><img src="{m}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
-                         c = hero_html + c
+                 # 2. Update Main Image if missing
+                 if not m: 
+                     m = unique_new_imgs[0]
+                     
+                 # 3. Inject ALL new images into content
+                 # (User wants to see ALL matches, e.g. the full gallery)
+                 gallery_html = ""
+                 for img_url in unique_new_imgs:
+                     # Check to avoid inserting if already present in text (safe check)
+                     if img_url not in c:
+                         gallery_html += f'<figure class="rthk-item"><img src="{img_url}" style="width:100%; height:auto; display:block; margin: 10px 0;"/></figure>'
+                 
+                 if gallery_html:
+                     # Prepend to content (Gallery usually at top)
+                     # Note: unique_new_imgs only has images NOT in xpath, so duplication is minimized.
+                     c = gallery_html + c
+        
         return c, m, i
 
 
