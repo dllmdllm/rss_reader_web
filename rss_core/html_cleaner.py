@@ -459,7 +459,16 @@ async def clean_html_fragment(
 
             # Extra cleanup for garbage spans/divs/icons often found at tail
             # e.g. social share icons (weibo, wechat) which might show as broken unicode boxes or PUA characters
-            for node in root.xpath(".//span | .//div | .//i | .//b | .//strong | .//p"):
+            # Also target 'figure' and 'img' which might be container for broken icons
+            for node in root.xpath(".//span | .//div | .//i | .//b | .//strong | .//p | .//figure | .//img"):
+                # Special check for images: if it's an image at the end with no src or broken src
+                if node.tag == 'img':
+                     src = node.get('src') or ""
+                     # If it's a small icon or has specific keywords
+                     if not src or any(k in src.lower() for k in ["icon", "share", "logo", "pixel", "blank", "transparent"]):
+                         node.drop_tree()
+                     continue
+                
                 txt = (node.text_content() or "").strip()
                 
                 # Check for Private Use Area characters (E000-F8FF) which are often used for icons
@@ -482,6 +491,11 @@ async def clean_html_fragment(
                      # Also kill if it is just "分享" parts or similar
                      if txt in ["分享", "到", "分享到"]:
                          node.drop_tree()
+            
+            # Prune empty figures specifically
+            for fig in root.xpath(".//figure"):
+                if not fig.xpath(".//img") and not fig.text_content().strip():
+                    fig.drop_tree()
         
         # Final whitespace pruning for all
         for empty in root.xpath(".//*[not(node()) and not(self::img) and not(self::br)]"):
