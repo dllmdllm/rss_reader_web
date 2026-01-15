@@ -18,10 +18,11 @@ def get_converter():
     global _CONVERTER
     if _CONVERTER is None:
         try:
-            _CONVERTER = opencc.OpenCC('s2t')
+            # Use 's2hk' for Hong Kong Traditional Chinese (User Request)
+            _CONVERTER = opencc.OpenCC('s2hk')
         except Exception:
             try:
-                _CONVERTER = opencc.OpenCC('s2t.json')
+                _CONVERTER = opencc.OpenCC('s2hk.json')
             except Exception:
                 _CONVERTER = None
     return _CONVERTER

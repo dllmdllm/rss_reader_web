@@ -2863,5 +2863,13 @@
       "https://fs.mingpao.com/fin/20260115/s00010/94ea65060e6af604f65201471f54a7e9.png"
     ],
     "ts": 1768490289
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840072-20260115.htm": {
+    "content": "<div><figure class=\"rthk-hero\"><img src=\"https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif\" style=\"width:100%; height:auto; display:block; margin-bottom:10px;\"></figure><div class=\"itemFullText\">\r\n\t\t\t國際油價急挫逾4%，市場對美國介入伊朗局勢的憂慮降溫。<br>\r\n<br>\r\n美國總統特朗普較早時表示，目前沒有計劃對伊朗展開大規模行動。<br>\r\n<br>\r\n倫敦布蘭特期油較早時報每桶63.63美元，跌2.89美元，跌幅4.35%。<br>\r\n<br>\r\n紐約期油報每桶59.12美元，跌2.77美元，跌幅4.47%。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840072_1_L_20260115230926.jpg"
+    ],
+    "ts": 1768491358
   }
 }
