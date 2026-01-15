@@ -52,6 +52,10 @@
             background: var(--bg-body);
             color: var(--text-main);
             padding-bottom: 80px;
+            /* Support for hardware acceleration */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            transform: translateZ(0);
         }
 
         /* --- Header & Search --- */
@@ -193,16 +197,10 @@
 
         .chips-row {
             display: flex;
-            gap: 4px;
-            /* Tighter gap */
-            overflow-x: auto;
-            /* Allow scroll if needed */
-            flex-wrap: nowrap;
-            /* Single line */
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
             padding-bottom: 4px;
-            justify-content: flex-start;
-            /* Align left to allow scroll */
-            scrollbar-width: none;
         }
 
         .chips-row::-webkit-scrollbar {
@@ -301,6 +299,8 @@
 
         .sub-filters.show {
             display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
         }
 
         @keyframes fadeIn {
@@ -331,6 +331,7 @@
             display: inline-block;
             animation: scroll 300s linear infinite;
             /* Slowed down from 60s (80% slower) */
+            will-change: transform;
         }
 
         .marquee-item {
@@ -394,6 +395,9 @@
             cursor: pointer;
             transition: box-shadow 0.2s, background 0.2s;
             position: relative;
+            /* Performance: GPU acceleration and rendering hint */
+            content-visibility: auto;
+            contain-intrinsic-size: 100px;
         }
 
         .card.read .card-title {
