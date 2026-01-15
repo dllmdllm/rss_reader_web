@@ -233,6 +233,7 @@ def main():
                 print(f"Enrichment error: {e}")
 
     # Final Construction (Ordered)
+    final_data_list = []
     for item in valid_items:
         # 3. Process Hero Image (already enriched in job)
         local_hero = None
