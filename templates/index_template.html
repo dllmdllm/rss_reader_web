@@ -70,20 +70,35 @@
             gap: 10px;
         }
 
-        .font-size-btn {
-            background: #f0f0f0;
+        .font-controls {
+            display: flex;
+            gap: 2px;
+            background: #e0e0e0;
+            padding: 2px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .font-btn {
+            background: none;
             border: none;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            font-weight: 700;
-            font-size: 14px;
+            border-radius: 6px;
             color: #333;
-            flex-shrink: 0;
+            transition: background 0.2s;
+        }
+
+        .font-btn:hover,
+        .font-btn.active {
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         }
 
         /* Font Sizing Classes applied to Body */
@@ -753,13 +768,13 @@
                     <input type="text" id="searchInput" placeholder="搜尋內容...">
                     <button class="clear-btn" id="clearBtn">✕</button>
                 </div>
-                <button class="font-size-btn" id="fontBtn" onclick="toggleFontSize()">
-                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-                        <path
-                            d="M2.53 19.65l1.34-3.6h5.45l1.34 3.6H13L7.85 6h-2.1L.6 19.65h1.93zm2.5-6.79l1.9-5.18 1.9 5.18H5.03zm17.97 6.79l-2-5.4L18.88 19.65H23zm-6.04-8.8h1.2l3.4 9.1 1.05-2.83-2.61-7.07h-3.04z" />
-                    </svg>
-                    <!-- Simple Aa Icon representation or just SVG -->
-                </button>
+                <!-- Font Controls -->
+                <div class="font-controls">
+                    <button class="font-btn" onclick="setFontSize(0)"
+                        style="font-size:13px; font-weight:500;">A</button>
+                    <button class="font-btn" onclick="setFontSize(2)"
+                        style="font-size:19px; font-weight:700;">A</button>
+                </div>
             </div>
             <div class="filter-section">
                 <!-- Level 1: Categories -->
@@ -1112,16 +1127,25 @@
         // 0: Normal, 1: Large, 2: XL
         applyFontSize(fontLevel);
 
-        function toggleFontSize() {
-            fontLevel = (fontLevel + 1) % 3;
+        function setFontSize(level) {
+            fontLevel = level;
             applyFontSize(fontLevel);
             localStorage.setItem('fontSizeLevel', fontLevel);
+
+            // Update active state visual
+            document.querySelectorAll('.font-btn').forEach((btn, idx) => {
+                // Map idx 0 -> level 0, idx 1 -> level 2 ? No, hard to map directly unless ID.
+                // Simplified: highlight based on level.
+                if (level === 0 && idx === 0) btn.classList.add('active');
+                else if (level === 2 && idx === 1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
         }
 
         function applyFontSize(level) {
             document.body.classList.remove('font-lg', 'font-xl');
             if (level === 1) document.body.classList.add('font-lg');
-            if (level === 2) document.body.classList.add('font-xl');
+            if (level === 2) document.body.classList.add('font-xl'); // XL
         }
 
         renderList();
