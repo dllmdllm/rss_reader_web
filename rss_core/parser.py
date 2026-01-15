@@ -332,33 +332,37 @@ class CNBetaParser(BaseParser):
         
         # 2. Regex Scan for ALL CDN images (Dual Grabbing)
         import re
-        # Pattern for common CNBeta CDN images
         matches = re.findall(r'https?://static\.cnbetacdn\.com/[^\s"\'>]+\.(?:jpg|png|gif|jpeg)', html_content)
         
         if matches:
             unique_new_imgs = []
-            seen = set(i)
+            seen = set()
+            # Normalize existing images from XPath to avoid duplicates
+            for existing in i:
+                fname = existing.split('/')[-1].split('?')[0].lower()
+                seen.add(fname)
+            
             for img_url in matches:
-                # Basic filter for tracking pixels or tiny icons
-                if img_url not in seen and not "icon" in img_url.lower():
+                fname = img_url.split('/')[-1].split('?')[0].lower()
+                if fname not in seen and not "icon" in img_url.lower():
                     unique_new_imgs.append(img_url)
-                    seen.add(img_url)
+                    seen.add(fname)
             
             if unique_new_imgs:
-                # Add to lists
                 i.extend(unique_new_imgs)
                 if not m: m = unique_new_imgs[0]
                 
-                # Inject missing images into content
                 gallery_html = ""
                 for img_url in unique_new_imgs:
-                    if img_url not in c:
-                        gallery_html += f'<figure class="cnbeta-item"><img src="{img_url}" style="width:100\%; height:auto; display:block; margin: 10px 0;"/></figure>'
+                    # Double check filename in content strings too
+                    fname = img_url.split('/')[-1].split('?')[0].lower()
+                    if fname not in c.lower():
+                        gallery_html += f'<figure class="cnbeta-item"><img src="{img_url}" style="width:100%; height:auto; display:block; margin: 10px 0;"/></figure>'
                 
                 if gallery_html:
-                    c = c + gallery_html # Append to end if not already in text
+                    c = c + gallery_html
         
-        # 3. Final Conversion to Traditional Chinese (Very Important)
+        # 3. Final Conversion to Traditional Chinese
         c = to_trad(c)
         
         return c, m, i

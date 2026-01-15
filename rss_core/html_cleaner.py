@@ -358,6 +358,25 @@ def clean_html_fragment(
                     parent = node.getparent()
                     if parent is not None:
                         parent.remove(node)
+
+        # CNBeta specific tail cleaning
+        if "cnbeta" in base_url.lower():
+            # Remove "Related News", "Topic", "Source" blocks
+            for node in root.xpath(".//*[contains(text(),'相关文章') or contains(text(),'相關文章') or contains(text(),'访问:') or contains(text(),'訪問:') or contains(text(),'來源：') or contains(text(),'来源：')]"):
+                parent = node.getparent()
+                if parent is not None:
+                    parent.remove(node)
+            
+            # Remove all remaining hyperlinks (keep text)
+            for a in root.xpath(".//a"):
+                text = (a.text_content() or "").strip()
+                if text:
+                    span = LXML_HTML.Element("span")
+                    span.text = text
+                    a.getparent().replace(a, span)
+                else:
+                    a.getparent().remove(a)
+                    
         return LXML_HTML.tostring(root, encoding="unicode")
     except Exception:
         return fragment
