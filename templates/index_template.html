@@ -70,7 +70,8 @@
         /* --- Header & Search --- */
         .top-nav-wrapper {
             position: sticky;
-            top: 0;
+            top: 31px;
+            /* Height of the fixed marquee */
             z-index: 2000;
             background: rgba(245, 245, 247, 0.98);
             backdrop-filter: blur(10px);
@@ -325,15 +326,25 @@
         }
 
         /* --- Marquee --- */
+        /* --- Fixed Marquee --- */
         .marquee {
-            background: transparent;
-            color: var(--text-main);
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2100;
+            /* Above nav */
+            background: #1c1c1e;
+            /* Deep Charcoal */
+            color: #ffffff;
             font-size: 13px;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 7px 0;
+            height: 31px;
             white-space: nowrap;
             overflow: hidden;
-            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
 
         .marquee-content {
@@ -345,28 +356,42 @@
 
         .marquee-item {
             display: inline-block;
-            margin-right: 24px;
-            opacity: 0.9;
-            font-weight: 700;
+            margin-right: 30px;
+            opacity: 1;
+            font-weight: 500;
             transition: all 0.2s;
             cursor: pointer;
             text-decoration: none;
-            /* No underline */
-            color: inherit;
-            /* Keep text color */
+            color: #e0e0e0;
+        }
+
+        /* Ticker Bullet Color */
+        .marquee-item::before {
+            content: "✦";
+            color: #ff9500;
+            /* News Orange */
+            margin-right: 8px;
+            font-weight: 900;
         }
 
         @media (hover: hover) {
             .marquee-item:hover {
-                opacity: 1;
-                text-decoration: underline;
+                color: #ffffff;
+                text-decoration: none;
             }
         }
 
         .marquee-item.read {
-            font-weight: 400;
-            /* Unbold when read */
-            color: #999;
+            font-weight: 500;
+            /* Keep weight same */
+            color: #636366;
+            /* Dimmer color for read */
+            opacity: 0.8;
+        }
+
+        .marquee-item.read::before {
+            color: #636366;
+            /* Dim the star too */
         }
 
         @media (hover: hover) {
