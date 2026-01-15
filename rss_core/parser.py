@@ -140,6 +140,13 @@ class BaseParser:
         # 2. Extract Content & Specific Images
         content_html, extra_imgs = self._extract_content(root, url)
         
+        # Filter Bad Images from list
+        def is_bad_img(u):
+            u = u.lower()
+            return "waiting.gif" in u or "prev.png" in u or "next.png" in u or "loading" in u or "spinner" in u
+
+        extra_imgs = [i for i in extra_imgs if not is_bad_img(i)]
+        
         if not main_img and extra_imgs:
             main_img = extra_imgs[0]
             
@@ -182,7 +189,7 @@ class BaseParser:
             # Fix Images
             for img in root.xpath(".//img"):
                 src = img.get("src") or img.get("data-src") or img.get("data-original")
-                if src and "loading" not in src.lower() and "spinner" not in src.lower():
+                if src and "loading" not in src.lower() and "spinner" not in src.lower() and "waiting.gif" not in src.lower() and "prev.png" not in src.lower() and "next.png" not in src.lower():
                     img.set("src", normalize_image_url(base_url, src))
                     # Remove loading/srcset to avoid browser confusion in static file
                     if img.get("srcset"): del img.attrib["srcset"]
