@@ -257,6 +257,15 @@
             display: inline-block;
             margin-right: 24px;
             opacity: 0.9;
+            font-weight: 700;
+            /* Bold by default */
+            transition: all 0.2s;
+        }
+
+        .marquee-item.read {
+            font-weight: 400;
+            /* Unbold when read */
+            color: #999;
         }
 
         .marquee:hover .marquee-content {
@@ -607,11 +616,11 @@
     <div class="marquee">
         <div class="marquee-content">
             {% for item in marquee_list %}
-            <span class="marquee-item">{{ item }}</span>
+            <span class="marquee-item" data-link="{{ item.link }}">{{ item.text }}</span>
             {% endfor %}
             <!-- Duplicate for loop -->
             {% for item in marquee_list %}
-            <span class="marquee-item">{{ item }}</span>
+            <span class="marquee-item" data-link="{{ item.link }}">{{ item.text }}</span>
             {% endfor %}
         </div>
     </div>
@@ -744,6 +753,11 @@
                     readHistory.add(item.link);
                     localStorage.setItem('readHistory', JSON.stringify(Array.from(readHistory)));
                     cardEl.classList.add('read');
+
+                    // Sync Marquee
+                    document.querySelectorAll(`.marquee-item[data-link="${item.link}"]`).forEach(el => {
+                        el.classList.add('read');
+                    });
                 }
 
                 // Inject content if not already injected
@@ -894,6 +908,13 @@
         // Init
         updateCounts();
         renderList();
+
+        // Sync Read History to Marquee immediately
+        readHistory.forEach(link => {
+            document.querySelectorAll(`.marquee-item[data-link="${link}"]`).forEach(el => {
+                el.classList.add('read');
+            });
+        });
 
     </script>
 </body>
