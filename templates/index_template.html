@@ -332,10 +332,9 @@
             top: 0;
             left: 0;
             right: 0;
-            z-index: 2100;
-            /* Above nav */
-            background: #1c1c1e;
-            /* Deep Charcoal */
+            z-index: 2500;
+            background: #5c5c5e;
+            /* Lighter Slate Gray */
             color: #ffffff;
             font-size: 13px;
             padding: 7px 0;
@@ -814,23 +813,23 @@
 
 <body>
 
-    <div class="top-nav-wrapper">
-        <div class="marquee">
-            <div class="marquee-content">
-                {% for item in marquee_list %}
-                <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
-                    item.text
-                    }}</span>
-                {% endfor %}
-                <!-- Duplicate for loop -->
-                {% for item in marquee_list %}
-                <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
-                    item.text
-                    }}</span>
-                {% endfor %}
-            </div>
+    <div class="marquee">
+        <div class="marquee-content">
+            {% for item in marquee_list %}
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                item.text
+                }}</span>
+            {% endfor %}
+            <!-- Duplicate for loop -->
+            {% for item in marquee_list %}
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                item.text
+                }}</span>
+            {% endfor %}
         </div>
+    </div>
 
+    <div class="top-nav-wrapper">
         <header class="site-header">
             <div class="search-row">
                 <div class="search-input-wrap">
