@@ -456,6 +456,22 @@ async def clean_html_fragment(
                         parent.replace(a, span)
                     else:
                         parent.remove(a)
+
+            # Extra cleanup for garbage spans/divs/icons often found at tail
+            # e.g. social share icons (weibo, wechat) which might show as broken unicode boxes
+            for node in root.xpath(".//span | .//div | .//i | .//b | .//strong"):
+                txt = (node.text_content() or "").strip()
+                # If node has no text and no images, drop it
+                if not txt and not node.xpath(".//img"):
+                     node.drop_tree()
+                     continue
+                
+                # If node has very short text (1-2 chars) that isn't a common punctuation, it might be an icon code
+                # or if it contains specific known garbage chars
+                if len(txt) <= 2 and not node.xpath(".//img"):
+                     # Check if it's alphanumeric or common punctuation, if not, likely garbage
+                     if not re.match(r"[a-zA-Z0-9.,!?;:'()\[\]]", txt):
+                         node.drop_tree()
         
         # Final whitespace pruning for all
         for empty in root.xpath(".//*[not(node()) and not(self::img) and not(self::br)]"):
