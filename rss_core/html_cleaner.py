@@ -361,21 +361,47 @@ def clean_html_fragment(
 
         # CNBeta specific tail cleaning
         if "cnbeta" in base_url.lower():
-            # Remove "Related News", "Topic", "Source" blocks
-            for node in root.xpath(".//*[contains(text(),'相关文章') or contains(text(),'相關文章') or contains(text(),'访问:') or contains(text(),'訪問:') or contains(text(),'來源：') or contains(text(),'来源：')]"):
-                parent = node.getparent()
-                if parent is not None:
-                    parent.remove(node)
+            # Remove "Related News", "Topic", "Source" blocks (Regex & Text mapping)
+            patterns = [
+               "相关文章", "相關文章", "访问:", "訪問:", "來源：", "来源：", 
+               "话题：", "話題：", "更多：", "更多:", "分享到：", "分享到:",
+               "相关连结", "相關連結"
+            ]
+            for node in root.xpath(".//*"):
+                txt = (node.text_content() or "").strip()
+                if any(p in txt for p in patterns) and len(txt) < 100:
+                    try:
+                        node.drop_tree()
+                    except Exception:
+                        pass
             
-            # Remove all remaining hyperlinks (keep text)
+            # Remove images that look like "Recommended" thumbnails or ads
+            for img in root.xpath(".//img"):
+                src = (img.get("src") or "").lower()
+                if any(k in src for k in ["recommend", "thumb", "logo", "icon", "ads", "avatar"]):
+                    try:
+                        img.drop_tree()
+                    except Exception:
+                        pass
+
+            # Remove ALL hyperlinks within content, keep only text
             for a in root.xpath(".//a"):
                 text = (a.text_content() or "").strip()
-                if text:
-                    span = LXML_HTML.Element("span")
-                    span.text = text
-                    a.getparent().replace(a, span)
-                else:
-                    a.getparent().remove(a)
+                parent = a.getparent()
+                if parent is not None:
+                    if text:
+                        span = LXML_HTML.Element("span")
+                        span.text = text
+                        parent.replace(a, span)
+                    else:
+                        parent.remove(a)
+        
+        # Final whitespace pruning for all
+        for empty in root.xpath(".//*[not(node()) and not(self::img) and not(self::br)]"):
+            try:
+                empty.drop_tree()
+            except Exception:
+                pass
                     
         return LXML_HTML.tostring(root, encoding="unicode")
     except Exception:

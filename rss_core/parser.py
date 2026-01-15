@@ -319,10 +319,14 @@ class CNBetaParser(BaseParser):
         # structural images
         imgs = root.xpath(xpath_union(XPATHS["cnbeta_images"]))
         
-        # Inject Hero Image at Top for visual order
+        # Inject Hero Image at Top for visual order - ONLY if not already in content
         if imgs:
-            hero_html = f'<figure class="cnbeta-hero"><img src="{imgs[0]}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
-            html_str = hero_html + html_str
+            first_img_url = imgs[0]
+            # check if url or just filename is already in the html
+            fname = first_img_url.split('/')[-1].split('?')[0].lower()
+            if fname not in html_str.lower():
+                hero_html = f'<figure class="cnbeta-hero"><img src="{first_img_url}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
+                html_str = hero_html + html_str
 
         return html_str, imgs
 
@@ -354,9 +358,10 @@ class CNBetaParser(BaseParser):
                 
                 gallery_html = ""
                 for img_url in unique_new_imgs:
-                    # Double check filename in content strings too
+                    # Final safety check before injection
                     fname = img_url.split('/')[-1].split('?')[0].lower()
-                    if fname not in c.lower():
+                    bad = any(k in img_url.lower() for k in ["icon", "thumb", "recommend", "logo", "avatar", "ads"])
+                    if fname not in c.lower() and not bad:
                         gallery_html += f'<figure class="cnbeta-item"><img src="{img_url}" style="width:100%; height:auto; display:block; margin: 10px 0;"/></figure>'
                 
                 if gallery_html:
