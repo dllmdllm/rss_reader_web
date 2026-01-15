@@ -258,9 +258,18 @@
             margin-right: 24px;
             opacity: 0.9;
             font-weight: 700;
-            /* Bold by default */
             transition: all 0.2s;
             cursor: pointer;
+            text-decoration: none;
+            /* No underline */
+            color: inherit;
+            /* Keep text color */
+        }
+
+        .marquee-item:hover {
+            opacity: 1;
+            text-decoration: underline;
+            /* Optional: hover effect */
         }
 
         .marquee-item.read {
@@ -693,13 +702,13 @@
     <div class="marquee">
         <div class="marquee-content">
             {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
-                }}</span>
+            <a href="{{ item.link }}" target="_blank" class="marquee-item" data-link="{{ item.link }}">{{ item.text
+                }}</a>
             {% endfor %}
             <!-- Duplicate for loop -->
             {% for item in marquee_list %}
-            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
-                }}</span>
+            <a href="{{ item.link }}" target="_blank" class="marquee-item" data-link="{{ item.link }}">{{ item.text
+                }}</a>
             {% endfor %}
         </div>
     </div>
