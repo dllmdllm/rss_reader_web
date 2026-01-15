@@ -458,19 +458,29 @@ async def clean_html_fragment(
                         parent.remove(a)
 
             # Extra cleanup for garbage spans/divs/icons often found at tail
-            # e.g. social share icons (weibo, wechat) which might show as broken unicode boxes
-            for node in root.xpath(".//span | .//div | .//i | .//b | .//strong"):
+            # e.g. social share icons (weibo, wechat) which might show as broken unicode boxes or PUA characters
+            for node in root.xpath(".//span | .//div | .//i | .//b | .//strong | .//p"):
                 txt = (node.text_content() or "").strip()
+                
+                # Check for Private Use Area characters (E000-F8FF) which are often used for icons
+                # If a node consists mainly of these or is very short and contains them, kill it.
+                if any(0xE000 <= ord(c) <= 0xF8FF for c in txt):
+                    node.drop_tree()
+                    continue
+
                 # If node has no text and no images, drop it
                 if not txt and not node.xpath(".//img"):
                      node.drop_tree()
                      continue
                 
-                # If node has very short text (1-2 chars) that isn't a common punctuation, it might be an icon code
-                # or if it contains specific known garbage chars
-                if len(txt) <= 2 and not node.xpath(".//img"):
-                     # Check if it's alphanumeric or common punctuation, if not, likely garbage
-                     if not re.match(r"[a-zA-Z0-9.,!?;:'()\[\]]", txt):
+                # If node has very short text (1-3 chars) that isn't a common punctuation/word
+                if len(txt) <= 3 and not node.xpath(".//img"):
+                     # If it doesn't contain at least one normal letter/number/Chinese char, it's likely garbage
+                     # Allow common punctuation
+                     if not re.search(r"[\w\u4e00-\u9fff]", txt):
+                         node.drop_tree()
+                     # Also kill if it is just "分享" parts or similar
+                     if txt in ["分享", "到", "分享到"]:
                          node.drop_tree()
         
         # Final whitespace pruning for all
