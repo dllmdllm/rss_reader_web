@@ -1,0 +1,8 @@
+lxml
+jinja2
+opencc-python-reimplemented
+Pillow
+readability-lxml
+argostranslate
+stanza
+tzdata

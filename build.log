@@ -1,0 +1,12 @@
+>>> [Build] Starting RSS Reader Build...
+>>> [Build] Timezone: Asia/Hong_Kong
+>>> [Build] Fetching 25 feeds...
+>>> [Build] Fetched 925 raw items.
+Traceback (most recent call last):
+  File "C:\Users\Nary\PY_Project\rss_reader_web\build.py", line 320, in <module>
+    main()
+    ~~~~^^
+  File "C:\Users\Nary\PY_Project\rss_reader_web\build.py", line 88, in main
+    cutoff = now - timedelta(hours=DEFAULT_LOOKBACK_HOURS)
+                   ^^^^^^^^^
+UnboundLocalError: cannot access local variable 'timedelta' where it is not associated with a value
