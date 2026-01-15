@@ -178,10 +178,16 @@ def main():
     final_data_list = []
     
     def map_cat(url):
-        if "ent" in url or "entertainment" in url: return "ent"
-        if "tech" in url or "unwire" in url or "epc" in url or "9to5" in url: return "tech"
-        if "intl" in url or "international" in url or "world" in url: return "intl"
-        if "china" in url: return "intl"
+        u = url.lower()
+        # Ent: stricter check to allow 'content'/'component' in URLs
+        if "entertainment" in u: return "ent"
+        if "/ent/" in u or "_ent" in u or "-ent-" in u: return "ent"
+        # Mingpao s00007 is entertainment
+        if "s00007" in u: return "ent"
+        
+        if "tech" in u or "unwire" in u or "epc" in u or "9to5" in u: return "tech"
+        if "intl" in u or "international" in u or "world" in u: return "intl"
+        if "china" in u: return "intl"
         return "news"
 
 
