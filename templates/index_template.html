@@ -365,7 +365,8 @@
             transition: all 0.2s;
             cursor: pointer;
             text-decoration: none;
-            color: #e0e0e0;
+            color: #ffffff;
+            /* Pure white text */
         }
 
         /* Ticker Bullet Color */
@@ -386,15 +387,17 @@
 
         .marquee-item.read {
             font-weight: 500;
-            /* Keep weight same */
-            color: #636366;
-            /* Dimmer color for read */
-            opacity: 0.8;
+            color: #ffffff;
+            /* Keep white */
+            opacity: 0.5;
+            /* Dim via opacity instead */
         }
 
         .marquee-item.read::before {
-            color: #636366;
-            /* Dim the star too */
+            color: #ff9500;
+            /* Keep orange star or dim it? user said 1 orange star is enough */
+            opacity: 0.6;
+            /* Dim star slightly for read */
         }
 
         @media (hover: hover) {

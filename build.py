@@ -196,7 +196,7 @@ async def main():
         template_str = f.read()
     
     tmpl = jinja2.Template(template_str)
-    marquee_items = [{"text": f"✦ [{i['pub_fmt']}] {i['title']}", "link": i['link']} for i in final_data_list[:20]]
+    marquee_items = [{"text": f"[{i['pub_fmt']}] {i['title']}", "link": i['link']} for i in final_data_list[:20]]
     import random
     random.shuffle(marquee_items)
     

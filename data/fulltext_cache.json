@@ -1337,5 +1337,11 @@
     "main_image": "https://static.cnbetacdn.com/article/2026/0116/31303725f1d75c4.png",
     "images": [],
     "ts": 1768495819
+  },
+  "https://www.cnbeta.com.tw/articles/tech/1545488.htm": {
+    "content": "<div><div class=\"article-content-wrapper\">\r\n                    <div class=\"main__right\">\r\n                        <div class=\"article-content\" id=\"artibody\">\r\n                        <div class=\"article-global\"></div>                            <p>有行業報告顯示，截至 2019 年，約有六成 Windows Server 部署仍運行在這一版本之上，體現了其在服務器市場的生命力。</p><p><img src=\"https://static.cnbetacdn.com/article/2026/0116/4509d780af0ad44.webp\"></p><p>在生命週期管理上，微軟通過 Premium Assurance 計劃為 Windows Server 2008 提供了延長支持，並在該計劃取消後，將符合條件的批量授權企業客户納入擴展安全更新（ESU）項目。 隨着 ESU 項目在 2026 年 1 月 13 日正式到期，Windows Server 2008 的全部官方支持也隨之畫上句號。 這意味着用户今後將不再獲得微軟提供的技術支持或安全補丁，繼續在生產環境中使用將面臨日益突出的安全與合規風險。</p><p>從技術傳承角度看，這一時間節點也象徵着 Vista/Longhorn 代碼分支的徹底退出生產舞台。 雖然 Windows Server 2008 直接繼承自 Vista，但一年後推出的 Windows Server 2008 R2 已改為基於 Windows 7 內核，在架構與性能上都進行了重新打磨。 如今，隨着 Server 2008 支持終結，以 Vista 為基礎的產品線在現代 IT 基礎設施中實際上已不再被視為可接受的生產選項。</p><p>對於仍依賴 Windows Server 2008 的機構，遷移已從“規劃選項”轉變為“現實剛需”。 在微軟當前的產品佈局中，諸如 Windows Server 2025 和 Windows Server 2022 等新一代服務器操作系統，才是承接工作負載、滿足安全合規與長期支持需求的主力平台。 對於那些仍在運行舊環境的企業而言，如何在業務連續性、應用兼容性和遷移成本之間取得平衡，將成為後 Vista 時代必須正面應對的課題。</p>                        </div>\r\n                    </div>\r\n                    <div class=\"main__left\">\r\n                        \r\n                    </div>\r\n                </div>\r\n                </div>",
+    "main_image": "https://static.cnbetacdn.com/article/2026/0116/4509d780af0ad44.webp",
+    "images": [],
+    "ts": 1768496146
   }
 }
