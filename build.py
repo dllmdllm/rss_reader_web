@@ -207,8 +207,26 @@ def main():
         return "news"
 
 
+    def clean_source_name(txt):
+        if not txt: return "News"
+        t = txt.lower()
+        if "mingpao" in t: return "MingPao"
+        if "hk01" in t: return "HK01"
+        if "rthk" in t: return "RTHK"
+        if "on.cc" in t: return "on.cc"
+        if "singtao" in t or "stheadline" in t: return "Singtao"
+        if "cnbeta" in t: return "CNBeta"
+        if "unwire" in t: return "unwire.hk"
+        if "hkepc" in t: return "HKEPC"
+        if "9to5" in t: return "9to5Mac"
+        if "witness" in t: return "The Witness"
+        return "News"
+
     for item in valid_items:
         # Pre-enrich strict logic
+        # 0. Clean Source
+        item.source = clean_source_name(item.source)
+        
         # 1. Assign Category
         item.category = map_cat(item.link)
         
