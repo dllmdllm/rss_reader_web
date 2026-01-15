@@ -952,6 +952,16 @@
             listEl.appendChild(frag);
         }
 
+        // Helper to scroll to the start of news list
+        function scrollToListTop() {
+            const el = document.getElementById('newsList');
+            if (el) {
+                // Scroll to list top, with a small offset for the header
+                const y = el.getBoundingClientRect().top + window.pageYOffset - 110;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
         function toggleCard(cardEl, item) {
             const isExpanded = cardEl.classList.contains('expanded');
 
@@ -993,6 +1003,12 @@
                 }
 
                 cardEl.classList.add('expanded');
+
+                // Scroll to card top for better reading
+                setTimeout(() => {
+                    const y = cardEl.getBoundingClientRect().top + window.pageYOffset - 110;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
+                }, 100);
             }
         }
 
@@ -1086,6 +1102,7 @@
                         else state.filterSource = src;
                         renderSourceChips();
                         renderList();
+                        scrollToListTop();
                     };
                     sourceRow.appendChild(btn);
                 }
@@ -1105,7 +1122,7 @@
 
                 renderSourceChips();
                 renderList();
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                scrollToListTop();
             });
         });
 
@@ -1138,8 +1155,12 @@
 
                 // Highlight/Expand
                 if (!card.classList.contains('expanded')) {
-                    const item = newsItems.find(i => i.link === link);
+                    const item = rawData.find(i => i.link === link); // Use rawData
                     if (item) toggleCard(card, item);
+                } else {
+                    // Already expanded, just scroll to it
+                    const y = card.getBoundingClientRect().top + window.pageYOffset - 110;
+                    window.scrollTo({ top: y, behavior: 'smooth' });
                 }
             } else {
                 alert('該新聞不在列表顯示範圍 (可能被過濾)');
