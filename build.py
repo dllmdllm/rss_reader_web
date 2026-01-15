@@ -98,7 +98,11 @@ async def main():
                  item.pub_dt = item.pub_dt.replace(tzinfo=hk_tz)
             else:
                  item.pub_dt = item.pub_dt.astimezone(hk_tz)
-                 
+            
+            # Future date correction (e.g. MingPao cache issues)
+            if item.pub_dt > now:
+                item.pub_dt = now
+
             if item.pub_dt < cutoff: continue
             if item.link in seen_links: continue
             seen_links.add(item.link)

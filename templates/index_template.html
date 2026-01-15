@@ -60,8 +60,8 @@
             background: var(--bg-body);
             color: var(--text-main);
             padding-bottom: 80px;
-            /* Offset for fixed marquee + sticky nav */
-            padding-top: calc(150px + env(safe-area-inset-top));
+            /* Precise offset for Fixed Marquee (31px) + Fixed Nav (approx 105px) */
+            padding-top: calc(136px + env(safe-area-inset-top));
             /* Support for hardware acceleration */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -71,10 +71,12 @@
 
         /* --- Header & Search --- */
         .top-nav-wrapper {
-            position: sticky;
+            position: fixed;
             top: calc(31px + env(safe-area-inset-top));
-            /* Sit below marquee + island */
-            z-index: 2000;
+            /* Flush with marquee */
+            left: 0;
+            right: 0;
+            z-index: 2400;
             background: rgba(245, 245, 247, 0.98);
             backdrop-filter: blur(10px);
             padding-top: 4px;
