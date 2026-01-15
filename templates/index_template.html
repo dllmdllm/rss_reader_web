@@ -702,13 +702,13 @@
     <div class="marquee">
         <div class="marquee-content">
             {% for item in marquee_list %}
-            <a href="{{ item.link }}" target="_blank" class="marquee-item" data-link="{{ item.link }}">{{ item.text
-                }}</a>
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
+                }}</span>
             {% endfor %}
             <!-- Duplicate for loop -->
             {% for item in marquee_list %}
-            <a href="{{ item.link }}" target="_blank" class="marquee-item" data-link="{{ item.link }}">{{ item.text
-                }}</a>
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{ item.text
+                }}</span>
             {% endfor %}
         </div>
     </div>
@@ -1008,7 +1008,7 @@
 
         // Marquee Interaction
         function focusCard(link) {
-            const card = document.querySelector(`.card[data - link= "${link}"]`);
+            const card = document.querySelector(`.card[data-link="${link}"]`);
             if (card) {
                 // Scroll to center
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1045,7 +1045,7 @@
 
         // Sync Read History to Marquee immediately
         readHistory.forEach(link => {
-            document.querySelectorAll(`.marquee - item[data - link="${link}"]`).forEach(el => {
+            document.querySelectorAll(`.marquee-item[data-link="${link}"]`).forEach(el => {
                 el.classList.add('read');
             });
         });
