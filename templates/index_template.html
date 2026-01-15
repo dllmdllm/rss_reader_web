@@ -866,7 +866,7 @@
             // Cat Map
             const catNames = { news: '新聞', ent: '娛樂', tech: '科技', intl: '國際' };
 
-            filtered.forEach(item => {
+            filtered.forEach((item, idx) => {
                 const card = document.createElement('div');
                 // Add distinct category class for background coloring
                 card.className = `card ${item.read ? 'read' : ''} ${item.category}`;
@@ -892,7 +892,7 @@
                     
                     <!-- Right Col -->
                     <div class="right-col">
-                        <h3 class="card-title-new">${item.title}</h3>
+                        <h3 class="card-title-new"><span class="index-num" style="color:var(--accent); font-weight:700; margin-right:4px;">${idx + 1}.</span>${item.title}</h3>
                         <div class="meta-tags-row">
                             <span class="cat-badge ${item.category}">${catLabel}</span>
                             <a href="${item.link}" target="_blank" class="source-tag" onclick="event.stopPropagation()">${item.source}</a>
@@ -1019,11 +1019,18 @@
 
             sourceRow.classList.add('show');
 
+            // Calculate Counts for Sources regarding Current Category
+            const relevantItems = newsItems.filter(i => i.category === state.filterCat);
+            const countMap = {};
+            relevantItems.forEach(i => {
+                countMap[i.source] = (countMap[i.source] || 0) + 1;
+            });
+
             // 'All Sources' button matching category color?
             const allBtn = document.createElement('div');
             allBtn.className = `chip ${state.filterSource === 'all' ? 'active' : ''} `;
             allBtn.dataset.cat = state.filterCat; // Inherit color style
-            allBtn.textContent = '所有來源';
+            allBtn.innerHTML = `所有來源 <span class="count">(${relevantItems.length})</span>`;
             allBtn.onclick = () => { state.filterSource = 'all'; renderSourceChips(); renderList(); };
             sourceRow.appendChild(allBtn);
 
@@ -1036,12 +1043,13 @@
                 const exists = newsItems.some(i => i.source.toLowerCase().includes(src.toLowerCase().replace('.hk', '')));
 
                 if (exists) {
+                    const cnt = countMap[src] || 0;
                     const btn = document.createElement('div');
                     btn.className = `chip ${state.filterSource === src ? 'active' : ''} `;
                     // Hack: use the current category data-attribute to style these source chips same as parent
                     btn.dataset.cat = state.filterCat;
 
-                    btn.textContent = src;
+                    btn.innerHTML = `${src} <span class="count">(${cnt})</span>`;
                     btn.onclick = () => {
                         if (state.filterSource === src) state.filterSource = 'all';
                         else state.filterSource = src;
