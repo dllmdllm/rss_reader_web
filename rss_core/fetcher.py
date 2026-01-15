@@ -6,15 +6,19 @@ import base64
 import hashlib
 import ssl
 import threading
+import asyncio
 import urllib.request
 import urllib.error
 from urllib.parse import urlparse
 from typing import Optional
 
+import httpx
+
 from .config import HTTP_TIMEOUT, IMAGES_DIR, IMAGE_CACHE_TTL, DEFAULT_USER_AGENT
 from .utils import normalize_image_url
 
 class Fetcher:
+    """Original Thread-based Fetcher (Keeping for compatibility)"""
     def __init__(self, feed_cache: dict, image_cache: dict):
         self.feed_cache = feed_cache
         self.image_cache = image_cache
@@ -77,10 +81,8 @@ class Fetcher:
                 return payload, meta
 
         except urllib.error.HTTPError as exc:
-            if exc.code == 304:
-                # Not Modified
-                if entry.get("payload_b64"):
-                    return base64.b64decode(entry["payload_b64"]), entry
+            if exc.code == 304 and entry.get("payload_b64"):
+                return base64.b64decode(entry["payload_b64"]), entry
             
             # If server error but we have cache, fallback to cache
             if entry.get("payload_b64"):
@@ -186,3 +188,114 @@ class Fetcher:
             # print(f"Image fail {url}: {e}")
             return ""
 
+class AsyncFetcher:
+    """New Asyncio-based Fetcher using httpx"""
+    def __init__(self, feed_cache: dict, image_cache: dict):
+        self.feed_cache = feed_cache
+        self.image_cache = image_cache
+        # In async, we use the fact that dict mutations are atomic in GIL 
+        # but better to avoid concurrent writes to same key if needed.
+        # httpx client will be managed externally or here.
+        self.client = httpx.AsyncClient(
+            timeout=HTTP_TIMEOUT,
+            verify=False, # Lenient SSL by default for CNBeta etc.
+            follow_redirects=True,
+            headers={"User-Agent": DEFAULT_USER_AGENT}
+        )
+
+    async def close(self):
+        await self.client.aclose()
+
+    async def fetch_url(self, url: str) -> tuple[bytes, dict]:
+        entry = self.feed_cache.get(url, {})
+        headers = {}
+        
+        if "9to5mac.com" in url:
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36",
+                "Accept": "application/rss+xml, application/xml;q=0.9, */*;q=0.8",
+                "Referer": "https://9to5mac.com/",
+            }
+        
+        if entry.get("etag"):
+            headers["If-None-Match"] = entry["etag"]
+        if entry.get("last_modified"):
+            headers["If-Modified-Since"] = entry["last_modified"]
+
+        try:
+            resp = await self.client.get(url, headers=headers)
+            
+            if resp.status_code == 304:
+                if entry.get("payload_b64"):
+                    return base64.b64decode(entry["payload_b64"]), entry
+            
+            resp.raise_for_status()
+            payload = resp.content
+            meta = {
+                "etag": resp.headers.get("ETag") or "",
+                "last_modified": resp.headers.get("Last-Modified") or "",
+                "timestamp": time.time(),
+            }
+            
+            self.feed_cache[url] = {
+                "payload_b64": base64.b64encode(payload).decode("ascii"),
+                **meta
+            }
+            return payload, meta
+
+        except Exception as e:
+            # Fallback to cache on any error
+            if entry.get("payload_b64"):
+                return base64.b64decode(entry["payload_b64"]), entry
+            return b"", {}
+
+    async def fetch_full_text(self, url: str) -> str:
+        try:
+            resp = await self.client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            resp.raise_for_status()
+            return resp.text
+        except Exception:
+            return ""
+
+    async def download_image(self, url: str, referer: str | None = None) -> str:
+        if not url: return ""
+        normalized_key = url.split("#")[0].split("?")[0]
+        now = time.time()
+        
+        entry = self.image_cache.get(normalized_key, {})
+        if entry.get("path") and (now - entry.get("timestamp", 0)) <= IMAGE_CACHE_TTL:
+            full_path = os.path.join(IMAGES_DIR, entry["path"])
+            if os.path.exists(full_path):
+                return entry["path"]
+
+        # Download
+        site_ref = ""
+        if "on.cc" in url: site_ref = "https://hk.on.cc/"
+        elif "mingpao.com" in url: site_ref = "https://news.mingpao.com/"
+        elif "hk01.com" in url: site_ref = "https://www.hk01.com/"
+        
+        final_referer = referer or site_ref or f"{urlparse(url).scheme}://{urlparse(url).netloc}/"
+        headers = {"User-Agent": "Mozilla/5.0", "Accept": "image/*", "Referer": final_referer}
+        
+        try:
+            resp = await self.client.get(url, headers=headers)
+            resp.raise_for_status()
+            data = resp.content
+            
+            ext = ".jpg"
+            if data.startswith(b"\x89PNG"): ext = ".png"
+            elif data.startswith(b"GIF"): ext = ".gif"
+            elif b"WEBP" in data[:16]: ext = ".webp"
+            
+            hash_name = hashlib.sha1(normalized_key.encode("utf-8")).hexdigest()[:16]
+            filename = f"{hash_name}{ext}"
+            save_path = os.path.join(IMAGES_DIR, filename)
+            
+            os.makedirs(IMAGES_DIR, exist_ok=True)
+            with open(save_path, "wb") as f:
+                f.write(data)
+                
+            self.image_cache[normalized_key] = {"path": filename, "timestamp": now, "url": url}
+            return filename
+        except Exception:
+            return ""
