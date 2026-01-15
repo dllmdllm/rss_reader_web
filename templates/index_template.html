@@ -7,15 +7,27 @@
     <title>RSS Reader</title>
     <style>
         :root {
-            --bg-body: #f5f5f7;
+            --bg-body: #faebd7;
+            /* Old Newspaper / Antique White */
             --bg-card: #ffffff;
-            --text-main: #1d1d1f;
-            --text-muted: #86868b;
-            --accent: #007aff;
+            --text-main: #2c2c2e;
+            --text-muted: #6e6e73;
             --border: #d2d2d7;
             --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             --radius: 12px;
             --max-width: 700px;
+
+            /* Category Colors (Button) */
+            --col-news: #007aff;
+            --col-intl: #ff9500;
+            --col-ent: #ff2d55;
+            --col-tech: #5856d6;
+
+            /* Card Pale Backgrounds */
+            --bg-card-news: #f0f8ff;
+            --bg-card-intl: #fff8e1;
+            --bg-card-ent: #fff0f5;
+            --bg-card-tech: #f3e5f5;
         }
 
         * {
@@ -133,10 +145,73 @@
         }
 
         .chip.active {
-            background: var(--text-main);
             color: #fff;
-            border-color: var(--text-main);
+            border-color: transparent;
+            font-weight: 600;
         }
+
+        /* Category Button Colors */
+        .chip[data-cat="all"].active {
+            background: #333;
+        }
+
+        .chip[data-cat="news"] {
+            color: var(--col-news);
+            border-color: var(--col-news);
+        }
+
+        .chip[data-cat="news"].active {
+            background: var(--col-news);
+            color: #fff;
+        }
+
+        .chip[data-cat="intl"] {
+            color: var(--col-intl);
+            border-color: var(--col-intl);
+        }
+
+        .chip[data-cat="intl"].active {
+            background: var(--col-intl);
+            color: #fff;
+        }
+
+        .chip[data-cat="ent"] {
+            color: var(--col-ent);
+            border-color: var(--col-ent);
+        }
+
+        .chip[data-cat="ent"].active {
+            background: var(--col-ent);
+            color: #fff;
+        }
+
+        .chip[data-cat="tech"] {
+            color: var(--col-tech);
+            border-color: var(--col-tech);
+        }
+
+        .chip[data-cat="tech"].active {
+            background: var(--col-tech);
+            color: #fff;
+        }
+
+        /* Card Background Tints */
+        .card.news {
+            background: var(--bg-card-news);
+        }
+
+        .card.intl {
+            background: var(--bg-card-intl);
+        }
+
+        .card.ent {
+            background: var(--bg-card-ent);
+        }
+
+        .card.tech {
+            background: var(--bg-card-tech);
+        }
+
 
         .sub-filters {
             display: none;
@@ -607,7 +682,8 @@
 
             filtered.forEach(item => {
                 const card = document.createElement('div');
-                card.className = `card ${item.read ? 'read' : ''}`;
+                // Add distinct category class for background coloring
+                card.className = `card ${item.read ? 'read' : ''} ${item.category}`;
                 card.dataset.id = item.id;
 
                 // Thumb logic
@@ -700,42 +776,73 @@
         }
 
         function renderSourceChips() {
-            // Generate source chips based on available items in current Category
-            const sources = new Set();
-            newsItems.forEach(i => {
-                if (state.filterCat === 'all' || i.category === state.filterCat) {
-                    sources.add(i.source);
-                }
-            });
+            // User requested specific lists per category group
+            // Group 1: News, Intl, Ent -> RTHK, HK01, on.cc, MingPao, Singtao
+            // Group 2: Tech -> unwire, cnbeta, hkepc, 9to5mac
 
+            // Normalize names for comparison if needed, currently source strings are:
+            // "RTHK", "MingPao", "Singtao", "HK01", "on.cc", "HKEPC", "unwire.hk", "CNBeta", "9to5Mac"
+
+            const groupGeneral = ['HK01', 'MingPao', 'on.cc', 'RTHK', 'Singtao']; // Alphabetical-ish/User order? User asked Alphabetical.
+            // Alphabetical: HK01, MingPao, on.cc, RTHK, Singtao
+            const groupTech = ['9to5Mac', 'CNBeta', 'HKEPC', 'unwire.hk'];
+
+            let targetSources = [];
+
+            if (['news', 'intl', 'ent'].includes(state.filterCat)) {
+                targetSources = groupGeneral;
+            } else if (state.filterCat === 'tech') {
+                targetSources = groupTech;
+            } else {
+                // 'all' -> Show combined or hide? Usually nice to show all unique sources sorted
+                // But user didn't specify. Let's show all available sorted.
+                const allSet = new Set();
+                newsItems.forEach(i => allSet.add(i.source));
+                targetSources = Array.from(allSet).sort();
+            }
+
+            sourceRow.innerHTML = '';
+
+            // Only show row if not 'all' or if we want to allow filtering in 'all' too
+            // User requirement: "News... have [list]" implies sub-menu appears on selection.
             if (state.filterCat === 'all') {
                 sourceRow.classList.remove('show');
                 return;
             }
 
-            // Show source bar
             sourceRow.classList.add('show');
-            sourceRow.innerHTML = '';
 
-            // 'All' chip
+            // 'All Sources' button matching category color?
             const allBtn = document.createElement('div');
             allBtn.className = `chip ${state.filterSource === 'all' ? 'active' : ''}`;
+            allBtn.dataset.cat = state.filterCat; // Inherit color style
             allBtn.textContent = '所有來源';
             allBtn.onclick = () => { state.filterSource = 'all'; renderSourceChips(); renderList(); };
             sourceRow.appendChild(allBtn);
 
-            Array.from(sources).sort().forEach(src => {
-                const btn = document.createElement('div');
-                btn.className = `chip ${state.filterSource === src ? 'active' : ''}`;
-                btn.textContent = src;
-                btn.onclick = () => {
-                    // Toggle
-                    if (state.filterSource === src) state.filterSource = 'all';
-                    else state.filterSource = src;
-                    renderSourceChips(); // Re-render to update active state
-                    renderList();
-                };
-                sourceRow.appendChild(btn);
+            // Render specific list
+            targetSources.forEach(src => {
+                // Only add if we actually have data for this source? 
+                // User might want to see the button even if empty (to know it's tracked). 
+                // But cleaner to show only if available in 'newsItems'?
+                // Let's check availability to avoid dead buttons.
+                const exists = newsItems.some(i => i.source.toLowerCase().includes(src.toLowerCase().replace('.hk', '')));
+
+                if (exists) {
+                    const btn = document.createElement('div');
+                    btn.className = `chip ${state.filterSource === src ? 'active' : ''}`;
+                    // Hack: use the current category data-attribute to style these source chips same as parent
+                    btn.dataset.cat = state.filterCat;
+
+                    btn.textContent = src;
+                    btn.onclick = () => {
+                        if (state.filterSource === src) state.filterSource = 'all';
+                        else state.filterSource = src;
+                        renderSourceChips();
+                        renderList();
+                    };
+                    sourceRow.appendChild(btn);
+                }
             });
         }
 
