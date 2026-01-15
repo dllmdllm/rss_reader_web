@@ -249,7 +249,8 @@
 
         .marquee-content {
             display: inline-block;
-            animation: scroll 60s linear infinite;
+            animation: scroll 300s linear infinite;
+            /* Slowed down from 60s (80% slower) */
         }
 
         .marquee-item {
@@ -334,8 +335,12 @@
         }
 
         .source-tag {
-            font-weight: 600;
-            color: var(--accent);
+            font-weight: 500;
+            color: #333;
+            background: rgba(0, 0, 0, 0.08);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
         }
 
         .card-title {

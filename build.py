@@ -255,8 +255,8 @@ def main():
     tmpl = jinja2.Template(template_str)
     
     # Marquee Data
-    # Get top 10 keywords or titles
-    marquee_items = [i["title"] for i in final_data_list[:20]]
+    # Get top 20 items, format: "[time] Title"
+    marquee_items = [f"[{i['pub_fmt']}] {i['title']}" for i in final_data_list[:20]]
     
     # Serialize Data safely
     json_data = json.dumps(final_data_list, ensure_ascii=False)
