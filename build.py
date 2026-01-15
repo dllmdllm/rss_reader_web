@@ -157,7 +157,10 @@ def main():
             cached = fulltext_cache[item.link]
             full_html = cached.get("content", "")
             imgs = cached.get("images", [])
+            main_img = cached.get("main_image", "") # NEW
             if full_html: item.content_html = full_html
+            if main_img: item.rss_image = main_img # NEW
+            elif imgs: item.rss_image = imgs[0] # Fallback
         else:
             p = get_parser(item.link, fetcher)
             page_src, _ = fetcher.fetch_url(item.link)
@@ -173,6 +176,7 @@ def main():
                     if main_img: item.rss_image = main_img
                     fulltext_cache[item.link] = {
                         "content": c_html,
+                        "main_image": main_img, # NEW
                         "images": all_imgs,
                         "ts": int(time.time())
                     }

@@ -38,9 +38,15 @@ XPATHS = {
     
     # RTHK
     "rthk_images": [
-       "//div[contains(@class,'itemImage')]//img/@src",
-       "//div[contains(@class,'videoDisplay')]//img/@src",
-       "//div[contains(@class,'img-slide-wrap')]//img/@src",
+        "//div[contains(@class,'itemImage')]//img/@src",
+        "//div[contains(@class,'itemImage')]//img/@data-src",
+        "//div[contains(@class,'itemImage')]//img/@data-original",
+        "//div[contains(@class,'videoDisplay')]//img/@src",
+        "//div[contains(@class,'videoDisplay')]//img/@data-src",
+        "//div[contains(@class,'videoDisplay')]//img/@data-original",
+        "//div[contains(@class,'img-slide-wrap')]//img/@src",
+        "//div[contains(@class,'img-slide-wrap')]//img/@data-src",
+        "//div[contains(@class,'img-slide-wrap')]//img/@data-original"
     ],
     "rthk_fulltext": ["//div[contains(@class,'itemFullText')]"],
     
@@ -147,6 +153,9 @@ class BaseParser:
 
         extra_imgs = [i for i in extra_imgs if not is_bad_img(i)]
         
+        if main_img and is_bad_img(main_img):
+            main_img = ""
+
         if not main_img and extra_imgs:
             main_img = extra_imgs[0]
             
@@ -226,13 +235,12 @@ class RTHKParser(BaseParser):
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
         c, m, i = super().parse(html_content, url)
         
-        # Regex Fallback for RTHK Images (Slider/Hidden)
         # Find ALL Large images (L.jpg) to capture full gallery
         import re
-        matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[L]\.jpg', html_content)
+        matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[Ll]\.jpg', html_content)
         
         if not matches:
-             matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[A-Z]+\.jpg', html_content)
+             matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[A-Za-z]+\.jpg', html_content)
              
         if matches:
              # Deduplicate and Filter existing
