@@ -129,11 +129,14 @@
         .chips-row {
             display: flex;
             gap: 8px;
-            overflow-x: auto;
+            flex-wrap: wrap;
+            /* Wrap to next line */
             padding-bottom: 4px;
-            scrollbar-width: none;
+            justify-content: center;
+            /* Center align items */
         }
 
+        /* Scrollbar hidden (legacy) - kept just in case but unused with wrap */
         .chips-row::-webkit-scrollbar {
             display: none;
         }
