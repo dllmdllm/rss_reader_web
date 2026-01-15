@@ -628,6 +628,39 @@
             gap: 8px;
             flex-wrap: wrap;
         }
+
+        .share-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .share-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-btn svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+
+        .source-tag {
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .source-tag:hover {
+            opacity: 0.7;
+        }
     </style>
 </head>
 
@@ -750,7 +783,7 @@
     </main>
 
     <div class="footer">
-        Updated: 22:30 • Auto-refresh: 600s
+        Updated: 22:34 • Auto-refresh: 600s
     </div>
 
     <div class="back-top" id="backTop">↑</div>
@@ -843,7 +876,10 @@
                         <h3 class="card-title-new">${item.title}</h3>
                         <div class="meta-tags-row">
                             <span class="cat-badge ${item.category}">${catLabel}</span>
-                            <span class="source-tag">${item.source}</span>
+                            <a href="${item.link}" target="_blank" class="source-tag" onclick="event.stopPropagation()">${item.source}</a>
+                            <button class="share-btn" onclick="shareItem(event, '${item.link}', '${item.title.replace(/'/g, "\\'")}')">
+                                <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -895,13 +931,10 @@
                 const body = cardEl.querySelector('.card-body');
                 if (!body.querySelector('.content-text')) {
                     const heroHtml = item.hero_img ? `<img src="${item.hero_img}" class="hero-img">` : '';
-                    body.innerHTML = `
-                    ${heroHtml}
+                    ${ heroHtml }
                     <div class="content-text">${item.content || '(無內容)'}</div>
-                    <div style="margin-top:16px; text-align:right">
-                        <a href="${item.link}" target="_blank" style="color:#007aff; text-decoration:none; font-size:12px">查看原文 →</a>
-                    </div>
-                `;
+                    <!--Bottom Link Removed as per request-- >
+                        `;
                 }
 
                 cardEl.classList.add('expanded');
@@ -920,7 +953,7 @@
             catChips.forEach(chip => {
                 const cat = chip.dataset.cat;
                 if (counts[cat] !== undefined) {
-                    chip.querySelector('.count').textContent = `(${counts[cat]})`;
+                    chip.querySelector('.count').textContent = `(${ counts[cat]})`;
                 }
             });
         }
@@ -964,7 +997,7 @@
 
             // 'All Sources' button matching category color?
             const allBtn = document.createElement('div');
-            allBtn.className = `chip ${state.filterSource === 'all' ? 'active' : ''}`;
+            allBtn.className = `chip ${ state.filterSource === 'all' ? 'active' : '' } `;
             allBtn.dataset.cat = state.filterCat; // Inherit color style
             allBtn.textContent = '所有來源';
             allBtn.onclick = () => { state.filterSource = 'all'; renderSourceChips(); renderList(); };
@@ -980,7 +1013,7 @@
 
                 if (exists) {
                     const btn = document.createElement('div');
-                    btn.className = `chip ${state.filterSource === src ? 'active' : ''}`;
+                    btn.className = `chip ${ state.filterSource === src ? 'active' : '' } `;
                     // Hack: use the current category data-attribute to style these source chips same as parent
                     btn.dataset.cat = state.filterCat;
 
@@ -1035,7 +1068,7 @@
 
         // Marquee Interaction
         function focusCard(link) {
-            const card = document.querySelector(`.card[data-link="${link}"]`);
+            const card = document.querySelector(`.card[data - link= "${link}"]`);
             if (card) {
                 // Scroll to center
                 card.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -1053,13 +1086,26 @@
         // Auto Refresh
         setTimeout(() => location.reload(), 600 * 1000);
 
+        function shareItem(e, url, title) {
+            e.stopPropagation();
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                }).catch(err => console.log('Share dismissed', err));
+            } else {
+                navigator.clipboard.writeText(url).then(() => alert('連結已複製'));
+            }
+        }
+
+
         // Init
         updateCounts();
         renderList();
 
         // Sync Read History to Marquee immediately
         readHistory.forEach(link => {
-            document.querySelectorAll(`.marquee-item[data-link="${link}"]`).forEach(el => {
+            document.querySelectorAll(`.marquee - item[data - link="${link}"]`).forEach(el => {
                 el.classList.add('read');
             });
         });
