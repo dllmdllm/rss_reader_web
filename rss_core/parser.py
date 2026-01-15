@@ -223,6 +223,29 @@ class RTHKParser(BaseParser):
             
         return html_str, imgs
 
+    def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
+        c, m, i = super().parse(html_content, url)
+        
+        # Regex Fallback for RTHK Images (often hidden in JS/Meta)
+        if not m:
+             import re
+             # Find RTHK static images (mfile_...jpg)
+             # Prefer Large (L.jpg)
+             matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[L]\.jpg', html_content)
+             if not matches:
+                 # Fallback to any size if no L found
+                 matches = re.findall(r'https?://newsstatic\.rthk\.hk/images/mfile_\d+_\d+_[A-Z]+\.jpg', html_content)
+                 
+             if matches:
+                 m = matches[0]
+                 if m not in i:
+                     i.insert(0, m)
+                     # Inject into content if not already there
+                     if '<figure class="rthk-hero">' not in c:
+                         hero_html = f'<figure class="rthk-hero"><img src="{m}" style="width:100%; height:auto; display:block; margin-bottom:10px;"/></figure>'
+                         c = hero_html + c
+        return c, m, i
+
 
 class MingPaoParser(BaseParser):
     def _extract_content(self, root, url) -> tuple[str, list[str]]:
