@@ -138,44 +138,6 @@ def main():
     valid_items = valid_items[:DEFAULT_MAX_ITEMS]
     
     print(f">>> [Build] {len(valid_items)} items after filter & sort.")
-    
-    # --- HELPER FUNCTIONS ---
-    def map_cat(url):
-        u = url.lower()
-        if "entertainment" in u: return "ent"
-        if "/ent/" in u or "_ent" in u or "-ent-" in u: return "ent"
-        if "s00007" in u: return "ent"
-        if "tech" in u or "unwire" in u or "epc" in u or "9to5" in u: return "tech"
-        if "intl" in u or "international" in u or "world" in u: return "intl"
-        if "china" in u: return "intl"
-        return "news"
-
-    def clean_source_name(txt):
-        if not txt: return "News"
-        t = txt.lower()
-        if "mingpao" in t: return "MingPao"
-        if "hk01" in t: return "HK01"
-        if "rthk" in t: return "RTHK"
-        if "on.cc" in t: return "on.cc"
-        if "singtao" in t or "stheadline" in t: return "Singtao"
-        if "cnbeta" in t: return "CNBeta"
-        if "unwire" in t: return "unwire.hk"
-        if "hkepc" in t: return "HKEPC"
-        if "9to5" in t: return "9to5Mac"
-        if "witness" in t: return "The Witness"
-        return "News"
-
-    def process_image_url(url):
-        return url
-
-    # Pre-process basic fields
-    from rss_core.parser import to_trad
-    for item in valid_items:
-        item.source = clean_source_name(item.source)
-        if not item.category:
-            item.category = map_cat(item.link)
-        if "cnbeta" in item.link or "cnbeta" in item.source.lower():
-            item.title = to_trad(item.title)
 
     # 5. Enrich (Images & Fulltext)
     # This is critical. We need to download images locally.
@@ -221,20 +183,63 @@ def main():
                 except Exception: pass
         return item
 
-    # Parallelize Enrichment
-    print(">>> [Build] Enriching items (Fulltext & Images) in parallel...")
-    with ThreadPoolExecutor(max_workers=10) as executor:
-        # Use as_completed to progress, but we need to map results back to ordered list
-        futures = {executor.submit(enrich_job, item): item for item in valid_items}
-        for future in as_completed(futures):
-            try:
-                future.result()
-            except Exception as e:
-                print(f"Enrichment error: {e}")
+    print(">>> [Build] Enriching items (Fulltext & Images)...")
+    
+    def process_image_url(url):
+        # Hotlinking Mode: Return original URL directly.
+        # This avoids downloading images locally and fixes the 404 issue on GitHub Pages
+        # since the local 'images/' folder is gitignored.
+        return url
 
-    # Final Construction (Ordered)
+    final_data_list = []
+    
+    def map_cat(url):
+        u = url.lower()
+        # Ent: stricter check to allow 'content'/'component' in URLs
+        if "entertainment" in u: return "ent"
+        if "/ent/" in u or "_ent" in u or "-ent-" in u: return "ent"
+        # Mingpao s00007 is entertainment
+        if "s00007" in u: return "ent"
+        
+        if "tech" in u or "unwire" in u or "epc" in u or "9to5" in u: return "tech"
+        if "intl" in u or "international" in u or "world" in u: return "intl"
+        if "china" in u: return "intl"
+        return "news"
+
+
+    def clean_source_name(txt):
+        if not txt: return "News"
+        t = txt.lower()
+        if "mingpao" in t: return "MingPao"
+        if "hk01" in t: return "HK01"
+        if "rthk" in t: return "RTHK"
+        if "on.cc" in t: return "on.cc"
+        if "singtao" in t or "stheadline" in t: return "Singtao"
+        if "cnbeta" in t: return "CNBeta"
+        if "unwire" in t: return "unwire.hk"
+        if "hkepc" in t: return "HKEPC"
+        if "9to5" in t: return "9to5Mac"
+        if "witness" in t: return "The Witness"
+        return "News"
+
     for item in valid_items:
-        # 3. Process Hero Image (already enriched in job)
+        # Pre-enrich strict logic
+        # 0. Clean Source
+        item.source = clean_source_name(item.source)
+        
+        # 1. Assign Category (if not pre-assigned by fetch_job)
+        if not item.category:
+            item.category = map_cat(item.link)
+        
+        # 1.5 Translate Title if CNBeta
+        if "cnbeta" in item.link or "cnbeta" in item.source:
+             item.title = to_trad(item.title)
+
+        
+        # 2. Enrich content if needed
+        enrich_job(item) 
+        
+        # 3. Process Hero Image
         local_hero = None
         if item.rss_image:
             local_hero = process_image_url(item.rss_image)
@@ -242,7 +247,6 @@ def main():
         # 4. Construct JSON Dict
         item_dict = {
             "title": item.title,
-            "id": None, # Will be set in JS
             "link": item.link,
             "pub_ts": int(item.pub_dt.timestamp()),
             "pub_fmt": item.pub_dt.strftime("%m-%d %H:%M"),
@@ -250,6 +254,7 @@ def main():
             "category": item.category,
             "hero_img": local_hero or "",
             "content": item.content_html or item.content_text or "",
+            # Extract simple text for search
             "search_text": clean_content_text(item.title + " " + (item.content_text or ""))[:1000] 
         }
         final_data_list.append(item_dict)
