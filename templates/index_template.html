@@ -331,18 +331,16 @@
         .card.focus-glow::after {
             content: '';
             position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            background: linear-gradient(90deg, #00C6FF, #0072FF, #FF00FF, #00C6FF);
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            /* Sharp Siri Gradient */
+            background: linear-gradient(90deg, #33ccff, #007aff, #ff00cc, #33ccff);
             background-size: 300% 300%;
-            border-radius: 16px;
-            /* slightly larger than card */
+            border-radius: 15px;
             z-index: -1;
             animation: flow-glow 3s linear infinite;
-            filter: blur(6px);
-            opacity: 0.8;
         }
 
         /* Collapsed View */
