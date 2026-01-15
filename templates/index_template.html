@@ -336,12 +336,18 @@
             left: -3px;
             right: -3px;
             bottom: -3px;
-            /* Yellow Gold Glow */
             background: linear-gradient(90deg, #FFD700, #FFFF00, #FFA500, #FFD700);
             background-size: 300% 300%;
             border-radius: 15px;
-            z-index: -1;
+            z-index: 2;
+            /* On Top */
             animation: flow-glow 3s linear infinite;
+            pointer-events: none;
+            padding: 3px;
+            /* Frame Thickness */
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
         }
 
         /* Collapsed View */
