@@ -70,6 +70,46 @@
             gap: 10px;
         }
 
+        .font-size-btn {
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            color: #333;
+            flex-shrink: 0;
+        }
+
+        /* Font Sizing Classes applied to Body */
+
+        /* Level 1 (Default): Title 17px, Content 16px */
+
+        /* Level 2: Large */
+        body.font-lg .card-title-new {
+            font-size: 20px !important;
+        }
+
+        body.font-lg .content-text {
+            font-size: 19px !important;
+            line-height: 1.6;
+        }
+
+        /* Level 3: XL */
+        body.font-xl .card-title-new {
+            font-size: 24px !important;
+        }
+
+        body.font-xl .content-text {
+            font-size: 22px !important;
+            line-height: 1.6;
+        }
+
         .title {
             font-weight: 700;
             font-size: 18px;
@@ -709,11 +749,17 @@
 
         <header class="site-header">
             <div class="search-row">
-                <div class="title">即時焦點</div>
                 <div class="search-input-wrap">
-                    <input type="text" id="searchInput" placeholder="搜尋標題或內容...">
+                    <input type="text" id="searchInput" placeholder="搜尋內容...">
                     <button class="clear-btn" id="clearBtn">✕</button>
                 </div>
+                <button class="font-size-btn" id="fontBtn" onclick="toggleFontSize()">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                        <path
+                            d="M2.53 19.65l1.34-3.6h5.45l1.34 3.6H13L7.85 6h-2.1L.6 19.65h1.93zm2.5-6.79l1.9-5.18 1.9 5.18H5.03zm17.97 6.79l-2-5.4L18.88 19.65H23zm-6.04-8.8h1.2l3.4 9.1 1.05-2.83-2.61-7.07h-3.04z" />
+                    </svg>
+                    <!-- Simple Aa Icon representation or just SVG -->
+                </button>
             </div>
             <div class="filter-section">
                 <!-- Level 1: Categories -->
@@ -1060,6 +1106,24 @@
 
         // Init
         updateCounts();
+
+        // Font Size Init
+        let fontLevel = parseInt(localStorage.getItem('fontSizeLevel')) || 0;
+        // 0: Normal, 1: Large, 2: XL
+        applyFontSize(fontLevel);
+
+        function toggleFontSize() {
+            fontLevel = (fontLevel + 1) % 3;
+            applyFontSize(fontLevel);
+            localStorage.setItem('fontSizeLevel', fontLevel);
+        }
+
+        function applyFontSize(level) {
+            document.body.classList.remove('font-lg', 'font-xl');
+            if (level === 1) document.body.classList.add('font-lg');
+            if (level === 2) document.body.classList.add('font-xl');
+        }
+
         renderList();
 
         // Sync Read History to Marquee immediately
