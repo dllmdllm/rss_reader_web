@@ -2724,5 +2724,28 @@
       "../image/grey.gif"
     ],
     "ts": 1768487210
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840071-20260115.htm": {
+    "content": "<div><div class=\"itemFullText\">\r\n\t\t\t路透社引述消息人士報道，美軍駐卡塔爾烏代德空軍基地已下調安全警報級別，星期三撤離基地的美軍飛機正逐步返回基地，亦有消息人士說，一些被建議離開基地的人員獲准返回。<br>\r\n<br>\r\n卡塔爾國際媒體辦公室星期三發表聲明說，為應對當前地區緊張局勢，美軍駐紮烏代德空軍基地的部分人員將會撤走。<br>\r\n<br>\r\n曾表示不排除軍事介入伊朗局勢的美國總統特朗普較早時說，從非常重要的消息來源得知，伊朗國內已停止殺戮，而且沒有大規模處決被扣押人士的計劃。被問到是否排除軍事干預的可能，特朗普說拭目以待，美方會觀察事態發展。\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840071_1_L_20260115225502.jpg"
+    ],
+    "ts": 1768489778
+  },
+  "https://news.rthk.hk/rthk/ch/component/k2/1840070-20260115.htm": {
+    "content": "<div><div class=\"itemFullText\">\r\n\t\t\t醫管局提醒市民，提防一個偽冒為「醫院管理局醫生證明書驗證網站」的虛假網站，局方高度關注事件，已聯絡相關機構移除網站，並已將事件轉交由警方調查。<br>\r\n　　 <br>\r\n醫管局表示，這個虛假網站偽冒可核實公立醫院發出的電子醫生證明書，從而誘使市民輸入病人姓名及病假日期等資料。發言人強調，醫管局與該網站沒有任何關連，呼籲市民切勿向來歷不明的可疑網站，提供任何個人資料。<br>\r\n　　 <br>\r\n發言人指出，醫管局自2023年3月推出電子醫生證明書，每張電子醫生證明書都印有經加密的二維碼，市民如需核實電子醫生證明書，掃描二維碼便可前往正確的官方網站進行核實。<br>\r\n　　 <br>\r\n　　\t\t</div>\r\n\t\t\r\n\t\t</div>",
+    "images": [
+      "https://newsstatic.rthk.hk/frontend_images/images/rthk/internal/waiting.gif",
+      "https://newsstatic.rthk.hk/images/mfile_1840070_1_L_20260115225655.jpg"
+    ],
+    "ts": 1768489778
+  },
+  "https://news.mingpao.com/ins/%e5%9c%8b%e9%9a%9b/article/20260115/s00005/1768488740618/%e4%bc%8a%e6%9c%97%e7%b4%85%e6%96%b0%e6%9c%88%e6%9c%83%e4%ba%ba%e5%93%a1%e5%9f%b7%e5%8b%a4%e6%ae%89%e8%81%b7-%e5%9c%8b%e9%9a%9b%e7%b4%85%e5%8d%81%e5%ad%97%e6%9c%83%e6%b7%b1%e8%a1%a8%e9%97%9c%e5%88%87": {
+    "content": "<div><article class=\"txt4\">\r\n\t\t\t\t\t\t<div id=\"upper\"><p>國際紅十字與紅新月會聯合會（IFRC）周四表示，伊朗西北部一名紅新月會本地職員在執勤時遇害，另有五人受傷。伊朗正值全國示威浪潮，成為自1979年以來對伊斯蘭共和國最大威脅。</p></div>\r\n\t\t\t\t\t\t<!--adv banner-->\r\n\t\t\t\t\t\t<div id=\"lower\">\r\n\t\t\t\t\t\t\t<div class=\"articlelogin\"><p>IFRC指出，上周六（10日）吉蘭省（Gilan）發生的事件，導致拉蒂菲（Amir Ali Latifi）殉職，其五名同事受傷。IFRC發言人對法新社表示，目前仍未完全掌握事件全貌，包括六人是否在同一事故中死傷。</p><p>人權組織表示，伊朗當局對示威採取零容忍政策，鎮壓已造成至少3428人死亡，並指政權利用網絡封鎖掩蓋暴力行為。</p><p>IFRC強調，伊朗紅新月會是一個秉持人道、公正、中立和獨立原則的人道組織，呼籲各方尊重紅新月標誌，保障救援人員安全，確保救援得以持續進行。</p><p>「我們與伊朗紅新月會及所有在艱難時刻提供生命救援的醫療與人道工作者同在。人道工作者必須受到保護。」</p><h2>（法新社）</h2></div>\t\t\t\t\t\t</div>\r\n\t\t\t\t\t\t<div class=\"clr\"></div>\r\n\t\t\t\t\t\t<div id=\"ssm2\" class=\"ssm\"></div>\r\n\t\t\t\t\t</article>\r\n\t\t\t\t\t</div>",
+    "images": [
+      "../image/grey.gif"
+    ],
+    "ts": 1768489779
   }
 }

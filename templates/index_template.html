@@ -369,7 +369,8 @@
             padding: 0 12px;
             display: flex;
             flex-direction: column;
-            gap: 16px;
+            gap: 10px;
+            /* Tighter spacing */
         }
 
         .card {
@@ -411,20 +412,20 @@
         .card.focus-glow::after {
             content: '';
             position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
+            top: -6px;
+            left: -6px;
+            right: -6px;
+            bottom: -6px;
             /* Siri Gradient */
             background: linear-gradient(90deg, #33ccff, #007aff, #ff00cc, #33ccff);
             background-size: 300% 300%;
-            border-radius: 15px;
+            border-radius: 16px;
             z-index: 2;
             /* On Top */
             animation: flow-glow 3s linear infinite;
             pointer-events: none;
-            padding: 3px;
-            /* Frame Thickness */
+            padding: 6px;
+            /* Thicker Frame */
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
