@@ -60,6 +60,8 @@
             background: var(--bg-body);
             color: var(--text-main);
             padding-bottom: 80px;
+            /* Offset for fixed marquee + sticky nav */
+            padding-top: calc(150px + env(safe-area-inset-top));
             /* Support for hardware acceleration */
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
@@ -70,13 +72,12 @@
         /* --- Header & Search --- */
         .top-nav-wrapper {
             position: sticky;
-            top: 31px;
-            /* Height of the fixed marquee */
+            top: calc(31px + env(safe-area-inset-top));
+            /* Sit below marquee + island */
             z-index: 2000;
             background: rgba(245, 245, 247, 0.98);
             backdrop-filter: blur(10px);
-            padding-top: max(4px, env(safe-area-inset-top));
-            /* Dynamic Island Space */
+            padding-top: 4px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
         }
 
@@ -327,6 +328,7 @@
 
         /* --- Marquee --- */
         /* --- Fixed Marquee --- */
+        /* --- Fixed Marquee --- */
         .marquee {
             position: fixed;
             top: 0;
@@ -334,11 +336,13 @@
             right: 0;
             z-index: 2500;
             background: #5c5c5e;
-            /* Lighter Slate Gray */
             color: #ffffff;
             font-size: 13px;
-            padding: 7px 0;
-            height: 31px;
+            /* Add padding to move text below Dynamic Island */
+            padding-top: env(safe-area-inset-top);
+            height: calc(31px + env(safe-area-inset-top));
+            display: flex;
+            align-items: center;
             white-space: nowrap;
             overflow: hidden;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
