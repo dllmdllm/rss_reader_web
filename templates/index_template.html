@@ -336,10 +336,11 @@
             /* Keep text color */
         }
 
-        .marquee-item:hover {
-            opacity: 1;
-            text-decoration: underline;
-            /* Optional: hover effect */
+        @media (hover: hover) {
+            .marquee-item:hover {
+                opacity: 1;
+                text-decoration: underline;
+            }
         }
 
         .marquee-item.read {
@@ -348,8 +349,10 @@
             color: #999;
         }
 
-        .marquee:hover .marquee-content {
-            animation-play-state: paused;
+        @media (hover: hover) {
+            .marquee:hover .marquee-content {
+                animation-play-state: paused;
+            }
         }
 
         @keyframes scroll {
