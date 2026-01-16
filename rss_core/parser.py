@@ -105,6 +105,7 @@ XPATHS = {
         "//article//img/@src"
     ],
     "cnbeta_fullhtml": [
+         "//div[contains(@class,'cnbeta-article-body')]",
          "//div[@id='article_content']",
          "//div[contains(@class,'article-content')]"
     ],
@@ -442,9 +443,14 @@ class CNBetaParser(BaseParser):
         nodes = root.xpath(xpath_union(XPATHS["cnbeta_fullhtml"]))
         if not nodes: return "", []
         
+        node = nodes[0]
+        # Remove share sidebars/garbage if we picked the wrapper
+        for bad in node.xpath(".//*[contains(@class,'main__left') or contains(@class,'article-share')]"):
+             bad.drop_tree()
+             
         # NOTE: We NO LONGER inject a hero image here because the template handles it separately,
         # and it often leads to duplicates if the image is already in the article body.
-        html_str = lxml.html.tostring(nodes[0], encoding="unicode")
+        html_str = lxml.html.tostring(node, encoding="unicode")
         imgs = root.xpath(xpath_union(XPATHS["cnbeta_images"]))
         return html_str, imgs
 
