@@ -591,13 +591,21 @@ class HK01Parser(BaseParser):
                  # HK01 uses data-src usually
                  all_imgs = []
                  for img in article_node.xpath(".//img"):
-                     real_src = img.get('data-src') or img.get('src')
+                     real_src = img.get('data-original') or img.get('data-src') or img.get('src')
                      if real_src:
                          img.set('src', real_src)
                          all_imgs.append(real_src)
                          
                  html_str = lxml.html.tostring(article_node, encoding="unicode")
-                 return html_str, (all_imgs[0] if all_imgs else ""), all_imgs
+                 
+                 # Hero Image Fallback (Meta OG)
+                 hero_img = all_imgs[0] if all_imgs else ""
+                 if not hero_img:
+                     meta_imgs = root.xpath('//meta[@property="og:image"]/@content')
+                     if meta_imgs:
+                         hero_img = meta_imgs[0]
+                 
+                 return html_str, hero_img, all_imgs
                  
         except Exception:
             pass
