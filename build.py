@@ -192,6 +192,7 @@ async def main():
             item.content_html = cached.get("content", "")
             imgs = cached.get("images", [])
             main_img = cached.get("main_image", "")
+            if cached.get("title"): item.title = cached["title"] # Load title from cache
             if main_img: item.rss_image = main_img
             elif imgs: item.rss_image = imgs[0]
         else:
@@ -199,6 +200,23 @@ async def main():
             html_text = await fetcher.fetch_full_text(item.link)
             if html_text:
                 try: 
+                    # Fix HK01 Title if generic
+                    if "HK01" in item.source and ("Article" in item.title or item.title.upper() == "HK01 ARTICLE"):
+                        # Try og:title with flexible regex
+                        tm = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html_text)
+                        if not tm:
+                             tm = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html_text)
+                        
+                        if tm:
+                            res_t = tm.group(1).split("｜")[0].split("|")[0].strip()
+                            if res_t: item.title = res_t
+                        else:
+                            # Try <title> tag
+                            tm2 = re.search(r'<title>(.*?)</title>', html_text, re.I | re.S)
+                            if tm2:
+                                res_t = tm2.group(1).split("｜")[0].split("|")[0].strip()
+                                if res_t: item.title = res_t
+
                     # Parsing can be thread-pooled if very heavy
                     c_html, main_img, all_imgs = p.parse(html_text, item.link)
                     c_html = await p.clean_html(c_html, item.link, main_img=main_img)
@@ -210,6 +228,7 @@ async def main():
                             "content": c_html,
                             "main_image": main_img,
                             "images": all_imgs,
+                            "title": item.title, # Save title to cache
                             "ts": int(time.time())
                         }
                 except Exception: pass
