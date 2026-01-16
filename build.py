@@ -87,38 +87,12 @@ async def main():
     # 4. Dedupe & Filter
     hk_tz = ZoneInfo("Asia/Hong_Kong")
     now = datetime.now(hk_tz)
-    cutoff = now - timedelta(hours=DEFAULT_LOOKBACK_HOURS)
     
-    valid_items = []
-    seen_links = set()
-    for item in raw_items:
-        try:
-            if not item.pub_dt: continue
-            if item.pub_dt.tzinfo is None:
-                 item.pub_dt = item.pub_dt.replace(tzinfo=hk_tz)
-            else:
-                 item.pub_dt = item.pub_dt.astimezone(hk_tz)
-            
-            # Future date correction (e.g. MingPao cache issues)
-            if item.pub_dt > now:
-                item.pub_dt = now
-
-            if item.pub_dt < cutoff: continue
-            if item.link in seen_links: continue
-            seen_links.add(item.link)
-            valid_items.append(item)
-        except Exception as e:
-            continue
-
-    valid_items.sort(key=lambda x: x.pub_dt, reverse=True)
-    valid_items = valid_items[:DEFAULT_MAX_ITEMS]
-    print(f">>> [Build] {len(valid_items)} items after filter & sort.")
-
-    # --- HELPER FUNCTIONS ---
+    # helper for category mapping (moved up)
     def map_cat(url):
         u = url.lower()
         if "entertainment" in u or "/ent/" in u or "s00007" in u: return "ent"
-        if any(x in u for x in ["tech", "unwire", "epc", "9to5"]): return "tech"
+        if any(x in u for x in ["tech", "unwire", "epc", "9to5", "cnbeta"]): return "tech"
         if any(x in u for x in ["intl", "international", "world", "china"]): return "intl"
         return "news"
 
@@ -135,11 +109,64 @@ async def main():
         return "News"
 
     from rss_core.parser import get_parser, to_trad
+
+    tech_items = []
+    other_items = []
+    seen_links = set()
+    
+    cutoff_others = now - timedelta(hours=6)
+    # Optional safety cutoff for Tech to prevent issues with very old items if feed is huge, 
+    # but user asked for "latest 50", so we prioritize count. 
+    # Let's still set a reasonable safety margin of 7 days for Tech just in case.
+    cutoff_tech_safety = now - timedelta(days=7)
+
+    for item in raw_items:
+        try:
+            if not item.pub_dt: continue
+            if item.pub_dt.tzinfo is None:
+                 item.pub_dt = item.pub_dt.replace(tzinfo=hk_tz)
+            else:
+                 item.pub_dt = item.pub_dt.astimezone(hk_tz)
+            
+            if item.pub_dt > now:
+                item.pub_dt = now
+
+            if item.link in seen_links: continue
+            
+            # Category Check
+            # (If item.category is already set by parser override e.g. RTHK, use it, else map)
+            cat = item.category if item.category else map_cat(item.link)
+            
+            # Filter Logic
+            if cat == 'tech':
+                if item.pub_dt < cutoff_tech_safety: continue
+                seen_links.add(item.link)
+                tech_items.append(item)
+            else:
+                if item.pub_dt < cutoff_others: continue
+                seen_links.add(item.link)
+                other_items.append(item)
+
+        except Exception as e:
+            continue
+
+    # Tech: Keep latest 50
+    tech_items.sort(key=lambda x: x.pub_dt, reverse=True)
+    tech_items = tech_items[:50]
+    
+    # Others: Already time-filtered
+    # Combine
+    valid_items = tech_items + other_items
+    valid_items.sort(key=lambda x: x.pub_dt, reverse=True)
+    
+    # Apply Metadata Cleaning (Source, Title, etc) to valid items
     for item in valid_items:
         item.source = clean_source_name(item.source)
         if not item.category: item.category = map_cat(item.link)
         if "cnbeta" in item.link or "cnbeta" in item.source.lower():
             item.title = to_trad(item.title)
+
+    print(f">>> [Build] {len(valid_items)} items after filter & sort (Tech: {len(tech_items)}, Others: {len(other_items)}).")
 
     # 5. Enrich (Async)
     async def enrich_job(item):

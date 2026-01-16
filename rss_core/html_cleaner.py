@@ -141,9 +141,13 @@ async def clean_html_fragment(
             
             # Attempt to remove duplicate title at the start
             # We assume the first significant text block might be the title
-            # This is a heuristic: if the first paragraph is shortish and doesn't end with punctuation/is not a sentence, it might be a title.
-            # But safer: RTHK often puts title in a specific structure or bold.
             pass
+            
+            # Remove gif images (often spinners/tracking) for RTHK
+            for img in root.xpath(".//img"):
+                src = (img.get("src") or "").lower()
+                if ".gif" in src:
+                    img.drop_tree()
 
         if "mingpao.com" not in base_url:
             for node in root.xpath(
