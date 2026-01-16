@@ -185,53 +185,55 @@ async def main():
 
     print(f">>> [Build] {len(valid_items)} items after filter & sort (Tech: {len(tech_items)}, Others: {len(other_items)}).")
 
-    # 5. Enrich (Async)
+    enrich_sem = asyncio.Semaphore(5)
     async def enrich_job(item):
         if item.link in fulltext_cache:
             cached = fulltext_cache[item.link]
             item.content_html = cached.get("content", "")
             imgs = cached.get("images", [])
             main_img = cached.get("main_image", "")
-            if cached.get("title"): item.title = cached["title"] # Load title from cache
+            if cached.get("title"): item.title = cached["title"] 
             if main_img: item.rss_image = main_img
             elif imgs: item.rss_image = imgs[0]
-        else:
+            return
+
+        async with enrich_sem:
             p = get_parser(item.link, fetcher)
             html_text = await fetcher.fetch_full_text(item.link)
-            if html_text:
-                try: 
-                    # Fix HK01 Title if generic
-                    if "HK01" in item.source and ("Article" in item.title or item.title.upper() == "HK01 ARTICLE"):
-                        # Try og:title with flexible regex
-                        tm = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html_text)
-                        if not tm:
-                             tm = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html_text)
-                        
-                        if tm:
-                            res_t = tm.group(1).split("｜")[0].split("|")[0].strip()
-                            if res_t: item.title = res_t
-                        else:
-                            # Try <title> tag
-                            tm2 = re.search(r'<title>(.*?)</title>', html_text, re.I | re.S)
-                            if tm2:
-                                res_t = tm2.group(1).split("｜")[0].split("|")[0].strip()
-                                if res_t: item.title = res_t
+            if not html_text: return
 
-                    # Parsing can be thread-pooled if very heavy
-                    c_html, main_img, all_imgs = p.parse(html_text, item.link)
-                    c_html = await p.clean_html(c_html, item.link, main_img=main_img)
-                    if c_html:
-                        item.content_html = c_html
-                        if all_imgs: pass # already in list
-                        if main_img: item.rss_image = main_img
-                        fulltext_cache[item.link] = {
-                            "content": c_html,
-                            "main_image": main_img,
-                            "images": all_imgs,
-                            "title": item.title, # Save title to cache
-                            "ts": int(time.time())
-                        }
-                except Exception: pass
+            try: 
+                # Fix HK01 Title aggressively
+                if "HK01" in item.source:
+                    tm = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html_text)
+                    if not tm:
+                        tm = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html_text)
+                    
+                    if tm:
+                        res_t = tm.group(1).split("｜")[0].split("|")[0].strip()
+                        if res_t: item.title = res_t
+                    else:
+                        # Fallback to <title>
+                        tm2 = re.search(r'<title>(.*?)</title>', html_text, re.I | re.S)
+                        if tm2:
+                            res_t = tm2.group(1).split("｜")[0].split("|")[0].strip()
+                            if res_t: item.title = res_t
+
+                c_html, main_img, all_imgs = p.parse(html_text, item.link)
+                c_html = await p.clean_html(c_html, item.link, main_img=main_img)
+                
+                if c_html:
+                    item.content_html = c_html
+                    if main_img: item.rss_image = main_img
+                
+                fulltext_cache[item.link] = {
+                    "content": c_html or "",
+                    "main_image": main_img or "",
+                    "images": all_imgs or [],
+                    "title": item.title,
+                    "ts": int(time.time())
+                }
+            except Exception: pass
 
     print(">>> [Build] Enriching items (Fulltext & Images) asynchronously...")
     await asyncio.gather(*[enrich_job(item) for item in valid_items])

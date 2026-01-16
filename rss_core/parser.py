@@ -605,6 +605,12 @@ class HK01Parser(BaseParser):
                      if meta_imgs:
                          hero_img = meta_imgs[0]
                  
+                 # If content too short, fallback to paragraph joining
+                 if len(html_str) < 500:
+                     pars = article_node.xpath(".//p")
+                     if pars:
+                         html_str = "".join(lxml.html.tostring(p, encoding="unicode") for p in pars)
+
                  return html_str, hero_img, all_imgs
                  
         except Exception:
