@@ -479,31 +479,101 @@ class CNBetaParser(BaseParser):
         
 
 class HK01Parser(BaseParser):
-    """HK01 uses hidden JSON in the HTML usually."""
+    """HK01 uses Next.js, so we try to extract from __NEXT_DATA__ for perfect ordering."""
+    
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
-        # Try Regex extract JSON block if standard parse fails
-        # But for now, let's look for standard article body which HK01 also renders
-        # Or better: rely on your original logic which parsed the API response directly in fetcher?
-        # Actually in V1, you fetched list via API, but content via HTML.
-        # Let's stick to HTML scraping for content.
-        
+        # 1. Try __NEXT_DATA__ JSON Extraction (Gold Standard for Order)
+        try:
+            import json
+            import re
+            
+            # Find the JSON blob
+            match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', html_content, re.S)
+            if match:
+                data = json.loads(match.group(1))
+                
+                # Navigate standard HK01 Next.js structure
+                # props -> pageProps -> article -> blocks
+                # Note: The path might vary slightly, so we look for 'article' safely
+                
+                article = None
+                try:
+                    props = data.get('props', {}).get('pageProps', {})
+                    # Direct article
+                    if 'article' in props:
+                        article = props['article']
+                    # Sometimes provided as 'initialState'
+                    elif 'initialState' in props:
+                        # deeper search provided if key exists
+                        pass 
+                except: pass
+                
+                # If explicit path failed, search for 'blocks' in the whole blob? Too risky.
+                # Let's stick to 'props.pageProps.article' which is standard for article pages.
+                
+                if article and 'blocks' in article:
+                    html_parts = []
+                    all_imgs = []
+                    
+                    for block in article['blocks']:
+                        b_type = block.get('type')
+                        b_data = block.get('data', {})
+                        
+                        if b_type == 'text':
+                            # Text block
+                            txt = b_data.get('text', '')
+                            if txt:
+                                html_parts.append(f'<p>{txt}</p>')
+                                
+                        elif b_type == 'image':
+                            # Image block
+                            # URL usually in 'url' or 'originalUrl'
+                            img_url = b_data.get('originalUrl') or b_data.get('url')
+                            caption = b_data.get('caption', '')
+                            
+                            if img_url:
+                                all_imgs.append(img_url)
+                                fig = f'<figure class="hk01-image"><img src="{img_url}" style="width:100%; display:block;"/><figcaption>{caption}</figcaption></figure>'
+                                html_parts.append(fig)
+                                
+                        elif b_type == 'header':
+                            # Subheader
+                            txt = b_data.get('text', '')
+                            if txt:
+                                html_parts.append(f'<h3>{txt}</h3>')
+
+                    if html_parts:
+                        content_html = "".join(html_parts)
+                        main_img = all_imgs[0] if all_imgs else ""
+                        return content_html, main_img, all_imgs
+
+        except Exception as e:
+            # print(f"HK01 JSON parse failed: {e}")
+            pass
+            
+        # 2. Fallback to HTML Parsing (Improved)
         try:
             root = lxml.html.fromstring(html_content)
             
-            # HK01 images
-            imgs = []
-            # They put images in figure tags
-            for img in root.xpath("//article//img/@src"):
-                imgs.append(img)
-                
-            # Content
+            # Remove "Extension Reading" / "Related"
+            for bad in root.xpath(".//*[contains(@class, '延伸閱讀')]"):
+                bad.drop_tree()
+            
             articles = root.xpath("//article")
             if articles:
-                 # Remove "Extension"
-                 for bad in articles[0].xpath(".//*[contains(@class, '延伸閱讀')]"):
-                     bad.drop_tree()
-                 html_str = lxml.html.tostring(articles[0], encoding="unicode")
-                 return html_str, (imgs[0] if imgs else ""), imgs
+                 article_node = articles[0]
+                 
+                 # Fix Lazy Loading Images: data-src -> src
+                 # HK01 uses data-src usually
+                 all_imgs = []
+                 for img in article_node.xpath(".//img"):
+                     real_src = img.get('data-src') or img.get('src')
+                     if real_src:
+                         img.set('src', real_src)
+                         all_imgs.append(real_src)
+                         
+                 html_str = lxml.html.tostring(article_node, encoding="unicode")
+                 return html_str, (all_imgs[0] if all_imgs else ""), all_imgs
                  
         except Exception:
             pass
