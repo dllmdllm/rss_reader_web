@@ -1165,7 +1165,7 @@
 
             const groupGeneral = ['HK01', 'MingPao', 'on.cc', 'RTHK', 'Singtao']; // Alphabetical-ish/User order? User asked Alphabetical.
             // Alphabetical: HK01, MingPao, on.cc, RTHK, Singtao
-            const groupTech = ['9to5Mac', 'CNBeta', 'HKEPC', 'unwire.hk'];
+            const groupTech = ['9to5Mac', 'CNBeta', 'HKEPC', 'unwire.hk', 'HK01', 'on.cc'];
 
             let targetSources = [];
 
@@ -1174,22 +1174,13 @@
             } else if (state.filterCat === 'tech') {
                 targetSources = groupTech;
             } else {
-                // 'all' -> Show combined or hide? Usually nice to show all unique sources sorted
-                // But user didn't specify. Let's show all available sorted.
+                // 'all' -> Show combined
                 const allSet = new Set();
                 newsItems.forEach(i => allSet.add(i.source));
                 targetSources = Array.from(allSet).sort();
             }
 
             sourceRow.innerHTML = '';
-
-            // Only show row if not 'all' or if we want to allow filtering in 'all' too
-            // User requirement: "News... have [list]" implies sub-menu appears on selection.
-            if (state.filterCat === 'all') {
-                sourceRow.classList.remove('show');
-                return;
-            }
-
             sourceRow.classList.add('show');
 
             // Calculate Counts for Sources regarding Current Category
