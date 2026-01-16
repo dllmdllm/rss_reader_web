@@ -360,60 +360,73 @@ class SingtaoParser(BaseParser):
         
         all_imgs = []
         
-        # Iterate all children to find gallery tags
-        # Note: xpath matching by name prefix is tricky in 1.0, so we iterate all and check tag
+        # Iterate all children to find gallery tags - Collect first to avoid modification issues during iteration
+        gallery_tags = []
         for element in node.xpath(".//*"):
             if isinstance(element.tag, str) and element.tag.startswith("gallery-"):
-                gallery_key = element.tag
-                # Now try to find this key in raw_html
-                # Pattern: "gallery-12345": [ { ... "src": "..." } ]
-                # We use regex to find the array for this specific key
-                # This avoids parsing the huge full JSON
-                g_regex = rf'"{gallery_key}"\s*:\s*(\[.*?\])'
-                g_match = re.search(g_regex, self.raw_html, re.S)
-                
-                if g_match:
-                    try:
-                        import ast
-                        # It's usually JS objects, so ast.literal_eval might fail if keys aren't quoted.
-                        # But STHeadline usually puts keys in quotes in that JSON blob.
-                        # If strict JSON fails, we can try to just regex extracts URLs.
-                        g_data_str = g_match.group(1)
-                        
-                        # Extract all "src": "URL"
-                        img_urls = re.findall(r'"src"\s*:\s*"([^"]+)"', g_data_str)
-                        if not img_urls:
-                             # Try srcset or other fields? Usually src is there.
-                             pass
-                             
-                        if img_urls:
-                            # Create a new structure: <div class="st-gallery"> <img...> <img...> </div>
-                            new_div = lxml.html.Element("div", **{"class": "st-gallery-injected"})
-                            for i_url in img_urls:
-                                if i_url.startswith("//"): i_url = "https:" + i_url
-                                img_el = lxml.html.Element("img", src=i_url)
-                                img_el.set("class", "st-gallery-img")
-                                img_el.set("style", "width:100%; height:auto; margin-bottom:8px;")
-                                new_div.append(img_el)
-                                all_imgs.append(i_url)
-                                
-                            # Replace the <gallery-xxx> tag with this new div
-                            element.getparent().replace(element, new_div)
-                    except:
-                        pass
+                gallery_tags.append(element)
+
+        for element in gallery_tags:
+            gallery_key = element.tag
+            # Now try to find this key in raw_html
+            # Pattern: "gallery-12345": [ { ... "src": "..." } ]
+            # We use regex to find the array for this specific key
+            g_regex = rf'"{gallery_key}"\s*:\s*(\[.*?\])'
+            g_match = re.search(g_regex, self.raw_html, re.S)
+            
+            replacement_done = False
+            if g_match:
+                try:
+                    import ast
+                    # It's usually JS objects, so ast.literal_eval might fail if keys aren't quoted.
+                    # But STHeadline usually puts keys in quotes in that JSON blob.
+                    # If strict JSON fails, we can try to just regex extracts URLs.
+                    g_data_str = g_match.group(1)
+                    
+                    # Extract all "src": "URL"
+                    img_urls = re.findall(r'"src"\s*:\s*"([^"]+)"', g_data_str)
+                    
+                    # Clean escaped slashes: https:\/\/ -> https://
+                    img_urls = [u.replace(r'\/', '/') for u in img_urls]
+                    
+                    if img_urls:
+                        # Create a new structure: <div class="st-gallery"> <img...> <img...> </div>
+                        new_div = lxml.html.Element("div", **{"class": "st-gallery-injected"})
+                        for i_url in img_urls:
+                            if i_url.startswith("//"): i_url = "https:" + i_url
+                            img_el = lxml.html.Element("img", src=i_url)
+                            img_el.set("class", "st-gallery-img")
+                            img_el.set("style", "width:100%; height:auto; margin-bottom:8px;")
+                            new_div.append(img_el)
+                            all_imgs.append(i_url)
+                            
+                        # Replace the <gallery-xxx> tag with this new div
+                        parent = element.getparent()
+                        if parent is not None:
+                            parent.replace(element, new_div)
+                            replacement_done = True
+                except Exception as e:
+                    # print(f"Singtao Gallery Error: {e}")
+                    pass
+            
+            # If replacement parsing failed, remove the ugly tag anyway
+            if not replacement_done:
+                 try:
+                     element.drop_tree()
+                 except: pass
 
         # 3. Fallback: If no galleries found but slider exists
         slider_imgs = root.xpath("//div[contains(@class,'std-slider')]//img/@src")
         if slider_imgs:
-             all_imgs.extend(slider_imgs)
+             # Only add unique images
+             new_slider_imgs = [s for s in slider_imgs if s not in all_imgs]
+             all_imgs.extend(new_slider_imgs)
+             
              # If content is short/empty, or no images in content, prepend slider
              if not node.xpath(".//img"):
-                 slider_html = ""
-                 for s_img in slider_imgs:
-                      slider_html += f'<figure><img src="{s_img}" style="width:100%;"/></figure>'
                  # Prepend string injection (modify node is harder to prepend raw string)
                  # Easy way: insert elements
-                 for s_img in reversed(slider_imgs):
+                 for s_img in reversed(new_slider_imgs):
                       new_img = lxml.html.Element("img", src=s_img)
                       node.insert(0, new_img)
 
