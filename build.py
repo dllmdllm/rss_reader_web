@@ -103,17 +103,21 @@ async def main():
         return "news"
 
 
-    def clean_source_name(txt):
-        if not txt: return "News"
-        t = txt.lower()
+    def clean_source_name(txt, url):
+        # Combine source title and URL for robust matching
+        # (e.g. HK01 feed title might be "香港01" which doesn't match "hk01" key, but URL does)
+        search_str = (str(txt) + " " + str(url)).lower()
+        
         mapping = {
             "mingpao": "MingPao", "hk01": "HK01", "rthk": "RTHK", "on.cc": "on.cc",
             "singtao": "Singtao", "stheadline": "Singtao", "cnbeta": "CNBeta",
-            "unwire": "unwire.hk", "hkepc": "HKEPC", "9to5": "9to5Mac", "witness": "The Witness"
+            "unwire": "unwire.hk", "hkepc": "HKEPC", "9to5": "9to5Mac", "witness": "The Witness",
+            "collective": "The Collective", "courtnews": "Court News"
         }
         for k, v in mapping.items():
-            if k in t: return v
-        return "News"
+            if k in search_str: return v
+            
+        return txt if txt else "News"
 
     from rss_core.parser import get_parser, to_trad
 
@@ -168,7 +172,7 @@ async def main():
     
     # Apply Metadata Cleaning (Source, Title, etc) to valid items
     for item in valid_items:
-        item.source = clean_source_name(item.source)
+        item.source = clean_source_name(item.source, item.link)
         if not item.category: item.category = map_cat(item.link)
         if "cnbeta" in item.link or "cnbeta" in item.source.lower():
             item.title = to_trad(item.title)
