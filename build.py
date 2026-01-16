@@ -96,10 +96,16 @@ async def main():
         if "s00004" in u or "s00005" in u: return "intl"
         if "s00007" in u or "s00024" in u: return "ent"
         
-        # General Rules
-        if "entertainment" in u or "/ent/" in u: return "ent"
-        if any(x in u for x in ["tech", "unwire", "epc", "9to5", "cnbeta"]): return "tech"
-        if any(x in u for x in ["intl", "international", "world", "china"]): return "intl"
+        # Mapping for HK01, On.cc and general
+        # Ent
+        if any(x in u for x in ["/entertainment/", "/ent/", "/star/", "娛樂", "娱乐"]): return "ent"
+        
+        # Tech
+        if any(x in u for x in ["tech", "unwire", "epc", "9to5", "cnbeta", "science", "/it/"]): return "tech"
+        
+        # Intl / China (Often categorized as Intl in HK context)
+        if any(x in u for x in ["/intl/", "/international/", "/world/", "/china/", "/cn/", "两岸", "國際", "国际"]): return "intl"
+        
         return "news"
 
 
