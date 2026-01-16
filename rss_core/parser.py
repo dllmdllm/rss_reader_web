@@ -188,6 +188,8 @@ class RTHKParser(BaseParser):
         
         # RTHK images often outside fulltext, in header
         imgs = root.xpath(xpath_union(XPATHS["rthk_images"]))
+        if not imgs:
+            imgs = root.xpath('//meta[@property="og:image"]/@content')
         
         html_str = lxml.html.tostring(nodes[0], encoding="unicode")
         
@@ -541,17 +543,20 @@ class HK01Parser(BaseParser):
                     all_imgs = []
                     
                     for block in article['blocks']:
-                        b_type = block.get('type')
-                        b_data = block.get('data', {})
+                        b_type = block.get('type') or block.get('blockType')
+                        b_data = block.get('data') or block
                         
-                        if b_type == 'text':
-                            # Support multiple text formats
-                            txt = b_data.get('text') or b_data.get('richText') or b_data.get('html', '')
+                        if b_type == 'text' or b_type == 'htmlTokens':
+                            txt = b_data.get('text') or b_data.get('richText') or b_data.get('html')
+                            if not txt and b_type == 'htmlTokens':
+                                tokens = b_data.get('htmlTokens', [])
+                                txt = "".join(t.get('value', '') for t in tokens if t.get('type') == 'text')
                             if txt:
                                 html_parts.append(f'<p>{txt}</p>')
                                 
                         elif b_type == 'image':
-                            img_url = b_data.get('originalUrl') or b_data.get('url')
+                            img_obj = b_data.get('image') or b_data
+                            img_url = img_obj.get('originalUrl') or img_obj.get('url')
                             caption = b_data.get('caption', '')
                             
                             if img_url:

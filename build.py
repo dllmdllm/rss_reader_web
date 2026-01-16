@@ -214,12 +214,20 @@ async def main():
                 # Robust Title Fix for HK01
                 if "HK01" in item.source:
                     try:
-                        # Re-parse HTML just for meta
                         from lxml import html
                         tree = html.fromstring(html_text)
                         ot = tree.xpath('//meta[@property="og:title"]/@content')
                         if ot:
-                            item.title = ot[0].split("｜")[0].split("|")[0].strip()
+                            full_t = ot[0].strip()
+                            p_char = "｜" if "｜" in full_t else "|"
+                            parts = full_t.split(p_char)
+                            if len(parts) > 1:
+                                # Remove source/category suffix if present
+                                if any(x in parts[-1] for x in ["香港01", "HK01", "娛樂", "國際", "中國", "研數所"]):
+                                    parts = parts[:-1]
+                                    if len(parts) > 1 and any(x in parts[-1] for x in ["娛樂", "國際", "中國", "研數所"]):
+                                        parts = parts[:-1]
+                            item.title = p_char.join(parts).strip()
                         else:
                             tt = tree.xpath('//title/text()')
                             if tt:
