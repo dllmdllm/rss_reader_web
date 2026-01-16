@@ -101,7 +101,11 @@ class Fetcher:
         """Simple fetch for HTML content (full text extraction)."""
         try:
             # Basic safe fetch
-            req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Referer": "https://www.google.com/"
+            }
+            req = urllib.request.Request(url, headers=headers)
             with urllib.request.urlopen(req, timeout=HTTP_TIMEOUT) as resp:
                 return resp.read().decode("utf-8", errors="ignore")
         except Exception:
@@ -251,7 +255,14 @@ class AsyncFetcher:
 
     async def fetch_full_text(self, url: str) -> str:
         try:
-            resp = await self.client.get(url, headers={"User-Agent": "Mozilla/5.0"})
+            # More realistic headers to avoid blocking
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+                "Accept-Language": "en-US,en;q=0.9,zh-HK;q=0.8,zh;q=0.7",
+                "Referer": "https://www.google.com/"
+            }
+            resp = await self.client.get(url, headers=headers)
             resp.raise_for_status()
             return resp.text
         except Exception:
