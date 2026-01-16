@@ -91,10 +91,17 @@ async def main():
     # helper for category mapping (moved up)
     def map_cat(url):
         u = url.lower()
-        if "entertainment" in u or "/ent/" in u or "s00007" in u: return "ent"
+        # MingPao Specifics
+        if "s00001" in u: return "news"
+        if "s00004" in u or "s00005" in u: return "intl"
+        if "s00007" in u or "s00024" in u: return "ent"
+        
+        # General Rules
+        if "entertainment" in u or "/ent/" in u: return "ent"
         if any(x in u for x in ["tech", "unwire", "epc", "9to5", "cnbeta"]): return "tech"
         if any(x in u for x in ["intl", "international", "world", "china"]): return "intl"
         return "news"
+
 
     def clean_source_name(txt):
         if not txt: return "News"
