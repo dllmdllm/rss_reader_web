@@ -1200,6 +1200,8 @@
 
             // Render specific list
             targetSources.forEach(src => {
+                if (state.filterCat === 'ent' && src === 'RTHK') return;
+
                 // Only add if we actually have data for this source? 
                 // User might want to see the button even if empty (to know it's tracked). 
                 // But cleaner to show only if available in 'newsItems'?
