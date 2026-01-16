@@ -496,6 +496,46 @@ async def clean_html_fragment(
             for fig in root.xpath(".//figure"):
                 if not fig.xpath(".//img") and not fig.text_content().strip():
                     fig.drop_tree()
+
+            # Aggressive tail cleanup for CNBeta:
+            # Remove any trailing figures, images, or empty containers at the very end 
+            # which are likely social buttons or broken icons.
+            # We check the last few top-level elements (or elements at the end of flow).
+            # Creating a flat list of significant nodes to iterate backwards might be safer,
+            # but cleaning the root's children is a good proxy.
+            
+            # 1. Remove specific known garbage classes
+            for node in root.xpath(".//*[contains(@class, 'cnbeta-item')]"):
+                node.drop_tree()
+
+            # 2. Iterate backwards from the end to remove trailing images/icons
+            # We do this in a loop because removing a node changes the last child.
+            while True:
+                last_child = None
+                if len(root) > 0:
+                    last_child = root[-1]
+                
+                if last_child is None:
+                    break
+                
+                tag = last_child.tag
+                txt = (last_child.text_content() or "").strip()
+                has_img = bool(last_child.xpath(".//img") or tag == 'img')
+                
+                # If it's a figure/img/div/span at the end
+                if tag in ('figure', 'img', 'div', 'span', 'p'):
+                    # If it has substantial text, we assume it's the end of the article content
+                    if len(txt) > 10: 
+                        break
+                        
+                    # If it's an image or wrapper with image, or empty/short text, remove it
+                    # (The broken icons often have empty text or just 'Vote' etc which is short)
+                    if has_img or len(txt) < 5:
+                        last_child.drop_tree()
+                        continue
+                
+                # If we encounter something else (e.g. valid unexpected tag), stop to be safe
+                break
         
         # Final whitespace pruning for all
         for empty in root.xpath(".//*[not(node()) and not(self::img) and not(self::br)]"):
