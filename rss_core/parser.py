@@ -579,6 +579,21 @@ class HK01Parser(BaseParser):
                             if txt:
                                 html_parts.append(f'<h3>{txt}</h3>')
 
+                        elif b_type == 'quote':
+                            msg = b_data.get('message', '')
+                            author = b_data.get('author')
+                            if msg:
+                                quote_html = f'<blockquote style="border-left: 4px solid #ccc; padding-left: 16px; margin: 16px 0; font-style: italic;">{msg}'
+                                if author:
+                                    quote_html += f'<footer style="margin-top: 8px; font-weight: bold;">— {author}</footer>'
+                                quote_html += '</blockquote>'
+                                html_parts.append(quote_html)
+
+                        elif b_type == 'related':
+                            # We can skip related or add a subtle link?
+                            # For now, let's keep it clean and skip recommendations.
+                            pass
+
                         elif b_type == 'summary':
                             sum_list = b_data.get('summary', [])
                             if sum_list:
