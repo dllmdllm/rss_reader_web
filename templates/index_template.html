@@ -454,7 +454,7 @@
             }
         }
 
-        /* Siri Glow Effect - Enhanced with Diffusion & Breathing */
+        /* Siri Glow Effect - Layered approach to keep category background */
         @keyframes siri-flow {
             0% {
                 background-position: 0% 50%;
@@ -475,38 +475,71 @@
         .card.focus-glow {
             transform: scale(1.02);
             z-index: 10;
+            background: transparent !important;
+            /* Hide original background to show layers */
+            border-radius: var(--radius);
+            /* Keep radius */
         }
 
-        .card.focus-glow::after {
+        /* Layer 1 (Bottom): The Flowing Gradient Glow (Border) */
+        .card.focus-glow::before {
             content: '';
             position: absolute;
             top: -3px;
             left: -3px;
             right: -3px;
             bottom: -3px;
-
-            /* The Flowing Gradient: Cyan -> Blue -> Purple -> Cyan */
             background: linear-gradient(90deg, #33ccff, #007aff, #d400d4, #33ccff);
             background-size: 300% 300%;
-
             border-radius: calc(var(--radius) + 3px);
-            z-index: -1;
-            /* Behind the card content */
-
-            /* The Animation */
+            z-index: -2;
             animation: siri-flow 3s ease infinite;
-
-            /* Optional: Add a slight blur to the gradient element itself for softer edges */
             filter: blur(4px);
             opacity: 0.9;
         }
 
-        /* Ensure the card background stays white/colored on top of the glowing border */
-        .card {
-            /* ... existing ... */
-            isolation: isolate;
-            /* Create stacking context */
+        /* Layer 2 (Middle): The Original Card Background (Solid) */
+        /* This covers the center of the gradient, leaving only the edges visible */
+        .card.focus-glow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: var(--radius);
+            z-index: -1;
         }
+
+        /* Restore Category Colors for the Inner Layer */
+        .card.focus-glow.news::after {
+            background: var(--bg-card-news);
+        }
+
+        .card.focus-glow.intl::after {
+            background: var(--bg-card-intl);
+        }
+
+        .card.focus-glow.ent::after {
+            background: var(--bg-card-ent);
+        }
+
+        .card.focus-glow.tech::after {
+            background: var(--bg-card-tech);
+        }
+
+        /* Ensure the card creates stacking context for these pseudo elements */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+            position: relative;
+            isolation: isolate;
+        }
+
+
 
         /* Collapsed View */
         .card-header {
