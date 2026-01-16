@@ -556,13 +556,23 @@ class HK01Parser(BaseParser):
                                 
                         elif b_type == 'image':
                             img_obj = b_data.get('image') or b_data
-                            img_url = img_obj.get('originalUrl') or img_obj.get('url')
+                            img_url = img_obj.get('originalUrl') or img_obj.get('url') or img_obj.get('cdnUrl')
                             caption = b_data.get('caption', '')
                             
                             if img_url:
                                 all_imgs.append(img_url)
                                 fig = f'<figure class="hk01-image"><img src="{img_url}" style="width:100%; display:block;"/><figcaption>{caption}</figcaption></figure>'
                                 html_parts.append(fig)
+
+                        elif b_type == 'gallery':
+                            g_imgs = b_data.get('images', [])
+                            for g_img in g_imgs:
+                                img_url = g_img.get('originalUrl') or g_img.get('url') or g_img.get('cdnUrl')
+                                caption = g_img.get('caption', '')
+                                if img_url:
+                                    all_imgs.append(img_url)
+                                    fig = f'<figure class="hk01-image"><img src="{img_url}" style="width:100%; display:block;"/><figcaption>{caption}</figcaption></figure>'
+                                    html_parts.append(fig)
                                 
                         elif b_type == 'header':
                             txt = b_data.get('text', '')
