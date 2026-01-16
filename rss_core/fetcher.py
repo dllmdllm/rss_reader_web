@@ -288,6 +288,40 @@ class AsyncFetcher:
             elif b"WEBP" in data[:16]: ext = ".webp"
             
             hash_name = hashlib.sha1(normalized_key.encode("utf-8")).hexdigest()[:16]
+            
+            # --- Compression Logic ---
+            try:
+                if len(data) > 500 * 1024: # If larger than 500KB
+                    from PIL import Image
+                    from io import BytesIO
+                    
+                    img = Image.open(BytesIO(data))
+                    
+                    # Convert to RGB if necessary (e.g. RGBA pngs that are huge)
+                    # For transparency, WebP handles it well. If saving as JPEG, must be RGB.
+                    # Let's standardize on WebP for compressed images
+                    output = BytesIO()
+                    
+                    # Check mode
+                    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+                        # Use WebP for transparency
+                        img.save(output, format="WEBP", quality=80)
+                        ext = ".webp"
+                    else:
+                        # Use JPEG for standard photos
+                        if img.mode != "RGB":
+                            img = img.convert("RGB")
+                        img.save(output, format="JPEG", quality=75, optimize=True)
+                        ext = ".jpg"
+                        
+                    data = output.getvalue()
+            except Exception as e:
+                # If compression fails (e.g. PIL not installed or image corrupt), 
+                # fallback to original data
+                print(f"[Warn] Image compression failed for {url}: {e}")
+                pass
+            # -------------------------
+
             filename = f"{hash_name}{ext}"
             save_path = os.path.join(IMAGES_DIR, filename)
             
