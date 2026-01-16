@@ -520,20 +520,21 @@ class HK01Parser(BaseParser):
                 # props -> pageProps -> article -> blocks
                 # Note: The path might vary slightly, so we look for 'article' safely
                 
-                article = None
-                try:
-                    props = data.get('props', {}).get('pageProps', {})
-                    # Direct article
-                    if 'article' in props:
-                        article = props['article']
-                    # Sometimes provided as 'initialState'
-                    elif 'initialState' in props:
-                        # deeper search provided if key exists
-                        pass 
-                except: pass
+                # Recursive search for the article object containing 'blocks'
+                def find_article(obj):
+                    if isinstance(obj, dict):
+                        if 'blocks' in obj and isinstance(obj['blocks'], list):
+                            return obj
+                        for v in obj.values():
+                            res = find_article(v)
+                            if res: return res
+                    elif isinstance(obj, list):
+                        for v in obj:
+                            res = find_article(v)
+                            if res: return res
+                    return None
                 
-                # If explicit path failed, search for 'blocks' in the whole blob? Too risky.
-                # Let's stick to 'props.pageProps.article' which is standard for article pages.
+                article = find_article(data)
                 
                 if article and 'blocks' in article:
                     html_parts = []
@@ -544,14 +545,12 @@ class HK01Parser(BaseParser):
                         b_data = block.get('data', {})
                         
                         if b_type == 'text':
-                            # Text block
-                            txt = b_data.get('text', '')
+                            # Support multiple text formats
+                            txt = b_data.get('text') or b_data.get('richText') or b_data.get('html', '')
                             if txt:
                                 html_parts.append(f'<p>{txt}</p>')
                                 
                         elif b_type == 'image':
-                            # Image block
-                            # URL usually in 'url' or 'originalUrl'
                             img_url = b_data.get('originalUrl') or b_data.get('url')
                             caption = b_data.get('caption', '')
                             
@@ -561,7 +560,6 @@ class HK01Parser(BaseParser):
                                 html_parts.append(fig)
                                 
                         elif b_type == 'header':
-                            # Subheader
                             txt = b_data.get('text', '')
                             if txt:
                                 html_parts.append(f'<h3>{txt}</h3>')

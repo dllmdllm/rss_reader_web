@@ -192,34 +192,48 @@ async def main():
             item.content_html = cached.get("content", "")
             imgs = cached.get("images", [])
             main_img = cached.get("main_image", "")
-            if cached.get("title"): item.title = cached["title"] 
+            # If cached title is real, use it
+            if cached.get("title") and ("HK01" not in item.source or "Article" not in cached["title"]):
+                 item.title = cached["title"] 
             if main_img: item.rss_image = main_img
             elif imgs: item.rss_image = imgs[0]
-            return
+            if item.content_html: return
 
         async with enrich_sem:
             p = get_parser(item.link, fetcher)
             html_text = await fetcher.fetch_full_text(item.link)
-            if not html_text: return
+            if not html_text:
+                if "HK01" in item.source: print(f"[HK01] Fetch FAILED for {item.link}")
+                return
+
+            if "HK01" in item.source:
+                # Basic logging
+                pass
 
             try: 
-                # Fix HK01 Title aggressively
+                # Robust Title Fix for HK01
                 if "HK01" in item.source:
-                    tm = re.search(r'<meta[^>]+property=["\']og:title["\'][^>]+content=["\']([^"\']+)["\']', html_text)
-                    if not tm:
-                        tm = re.search(r'<meta[^>]+content=["\']([^"\']+)["\'][^>]+property=["\']og:title["\']', html_text)
-                    
-                    if tm:
-                        res_t = tm.group(1).split("｜")[0].split("|")[0].strip()
-                        if res_t: item.title = res_t
-                    else:
-                        # Fallback to <title>
-                        tm2 = re.search(r'<title>(.*?)</title>', html_text, re.I | re.S)
-                        if tm2:
-                            res_t = tm2.group(1).split("｜")[0].split("|")[0].strip()
-                            if res_t: item.title = res_t
+                    try:
+                        # Re-parse HTML just for meta
+                        from lxml import html
+                        tree = html.fromstring(html_text)
+                        ot = tree.xpath('//meta[@property="og:title"]/@content')
+                        if ot:
+                            item.title = ot[0].split("｜")[0].split("|")[0].strip()
+                        else:
+                            tt = tree.xpath('//title/text()')
+                            if tt:
+                                item.title = tt[0].split("｜")[0].split("|")[0].strip()
+                    except: pass
 
                 c_html, main_img, all_imgs = p.parse(html_text, item.link)
+
+                # Localize Hero Image
+                if main_img and ("hk01.com" in main_img or "on.cc" in main_img or "mingpao" in main_img):
+                    local_img = await fetcher.download_image(main_img, referer=item.link)
+                    if local_img:
+                        main_img = f"images/{local_img}"
+
                 c_html = await p.clean_html(c_html, item.link, main_img=main_img)
                 
                 if c_html:
@@ -233,7 +247,8 @@ async def main():
                     "title": item.title,
                     "ts": int(time.time())
                 }
-            except Exception: pass
+            except Exception as e: 
+                print(f"[Error] Enrich failed for {item.link}: {e}")
 
     print(">>> [Build] Enriching items (Fulltext & Images) asynchronously...")
     await asyncio.gather(*[enrich_job(item) for item in valid_items])
