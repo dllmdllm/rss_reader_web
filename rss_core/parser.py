@@ -454,6 +454,11 @@ class CNBetaParser(BaseParser):
         imgs = root.xpath(xpath_union(XPATHS["cnbeta_images"]))
         return html_str, imgs
 
+    async def clean_html(self, html_fragment: str, base_url: str, main_img: str = None) -> str:
+        # Override to NOT strip hero image from body.
+        # Users prefer seeing the image in context even if duplicated in card header.
+        return await clean_html_fragment(html_fragment, base_url, fetcher=self.fetcher, hero_img=None)
+
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
         # 1. Base extraction
         c, m, i = super().parse(html_content, url)
