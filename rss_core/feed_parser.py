@@ -92,34 +92,145 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
         
         # HK01 Scraper
         if "hk01" in source.lower():
-            # HK01 usually uses <a href="/article/..."> or data-testid="article-link"
-            # We look for links that look like articles
+            import json
+            # Try JSON first (Next.js data)
+            match = re.search(r'<script id="__NEXT_DATA__" type="application/json">(.*?)</script>', text, re.S)
+            if match:
+                print("HK01 '__NEXT_DATA__' script block found.")
+                try:
+                    data = json.loads(match.group(1))
+                    print(f"JSON Keys: {list(data.keys())}")
+                    
+                    def find_articles(obj):
+                        if isinstance(obj, dict):
+                            # Aggressive search for article-like objects
+                            has_title = 'title' in obj and isinstance(obj['title'], str) and len(obj['title']) > 3
+                            
+                            # Check for URL keys first
+                            url = obj.get('publishUrl') or obj.get('url') or obj.get('originalUrl')
+                            
+                            if has_title and url and isinstance(url, str) and '/article/' in url:
+                                yield obj
+                            elif has_title:
+                                # Maybe URL is in a different key?
+                                # Check all values for article path
+                                for v in obj.values():
+                                    if isinstance(v, str) and '/article/' in v and v.startswith('/'):
+                                        # Found a potential relative link, inject it as 'scraped_url'
+                                        obj['scraped_url'] = v
+                                        yield obj
+                                        break
+
+                            for k, v in obj.items():
+                                yield from find_articles(v)
+                                
+                        elif isinstance(obj, list):
+                            for item in obj:
+                                yield from find_articles(item)
+
+                    seen = set()
+                    for art in find_articles(data):
+                        url_path = art.get('publishUrl') or art.get('url') or art.get('originalUrl') or art.get('scraped_url')
+                        title = art.get('title')
+                        
+                        if url_path and title:
+                             # Ensure text title
+                             if not isinstance(title, str): continue
+                             
+                             if url_path in seen: continue
+                             seen.add(url_path)
+                             
+                             full_url = url_path
+                             if not full_url.startswith('http'):
+                                 # HK01 absolute links often lack protocol or are relative
+                                 full_url = base_url + url_path if url_path.startswith('/') else base_url + '/' + url_path
+                             
+                             if '/article/' not in full_url: continue
+
+                             items.append(Item(
+                                title=strip_html(title),
+                                link=full_url,
+                                pub_dt=datetime.now(),
+                                pub_text="",
+                                source=source,
+                                rss_image="",
+                                category="",
+                                summary=""
+                             ))
+                    
+                    if items:
+                        print(f"HK01 JSON Scraper found {len(items)} items.")
+                        return items
+                        
+                except Exception as e:
+                     print(f"HK01 JSON Scrape Error: {e}")
+
+            # HTML Fallback
+            nodes = doc.xpath("//a[contains(@href, '/article/')]")
+            print(f"HK01 HTML Scraper found {len(nodes)} candidate nodes.")
             seen = set()
-            for a in doc.xpath("//a[contains(@href, '/article/')]"):
+            for a in nodes:
                 href = a.get("href")
                 if not href or href in seen: continue
-                # Title often in a child div or h3
                 title = "".join(a.xpath(".//text()")).strip()
                 if not title or len(title) < 5: continue
                 
                 seen.add(href)
                 
-                # Try to scrape date from parent? Hard. Default to now() or None.
-                # Build.py will handle None pub_dt appropriately (or drop if filtering strictly).
-                # Wait, build.py filters by cutoff. If None, it skips?
-                # "if not item.pub_dt: continue" -> Yes.
-                # So we MUST fake a date or try to find it.
-                # For "Recent" lists, we can assume "Now" or parse from time ago?
-                # Let's use datetime.now() for now as it's "Latest News".
-                
+                full_url = href
+                if not full_url.startswith('http'):
+                     full_url = base_url + href if href.startswith('/') else base_url + '/' + href
+
                 items.append(Item(
                     title=strip_html(title),
-                    link=href,
-                    pub_dt=datetime.now(), # Approximate for scraped index
+                    link=full_url,
+                    pub_dt=datetime.now(),
                     pub_text="",
                     source=source,
-                    rss_image=""
+                    rss_image="",
+                    category="",
+                    summary=""
                 ))
+            
+            # Regex Fallback (Last Resort)
+            if not items:
+                print("HK01: Triggering Regex Fallback")
+                # Robust regex for /article/ links
+                # Just find the paths directly as seen in debug script
+                pat = r'(/article/\d+)'
+                raw_links = set(re.findall(pat, text))
+                print(f"HK01 Regex Found {len(raw_links)} links.")
+                
+                for rlink in raw_links:
+                     if rlink in seen: continue
+                     seen.add(rlink)
+                     
+                     full_url = rlink
+                     if not full_url.startswith('http'):
+                         full_url = base_url + rlink if rlink.startswith('/') else base_url + '/' + rlink
+                         
+                     title = "HK01 Article"
+                     # Try to find title
+                     try:
+                         # Look for href="...rlink..." > ... <
+                         # We accept partial match on rlink if needed but rlink is path so it should be in href
+                         t_match = re.search(f'href=["\'][^"\']*?{re.escape(rlink)}[^"\']*?["\'][^>]*>(.*?)</a>', text, re.S)
+                         if t_match:
+                             candidate = strip_html(t_match.group(1)).strip()
+                             if len(candidate) > 5:
+                                 title = candidate
+                     except: pass
+                     
+                     items.append(Item(
+                        title=title,
+                        link=full_url,
+                        pub_dt=datetime.now(),
+                        pub_text="",
+                        source=source,
+                        rss_image="",
+                        category="",
+                        summary=""
+                     ))
 
         # On.cc Scraper
         elif "on.cc" in source.lower():
@@ -148,7 +259,9 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                         pub_dt=datetime.now(),
                         pub_text="",
                         source=source,
-                        rss_image=""
+                        rss_image="",
+                        category="",
+                        summary=""
                     ))
                     
     except Exception as e:
