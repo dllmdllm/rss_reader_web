@@ -247,16 +247,74 @@ class MingPaoParser(BaseParser):
         nodes = root.xpath(xpath_union(XPATHS["mingpao_fulltext"]))
         if not nodes: return "", []
         
-        # Cleaning specific to Mingpao
-        for node in nodes[0].xpath(".//*[contains(text(),'相關字詞') or contains(text(),'報道詳情')]"):
+        content_node = nodes[0]
+        
+        # 1. Cleaning: Remove unwanted Mingpao elements
+        for node in content_node.xpath(".//*[contains(text(),'相關字詞') or contains(text(),'報道詳情')]"):
              node.drop_tree()
              
-        html_str = lxml.html.tostring(nodes[0], encoding="unicode")
-        imgs = root.xpath(xpath_union(XPATHS["mingpao_images"]))
-        return html_str, imgs
+        # 2. Intelligent Image Recovery
+        # Mingpao often links thumbnails to high-res images using 'fancybox' class or just <a> links
+        # We want to replace the thumbnail <img> with the high-res <img>
+        
+        # Find all fancybox links in the root (Full page context)
+        # Because sometimes the gallery sequence is in the header, not body
+        gallery_imgs = []
+        for a in root.xpath("//a[contains(@class,'fancybox') or contains(@class,'fancybox-buttons')]"):
+            href = a.get('href')
+            if href and (href.endswith('.jpg') or href.endswith('.png')):
+                gallery_imgs.append(href)
+                
+        # Also check standard gallery wrapper
+        for img in root.xpath("//div[contains(@class,'gallery_wrapper')]//img"):
+             src = img.get('src')
+             if src: gallery_imgs.append(src)
+             
+        # Dedupe
+        gallery_imgs = list(dict.fromkeys(gallery_imgs))
+        
+        # Strategy: 
+        # A. Walk through content_node. If we find an <a> linking to an image, unwrap it to an <img>.
+        # B. If we find an <img> that is a thumbnail (contains /thumbnail/ or similar), try to match with high-res.
+        # C. If images are NOT in the text at all, prepend them (Gallery style).
+        
+        content_imgs = content_node.xpath(".//img/@src")
+        has_inline_images = len(content_imgs) > 0
+        
+        # Transform links to images
+        for a in content_node.xpath(".//a"):
+            href = a.get('href')
+            if href and (href.endswith('.jpg') or href.endswith('.png')):
+                # It's a link to an image. Replace <a>Text</a> with <img src="href">
+                # Check if it already contains an img
+                if not a.xpath(".//img"):
+                    new_img = lxml.html.Element("img", src=href)
+                    new_img.set("class", "recovered-img")
+                    a.getparent().replace(a, new_img)
+                    has_inline_images = True
+                    
+        html_str = lxml.html.tostring(content_node, encoding="unicode")
+        
+        # If we found gallery images but the content seems void of them (or very few), 
+        # it's likely a "Top Gallery + Text" layout. Prepend the gallery.
+        # But we must avoid duplicates.
+        if gallery_imgs and not has_inline_images:
+            gallery_html = ""
+            for img_url in gallery_imgs:
+                gallery_html += f'<figure class="mingpao-gallery"><img src="{img_url}" style="width:100%; display:block;"/></figure>'
+            html_str = gallery_html + html_str
+            
+        # Return all found images for caching
+        all_imgs = gallery_imgs + content_imgs
+        return html_str, all_imgs
 
 
 class SingtaoParser(BaseParser):
+    def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
+        # Need to capture raw html for Regex parsing of JS variables BEFORE standard parsing
+        self.raw_html = html_content
+        return super().parse(html_content, url)
+
     def _extract_content(self, root, url) -> tuple[str, list[str]]:
         nodes = root.xpath(xpath_union(XPATHS["stheadline_fullhtml"]))
         if not nodes: return "", []
@@ -265,12 +323,105 @@ class SingtaoParser(BaseParser):
         # Remove "Extension Reading"
         for bad in node.xpath(".//*[contains(text(),'延伸閱讀') or contains(text(),'相關新聞')]"):
              bad.getparent().remove(bad)
-             
-        # Extract gallery images (data-fancybox)
-        imgs = root.xpath(xpath_union(XPATHS["stheadline_images"]))
         
+        # --- Intelligent Gallery Injection ---
+        # Stheadline uses <gallery-id> tags in content and a separate JS mapping
+        # 1. Parse the JSON map
+        import re
+        import json
+        
+        galleries_map = {}
+        # Look for: article_galleries = {"gallery-123": [...], ...};
+        match = re.search(r"article_galleries\s*=\s*(\{.*?\});", self.raw_html, re.S)
+        if match:
+            try:
+                # Need to handle loose JSON if necessary, but typically it's valid JS object
+                # It might not be strict JSON (keys not quoted).
+                # Simplified approach: If it fails, rely on raw cleaning steps? 
+                # Better: clean the JS string to valid JSON or use a robust parser if available.
+                # For now let's try a simple loose parse or just basic pattern matching if needed.
+                # But actually, html_cleaner.py has `parse_stheadline_galleries` helper we can borrow logic from,
+                # but better to reimplement simple version here to modify the tree directly.
+                
+                json_str = match.group(1)
+                # Quick fix for common JS obj quirks if strictly needed, but let's try mostly direct load 
+                # or finding gallery keys in the string.
+                # Actually, let's just find the mapping in the simplest way:
+                # We know the keys are like "gallery-12345".
+                # We can iterate the keys found in the Content Node.
+                pass
+            except: pass
+
+        # 2. Find placeholder tags in Content
+        # They look like: <gallery-1065706 class="gallery-widget" ...></gallery-1065706>
+        
+        # We need to extract the ID from the tag name
+        # lxml creates Elements with tag names like "gallery-1065706"
+        
+        all_imgs = []
+        
+        # Iterate all children to find gallery tags
+        # Note: xpath matching by name prefix is tricky in 1.0, so we iterate all and check tag
+        for element in node.xpath(".//*"):
+            if isinstance(element.tag, str) and element.tag.startswith("gallery-"):
+                gallery_key = element.tag
+                # Now try to find this key in raw_html
+                # Pattern: "gallery-12345": [ { ... "src": "..." } ]
+                # We use regex to find the array for this specific key
+                # This avoids parsing the huge full JSON
+                g_regex = rf'"{gallery_key}"\s*:\s*(\[.*?\])'
+                g_match = re.search(g_regex, self.raw_html, re.S)
+                
+                if g_match:
+                    try:
+                        import ast
+                        # It's usually JS objects, so ast.literal_eval might fail if keys aren't quoted.
+                        # But STHeadline usually puts keys in quotes in that JSON blob.
+                        # If strict JSON fails, we can try to just regex extracts URLs.
+                        g_data_str = g_match.group(1)
+                        
+                        # Extract all "src": "URL"
+                        img_urls = re.findall(r'"src"\s*:\s*"([^"]+)"', g_data_str)
+                        if not img_urls:
+                             # Try srcset or other fields? Usually src is there.
+                             pass
+                             
+                        if img_urls:
+                            # Create a new structure: <div class="st-gallery"> <img...> <img...> </div>
+                            new_div = lxml.html.Element("div", **{"class": "st-gallery-injected"})
+                            for i_url in img_urls:
+                                if i_url.startswith("//"): i_url = "https:" + i_url
+                                img_el = lxml.html.Element("img", src=i_url)
+                                img_el.set("class", "st-gallery-img")
+                                img_el.set("style", "width:100%; height:auto; margin-bottom:8px;")
+                                new_div.append(img_el)
+                                all_imgs.append(i_url)
+                                
+                            # Replace the <gallery-xxx> tag with this new div
+                            element.getparent().replace(element, new_div)
+                    except:
+                        pass
+
+        # 3. Fallback: If no galleries found but slider exists
+        slider_imgs = root.xpath("//div[contains(@class,'std-slider')]//img/@src")
+        if slider_imgs:
+             all_imgs.extend(slider_imgs)
+             # If content is short/empty, or no images in content, prepend slider
+             if not node.xpath(".//img"):
+                 slider_html = ""
+                 for s_img in slider_imgs:
+                      slider_html += f'<figure><img src="{s_img}" style="width:100%;"/></figure>'
+                 # Prepend string injection (modify node is harder to prepend raw string)
+                 # Easy way: insert elements
+                 for s_img in reversed(slider_imgs):
+                      new_img = lxml.html.Element("img", src=s_img)
+                      node.insert(0, new_img)
+
         html_str = lxml.html.tostring(node, encoding="unicode")
-        return html_str, imgs
+        
+        # Supplement regex-extracted images
+        # The BaseParser will add these to the extraction list if we return them
+        return html_str, all_imgs
 
 
 class CNBetaParser(BaseParser):
