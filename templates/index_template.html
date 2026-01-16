@@ -840,7 +840,7 @@
             flex-wrap: wrap;
         }
 
-        .share-btn {
+        .share-btn-v2 {
             background: #e0e0e0 !important;
             border: 1px solid #c0c0c0 !important;
             cursor: pointer;
@@ -859,16 +859,16 @@
             visibility: visible !important;
         }
 
-        .share-btn:active {
+        .share-btn-v2:active {
             transform: scale(0.9);
             background: rgba(0, 0, 0, 0.1);
         }
 
-        .share-btn:hover {
+        .share-btn-v2:hover {
             background: rgba(0, 0, 0, 0.1);
         }
 
-        .share-btn svg {
+        .share-btn-v2 svg {
             width: 18px;
             height: 18px;
             stroke: currentColor;
@@ -1054,7 +1054,7 @@
                         <div class="meta-tags-row">
                             <span class="cat-badge ${item.category}">${catLabel}</span>
                             <a href="${item.link}" target="_blank" class="source-tag" onclick="event.stopPropagation()">${item.source}</a>
-                            <button class="share-btn" title="分享" aria-label="分享">
+                            <button class="share-btn-v2" title="分享" aria-label="分享">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
                                     <polyline points="16 6 12 2 8 6"></polyline>
@@ -1073,7 +1073,7 @@
                 card.querySelector('.card-header').addEventListener('click', () => toggleCard(card, item));
 
                 // Share Interaction (Safe Listener)
-                const sBtn = card.querySelector('.share-btn');
+                const sBtn = card.querySelector('.share-btn-v2');
                 if (sBtn) sBtn.addEventListener('click', (e) => shareItem(e, item.link, item.title));
 
                 frag.appendChild(card);

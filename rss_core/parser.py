@@ -583,7 +583,7 @@ class HK01Parser(BaseParser):
             for bad in root.xpath(".//*[contains(@class, '延伸閱讀')]"):
                 bad.drop_tree()
             
-            articles = root.xpath("//article")
+            articles = root.xpath("//article | //div[@id='article-content-section']")
             if articles:
                  article_node = articles[0]
                  
