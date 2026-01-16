@@ -841,16 +841,25 @@
         }
 
         .share-btn {
-            background: none;
+            background: rgba(0, 0, 0, 0.05);
             border: none;
             cursor: pointer;
-            padding: 4px;
-            color: #666;
+            padding: 6px;
+            color: #555;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            transition: background 0.2s;
+            transition: background 0.2s, transform 0.1s;
+            margin-left: auto;
+            /* Push to right */
+            width: 32px;
+            height: 32px;
+        }
+
+        .share-btn:active {
+            transform: scale(0.9);
+            background: rgba(0, 0, 0, 0.1);
         }
 
         .share-btn:hover {
@@ -858,9 +867,10 @@
         }
 
         .share-btn svg {
-            width: 16px;
-            height: 16px;
+            width: 18px;
+            height: 18px;
             stroke: currentColor;
+            stroke-width: 2;
         }
 
         .source-tag {
