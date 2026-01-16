@@ -454,32 +454,58 @@
             }
         }
 
+        /* Siri Glow Effect - Enhanced with Diffusion & Breathing */
+        @keyframes siri-flow {
+            0% {
+                background-position: 0% 50%;
+                box-shadow: 0 0 15px rgba(0, 122, 255, 0.4);
+            }
+
+            50% {
+                background-position: 100% 50%;
+                box-shadow: 0 0 25px rgba(255, 0, 204, 0.5);
+            }
+
+            100% {
+                background-position: 0% 50%;
+                box-shadow: 0 0 15px rgba(0, 122, 255, 0.4);
+            }
+        }
+
         .card.focus-glow {
-            transform: scale(1.01);
-            /* Subtle pop */
+            transform: scale(1.02);
             z-index: 10;
         }
 
         .card.focus-glow::after {
             content: '';
             position: absolute;
-            top: -6px;
-            left: -6px;
-            right: -6px;
-            bottom: -6px;
-            /* Siri Gradient */
-            background: linear-gradient(90deg, #33ccff, #007aff, #ff00cc, #33ccff);
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+
+            /* The Flowing Gradient: Cyan -> Blue -> Purple -> Cyan */
+            background: linear-gradient(90deg, #33ccff, #007aff, #d400d4, #33ccff);
             background-size: 300% 300%;
-            border-radius: 16px;
-            z-index: 2;
-            /* On Top */
-            animation: flow-glow 3s linear infinite;
-            pointer-events: none;
-            padding: 6px;
-            /* Thicker Frame */
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
+
+            border-radius: calc(var(--radius) + 3px);
+            z-index: -1;
+            /* Behind the card content */
+
+            /* The Animation */
+            animation: siri-flow 3s ease infinite;
+
+            /* Optional: Add a slight blur to the gradient element itself for softer edges */
+            filter: blur(4px);
+            opacity: 0.9;
+        }
+
+        /* Ensure the card background stays white/colored on top of the glowing border */
+        .card {
+            /* ... existing ... */
+            isolation: isolate;
+            /* Create stacking context */
         }
 
         /* Collapsed View */
