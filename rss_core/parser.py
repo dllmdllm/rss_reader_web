@@ -581,6 +581,64 @@ class HK01Parser(BaseParser):
         return "", "", []
 
 
+class OnCCParser(BaseParser):
+    def _extract_content(self, root, url) -> tuple[str, list[str]]:
+        # On.cc structure: .breakingNewsContent is usually the body container
+        nodes = root.xpath("//div[contains(@class,'breakingNewsContent')] | //div[contains(@class,'news-section')]")
+        if not nodes: 
+            # Fallback for some sub-domains
+            nodes = root.xpath("//div[@id='content']//div[@class='content']")
+            
+        if not nodes: return "", []
+        
+        node = nodes[0]
+        html_str = ""
+        all_imgs = []
+        
+        # 1. Image Extraction (High Res)
+        # On.cc often uses a top gallery or single large photo at the top
+        # Structure: <div class="photo"> <a href="LARGE_IMG" title="..."> <img src="THUMB"...> </a> </div>
+        
+        top_gallery_html = ""
+        # Find all gallery items in the article context
+        gallery_items = root.xpath("//div[contains(@class,'photo')]//a[contains(@class,'fancybox')] | //div[contains(@class,'photo')]//a[@href]")
+        
+        seen_imgs = set()
+        
+        for a in gallery_items:
+            href = a.get('href')
+            if href and (href.endswith('.jpg') or href.endswith('.png')):
+                if href not in seen_imgs:
+                    seen_imgs.add(href)
+                    all_imgs.append(href)
+                    caption = a.get('title') or ""
+                    # Create a nice figure
+                    top_gallery_html += f'<figure class="oncc-gallery"><img src="{href}" style="width:100%; display:block;"/><figcaption>{caption}</figcaption></figure>'
+
+        # 2. Content Cleaning
+        # Remove related news, useless buttons
+        for bad in node.xpath(".//*[contains(@class,'related')] | .//*[contains(@class,'bottom_link')] | .//*[contains(@class,'fb_iframe')]"):
+            bad.drop_tree()
+            
+        # 3. Inline images? 
+        # Sometimes on.cc puts images inline. Let's capture them too.
+        for img in node.xpath(".//img"):
+            src = img.get('src')
+            if src and src not in seen_imgs:
+                seen_imgs.add(src)
+                all_imgs.append(src)
+        
+        content_html = lxml.html.tostring(node, encoding="unicode")
+        
+        # 4. Construct Final HTML
+        # If we found top gallery images, put them FIRST (standard layout for On.cc)
+        # Unless the content already contains them (unlikely for the 'breakingNewsContent' div which is usually text only)
+        
+        html_str = top_gallery_html + content_html
+        
+        return html_str, all_imgs
+
+
 class NineToFiveMacParser(BaseParser):
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
         c, m, i = super().parse(html_content, url)
@@ -596,5 +654,6 @@ def get_parser(url: str, fetcher) -> BaseParser:
     if "stheadline.com" in url: return SingtaoParser(fetcher)
     if "cnbeta" in url: return CNBetaParser(fetcher)
     if "hk01.com" in url: return HK01Parser(fetcher)
+    if "on.cc" in url: return OnCCParser(fetcher)
     if "9to5mac.com" in url: return NineToFiveMacParser(fetcher)
     return BaseParser(fetcher)
