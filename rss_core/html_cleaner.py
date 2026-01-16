@@ -512,34 +512,54 @@ async def clean_html_fragment(
             for node in root.xpath(".//*[contains(@class, 'cnbeta-item')]"):
                 node.drop_tree()
 
-            # 2. Iterate backwards from the end to remove trailing images/icons
-            # We do this in a loop because removing a node changes the last child.
+            # 2. Iterate backwards from the end to remove ALL trailing images/icons/empty blocks
+            # We want to be very aggressive here: keep stripping from the bottom 
+            # until we hit a real paragraph of text.
             while True:
-                last_child = None
-                if len(root) > 0:
-                    last_child = root[-1]
-                
-                if last_child is None:
-                    break
+                if len(root) == 0: break
+                last_child = root[-1]
                 
                 tag = last_child.tag
                 txt = (last_child.text_content() or "").strip()
+                html_str = LXML_HTML.tostring(last_child).decode("utf-8")
+                
+                # Check if it contains an image
                 has_img = bool(last_child.xpath(".//img") or tag == 'img')
                 
-                # If it's a figure/img/div/span at the end
-                if tag in ('figure', 'img', 'div', 'span', 'p'):
-                    # If it has substantial text, we assume it's the end of the article content
-                    if len(txt) > 10: 
+                # If it's a structural tag that might hold the icons
+                if tag in ('figure', 'img', 'div', 'span', 'p', 'center', 'br'):
+                    # If it has substantial text (>20 chars), valid end of article
+                    if len(txt) > 20: 
                         break
                         
-                    # If it's an image or wrapper with image, or empty/short text, remove it
-                    # (The broken icons often have empty text or just 'Vote' etc which is short)
-                    if has_img or len(txt) < 5:
-                        last_child.drop_tree()
-                        continue
+                    # If it is short text or just images, KILL IT
+                    last_child.drop_tree()
+                    continue
                 
-                # If we encounter something else (e.g. valid unexpected tag), stop to be safe
+                # If we encounter something else (e.g. h3, hr), stop to be safe,
+                # unless it's clearly empty
+                if not txt and not has_img:
+                    last_child.drop_tree()
+                    continue
+                    
                 break
+                
+            # 3. Global small image nuke for CNBeta
+            # Remove any image that looks tiny (likely an icon/stats pixel)
+            for img in root.xpath(".//img"):
+                 src = img.get("src") or ""
+                 # If we can infer size from attributes (width/height)
+                 w = img.get("width")
+                 h = img.get("height")
+                 if w and w.isdigit() and int(w) < 50:
+                     img.drop_tree()
+                     continue
+                 if h and h.isdigit() and int(h) < 50:
+                     img.drop_tree()
+                     continue
+                 # If src contains indicator of small icon
+                 if any(k in src.lower() for k in ["icon", "pixel", "stats", "count", "share", "avatar", "feed"]):
+                     img.drop_tree()
         
         # Final whitespace pruning for all
         for empty in root.xpath(".//*[not(node()) and not(self::img) and not(self::br)]"):
