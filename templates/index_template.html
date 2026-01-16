@@ -147,6 +147,21 @@
             line-height: 1.6;
         }
 
+        /* Desktop Image Optimization */
+        @media (min-width: 1024px) {
+
+            .content-text img,
+            .hero-img {
+                max-width: 60% !important;
+                /* Don't fill 1100px width */
+                max-height: 500px;
+                /* Cap height */
+                width: auto !important;
+                display: block;
+                margin: 10px 0;
+            }
+        }
+
         .title {
             font-weight: 700;
             font-size: 18px;
