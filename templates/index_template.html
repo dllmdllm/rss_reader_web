@@ -974,6 +974,7 @@
             filterSource: 'all',
             search: ''
         };
+        let currentList = []; // Global for navigation
 
         // DOM Elements
         const listEl = document.getElementById('newsList');
@@ -992,6 +993,9 @@
                 const matchSearch = !state.search || item.search_text.toLowerCase().includes(state.search);
                 return matchCat && matchSource && matchSearch;
             });
+
+            // Update Global for Navigation
+            currentList = filtered;
 
             // Update Counts on main chips (optional, keeps UI alive)
             updateCounts();
@@ -1338,13 +1342,60 @@
 
         renderList();
 
+        // Global reference for navigation
+        let currentList = [];
+
+        // Swipe Logic
+        let touchStartX = 0;
+        let touchStartY = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            touchStartY = e.changedTouches[0].screenY;
+        }, { passive: true });
+
+        document.addEventListener('touchend', e => {
+            if (!document.querySelector('.card.expanded')) return;
+
+            const touchEndX = e.changedTouches[0].screenX;
+            const touchEndY = e.changedTouches[0].screenY;
+
+            const diffX = touchEndX - touchStartX;
+            const diffY = touchEndY - touchStartY;
+
+            // Thresholds for Horizontal Swipe
+            if (Math.abs(diffX) > 80 && Math.abs(diffY) < 60) {
+                if (diffX > 0) navigateArticle(-1); // Swipe Right -> Prev
+                else navigateArticle(1); // Swipe Left -> Next
+            }
+        }, { passive: true });
+
+        function navigateArticle(offset) {
+            const expanded = document.querySelector('.card.expanded');
+            if (!expanded) return;
+            const link = expanded.dataset.link;
+            const currentIndex = currentList.findIndex(i => i.link === link);
+            if (currentIndex === -1) return;
+
+            const nextIndex = currentIndex + offset;
+            if (nextIndex >= 0 && nextIndex < currentList.length) {
+                const nextItem = currentList[nextIndex];
+                const nextCard = document.querySelector(`.card[data-link="${nextItem.link}"]`);
+                if (nextCard) {
+                    toggleCard(nextCard, nextItem); // toggleCard handles collapsing others
+
+                    // Optional: Show simple toast
+                    // alert(offset > 0 ? "下一則" : "上一則");
+                }
+            }
+        }
+
         // Sync Read History to Marquee immediately
         readHistory.forEach(link => {
             document.querySelectorAll(`.marquee-item[data-link="${link}"]`).forEach(el => {
                 el.classList.add('read');
             });
         });
-
     </script>
 </body>
 
