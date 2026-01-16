@@ -579,6 +579,19 @@ class HK01Parser(BaseParser):
                             if txt:
                                 html_parts.append(f'<h3>{txt}</h3>')
 
+                        elif b_type == 'summary':
+                            sum_list = b_data.get('summary', [])
+                            if sum_list:
+                                items_html = "".join([f'<li>{s}</li>' for s in sum_list])
+                                html_parts.append(f'<div class="hk01-summary" style="background:#f9f9f9; padding:12px; border-left:4px solid #007aff; margin:10px 0;"><ul>{items_html}</ul></div>')
+
+                        elif b_type == 'code':
+                            h_str = b_data.get('htmlString')
+                            if h_str:
+                                # Clean potential script tags for safety or just keep for interactivity?
+                                # Usually better to keep for infographics.
+                                html_parts.append(f'<div class="hk01-embed">{h_str}</div>')
+
                     if html_parts:
                         content_html = "".join(html_parts)
                         main_img = all_imgs[0] if all_imgs else ""
