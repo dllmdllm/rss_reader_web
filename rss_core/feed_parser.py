@@ -147,10 +147,17 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                              
                              if '/article/' not in full_url: continue
 
+                             # Fix timestamp
+                             dt = datetime.now()
+                             if 'publishTime' in art:
+                                 try:
+                                     dt = datetime.fromtimestamp(int(art['publishTime']))
+                                 except: pass
+
                              items.append(Item(
                                 title=strip_html(title),
                                 link=full_url,
-                                pub_dt=datetime.now(),
+                                pub_dt=dt,
                                 pub_text="",
                                 source=source,
                                 rss_image="",
