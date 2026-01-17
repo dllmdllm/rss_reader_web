@@ -109,7 +109,26 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                             # Check for URL keys first
                             url = obj.get('publishUrl') or obj.get('url') or obj.get('originalUrl')
                             
-                            if has_title and url and isinstance(url, str) and '/article/' in url:
+                            # Check nested data.url
+                            if not url and 'data' in obj and isinstance(obj['data'], dict):
+                                d = obj['data']
+                                url = d.get('url') or d.get('originalUrl') or d.get('publishUrl')
+                                
+                                # Lift title if missing
+                                if not has_title and 'title' in d and isinstance(d['title'], str) and len(d['title']) > 3:
+                                    obj['title'] = d['title']
+                                    has_title = True
+                                
+                                # Lift publishTime if missing
+                                if 'publishTime' not in obj and 'publishTime' in d:
+                                    obj['publishTime'] = d['publishTime']
+
+                            # Robust check: accepts /article/ OR presence of articleId
+                            is_article_url = url and isinstance(url, str) and ('/article/' in url or re.search(r'/\d+/', url))
+                            has_id = 'articleId' in obj or ('data' in obj and isinstance(obj['data'], dict) and 'articleId' in obj['data'])
+
+                            if has_title and (is_article_url or has_id):
+                                obj['scraped_url'] = url
                                 yield obj
                             elif has_title:
                                 # Maybe URL is in a different key?
@@ -145,7 +164,7 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                                  # HK01 absolute links often lack protocol or are relative
                                  full_url = base_url + url_path if url_path.startswith('/') else base_url + '/' + url_path
                              
-                             if '/article/' not in full_url: continue
+                             if '/article/' not in full_url and not re.search(r'/\d+/', full_url): continue
 
                              # Fix timestamp
                              dt = datetime.now()
