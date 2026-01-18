@@ -575,7 +575,18 @@ class HK01Parser(BaseParser):
                                     else:
                                         flat_tokens.append(t)
                                 
-                                txt = "".join(t.get('content') or t.get('value', '') for t in flat_tokens if isinstance(t, dict) and t.get('type') == 'text')
+                                # Extract content/value from ALL tokens regardless of type (text, tag, link, etc.)
+                                # Often 'tag' type has 'content' too, or we might need to recurse, but usually flattened lists have content at top level for simple formatting.
+                                # If type is 'tag', it might have children. For now, try to grab direct content.
+                                txt_parts = []
+                                for t in flat_tokens:
+                                    if isinstance(t, dict):
+                                        # Prefer valid content
+                                        val = t.get('content') or t.get('value')
+                                        if val and isinstance(val, str):
+                                            txt_parts.append(val)
+                                            
+                                txt = "".join(txt_parts)
                             
                             if txt:
                                 html_parts.append(f'<p>{txt}</p>')
