@@ -507,7 +507,10 @@ class CNBetaParser(BaseParser):
 class HK01Parser(BaseParser):
     """HK01 uses Next.js, so we try to extract from __NEXT_DATA__ for perfect ordering."""
     
+
     def parse(self, html_content: str, url: str) -> tuple[str, str, list[str]]:
+        self.using_json = False # Flag to track if we used JSON
+
         # 1. Try __NEXT_DATA__ JSON Extraction (Gold Standard for Order)
         try:
             import json
@@ -518,26 +521,27 @@ class HK01Parser(BaseParser):
             if match:
                 data = json.loads(match.group(1))
                 
-                # Navigate standard HK01 Next.js structure
-                # props -> pageProps -> article -> blocks
-                # Note: The path might vary slightly, so we look for 'article' safely
-                
                 # Recursive search for the article object containing 'blocks'
-                def find_article(obj):
+                # Improvement: Collect ALL candidates and pick the "heaviest" one (most blocks)
+                candidates = []
+                
+                def collect_candidates(obj):
                     if isinstance(obj, dict):
-                        if 'blocks' in obj and isinstance(obj['blocks'], list):
-                            return obj
+                        if 'blocks' in obj and isinstance(obj['blocks'], list) and len(obj['blocks']) > 0:
+                            candidates.append(obj)
                         for v in obj.values():
-                            res = find_article(v)
-                            if res: return res
+                            collect_candidates(v)
                     elif isinstance(obj, list):
                         for v in obj:
-                            res = find_article(v)
-                            if res: return res
-                    return None
+                            collect_candidates(v)
                 
-                article = find_article(data)
+                collect_candidates(data)
                 
+                # Pick the best candidate (longest blocks list)
+                article = None
+                if candidates:
+                    article = max(candidates, key=lambda x: len(x['blocks']))
+
                 if article and 'blocks' in article:
                     html_parts = []
                     all_imgs = []
@@ -592,11 +596,6 @@ class HK01Parser(BaseParser):
                                 quote_html += '</blockquote>'
                                 html_parts.append(quote_html)
 
-                        elif b_type == 'related':
-                            # We can skip related or add a subtle link?
-                            # For now, let's keep it clean and skip recommendations.
-                            pass
-
                         elif b_type == 'summary':
                             sum_list = b_data.get('summary', [])
                             if sum_list:
@@ -606,13 +605,12 @@ class HK01Parser(BaseParser):
                         elif b_type == 'code':
                             h_str = b_data.get('htmlString')
                             if h_str:
-                                # Clean potential script tags for safety or just keep for interactivity?
-                                # Usually better to keep for infographics.
                                 html_parts.append(f'<div class="hk01-embed">{h_str}</div>')
 
                     if html_parts:
                         content_html = "".join(html_parts)
                         main_img = all_imgs[0] if all_imgs else ""
+                        self.using_json = True
                         return content_html, main_img, all_imgs
 
         except Exception as e:
@@ -627,12 +625,12 @@ class HK01Parser(BaseParser):
             for bad in root.xpath(".//*[contains(@class, '延伸閱讀')]"):
                 bad.drop_tree()
             
-            articles = root.xpath("//article | //div[@id='article-content-section']")
+            # Less strict selector for fallback
+            articles = root.xpath("//article | //div[@id='article-content-section'] | //main//div[contains(@class, 'ArticleContentWrapper')]")
             if articles:
                  article_node = articles[0]
                  
                  # Fix Lazy Loading Images: data-src -> src
-                 # HK01 uses data-src usually
                  all_imgs = []
                  for img in article_node.xpath(".//img"):
                      real_src = img.get('data-original') or img.get('data-src') or img.get('src')
@@ -661,6 +659,16 @@ class HK01Parser(BaseParser):
             pass
             
         return "", "", []
+
+    async def clean_html(self, html_fragment: str, base_url: str, main_img: str = None) -> str:
+        # If we successfully used JSON, the content is already clean and structured.
+        # Bypassing the heavy 'clean_html_fragment' (Readability) prevents it from stripping our valid images.
+        if hasattr(self, 'using_json') and self.using_json:
+            # We still might want basic sanitization if needed, but for now return as-is to preserve full content
+            return html_fragment
+            
+        # Otherwise use standard cleaner for HTML fallback content
+        return await clean_html_fragment(html_fragment, base_url, fetcher=self.fetcher, hero_img=main_img)
 
 
 class OnCCParser(BaseParser):
