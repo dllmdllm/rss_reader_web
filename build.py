@@ -185,7 +185,7 @@ async def main():
 
     print(f">>> [Build] {len(valid_items)} items after filter & sort (Tech: {len(tech_items)}, Others: {len(other_items)}).")
 
-    enrich_sem = asyncio.Semaphore(5)
+    enrich_sem = asyncio.Semaphore(10)
     async def enrich_job(item):
         if item.link in fulltext_cache:
             cached = fulltext_cache[item.link]
