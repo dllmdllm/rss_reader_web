@@ -544,6 +544,15 @@ class HK01Parser(BaseParser):
                     article = max(candidates, key=lambda x: len(x['blocks']))
 
                 if article and 'blocks' in article:
+                    # Check if the candidate actually has body text.
+                    # Some "Breaking News" items have JSON with only summary/images but missing the main content blocks.
+                    # In these cases, we should fallback to HTML parsing which usually contains the full initial report.
+                    has_body_text = any((b.get('type') or b.get('blockType')) in ['text', 'htmlTokens'] for b in article['blocks'])
+                    
+                    if not has_body_text:
+                         # Raise exception to trigger the try-except block and fall through to HTML parsing
+                         raise ValueError("JSON candidate exists but has no body text (text/htmlTokens). Prefer HTML fallback.")
+
                     html_parts = []
                     all_imgs = []
                     
