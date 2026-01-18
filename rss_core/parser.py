@@ -548,9 +548,12 @@ class HK01Parser(BaseParser):
                         
                         if b_type == 'text' or b_type == 'htmlTokens':
                             txt = b_data.get('text') or b_data.get('richText') or b_data.get('html')
-                            if not txt and b_type == 'htmlTokens':
+                            
+                            # Fix: HK01 sometimes puts htmlTokens inside type='text'
+                            if not txt and (b_type == 'htmlTokens' or 'htmlTokens' in b_data):
                                 tokens = b_data.get('htmlTokens', [])
                                 txt = "".join(t.get('value', '') for t in tokens if t.get('type') == 'text')
+                            
                             if txt:
                                 html_parts.append(f'<p>{txt}</p>')
                                 
