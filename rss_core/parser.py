@@ -558,7 +558,15 @@ class HK01Parser(BaseParser):
                             
                             if not txt and (b_type == 'htmlTokens' or 'htmlTokens' in b_data):
                                 tokens = b_data.get('htmlTokens', [])
-                                txt = "".join(t.get('value', '') for t in tokens if isinstance(t, dict) and t.get('type') == 'text')
+                                # Flatten if list of lists
+                                flat_tokens = []
+                                for t in tokens:
+                                    if isinstance(t, list):
+                                        flat_tokens.extend(t)
+                                    else:
+                                        flat_tokens.append(t)
+                                
+                                txt = "".join(t.get('content') or t.get('value', '') for t in flat_tokens if isinstance(t, dict) and t.get('type') == 'text')
                             
                             if txt:
                                 html_parts.append(f'<p>{txt}</p>')
