@@ -155,6 +155,10 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                         if url_path and title:
                              # Ensure text title
                              if not isinstance(title, str): continue
+
+                             # Filter specific sticky/ad articles
+                             if '如何隱藏《香港01》App內廣告' in title: continue
+                             if '刪除會員帳戶' in title: continue
                              
                              if url_path in seen: continue
                              seen.add(url_path)
