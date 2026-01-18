@@ -71,6 +71,24 @@ def to_trad_if_cnbeta(source: str, text: str) -> str:
         return to_trad(text)
     return text
 
+def is_blocked_item(title: str, url: str) -> bool:
+    clean_title = strip_html(title).strip()
+    
+    # 1. URL Filters
+    if '/zone/' in url or '/campaign/' in url: return True
+    
+    # 2. Title Keyword Filters
+    block_keywords = [
+        "如何隱藏", "App內廣告", "刪除會員帳戶", 
+        "會員資訊", "尊享會員優惠", "會員優惠不斷更新",
+        "如果你想解決", "低成本啟動方法", "轉數快 2024",
+        "即睇低成本啟動方法", "App廣告"
+    ]
+    if any(k in clean_title for k in block_keywords): return True
+    if clean_title == "會員資訊": return True
+    
+    return False
+
 def scrape_html_feed(text: str, source: str) -> list[Item]:
     """Fallback scraper for HTML-only 'feeds' (e.g. HK01, On.cc index pages)."""
     items = []
@@ -80,23 +98,6 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
     elif "on.cc" in source.lower():
         base_url = "https://hk.on.cc"
         
-    def is_blocked_item(title: str, url: str) -> bool:
-        clean_title = strip_html(title).strip()
-        
-        # 1. URL Filters
-        if '/zone/' in url or '/campaign/' in url: return True
-        
-        # 2. Title Keyword Filters
-        block_keywords = [
-            "如何隱藏", "App內廣告", "刪除會員帳戶", 
-            "會員資訊", "尊享會員優惠", "會員優惠不斷更新",
-            "如果你想解決", "低成本啟動方法", "轉數快 2024"
-        ]
-        if any(k in clean_title for k in block_keywords): return True
-        if clean_title == "會員資訊": return True
-        
-        return False
-
     try:
         if LXML_ETREE is None:
              # Basic regex fallback if lxml missing (unlikely in this env)
@@ -421,6 +422,9 @@ def parse_items(payload: bytes | str, source: str, category: str = "") -> list[I
                      link = item.xpath("./link/@href")[0]
 
                 link = normalize_link(link)
+                if is_blocked_item(title, link):
+                    continue
+                    
                 pub_text = lxml_text(item, "pubDate") or lxml_text(item, "published") or lxml_text(item, "updated")
                 pub_dt = parse_pub_date(pub_text)
                 desc_raw = lxml_text(item, "encoded") or lxml_text(item, "description") or lxml_text(item, "content") or lxml_text(item, "summary")
