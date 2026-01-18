@@ -650,9 +650,15 @@
         }
 
         .content-text {
-            font-size: 18px;
+            font-size: 18px !important;
             line-height: 1.6;
             color: #333;
+        }
+
+        /* Force override inline styles from specific feeds (e.g. Unwire) */
+        .content-text * {
+            font-size: 18px !important;
+            line-height: 1.6 !important;
         }
 
         /* Handle content images from HTML */
