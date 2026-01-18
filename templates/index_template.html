@@ -1147,21 +1147,17 @@
                 // Scroll to card top for better reading
                 setTimeout(() => {
                     const marquee = document.querySelector('.marquee');
-                    const mHeight = marquee ? marquee.offsetHeight : 50;
+                    const mHeight = marquee ? marquee.getBoundingClientRect().height : 31;
 
-                    // Use stable offsetTop to find absolute document position
-                    let absoluteTop = 0;
-                    let curr = cardEl;
-                    while (curr && curr !== document.body) {
-                        absoluteTop += curr.offsetTop;
-                        curr = curr.offsetParent;
-                    }
+                    // Measure current position after layout has settled
+                    const rect = cardEl.getBoundingClientRect();
+                    const absoluteTop = window.pageYOffset + rect.top;
 
-                    // Align card top perfectly with marquee bottom
-                    const targetY = absoluteTop - mHeight;
+                    // Align: scroll to absoluteTop - marqueeHeight - small gap
+                    const targetY = absoluteTop - mHeight - 4;
 
                     window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
-                }, 150);
+                }, 250);
             }
         }
 
