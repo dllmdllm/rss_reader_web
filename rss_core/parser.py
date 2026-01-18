@@ -547,11 +547,11 @@ class HK01Parser(BaseParser):
                     # Check if the candidate actually has body text.
                     # Some "Breaking News" items have JSON with only summary/images but missing the main content blocks.
                     # In these cases, we should fallback to HTML parsing which usually contains the full initial report.
-                    has_body_text = any((b.get('type') or b.get('blockType')) in ['text', 'htmlTokens'] for b in article['blocks'])
+                    has_content = any((b.get('type') or b.get('blockType')) in ['text', 'htmlTokens', 'image', 'gallery'] for b in article['blocks'])
                     
-                    if not has_body_text:
+                    if not has_content:
                          # Raise exception to trigger the try-except block and fall through to HTML parsing
-                         raise ValueError("JSON candidate exists but has no body text (text/htmlTokens). Prefer HTML fallback.")
+                         raise ValueError("JSON candidate exists but has no real content (text/image/gallery). Prefer HTML fallback.")
 
                     html_parts = []
                     all_imgs = []
@@ -651,12 +651,8 @@ class HK01Parser(BaseParser):
         try:
             root = lxml.html.fromstring(html_content)
             
-            # Remove "Extension Reading" / "Related"
-            for bad in root.xpath(".//*[contains(@class, '延伸閱讀')]"):
-                bad.drop_tree()
-            
-            # Less strict selector for fallback
-            articles = root.xpath("//article | //div[@id='article-content-section'] | //main//div[contains(@class, 'ArticleContentWrapper')]")
+            # Preferred order: ID-based content section first, then class-based, then generic article
+            articles = root.xpath("//div[@id='article-content-section'] | //main//div[contains(@class, 'ArticleContentWrapper')] | //article")
             if articles:
                  article_node = articles[0]
                  
@@ -691,13 +687,8 @@ class HK01Parser(BaseParser):
         return "", "", []
 
     async def clean_html(self, html_fragment: str, base_url: str, main_img: str = None) -> str:
-        # If we successfully used JSON, the content is already clean and structured.
-        # Bypassing the heavy 'clean_html_fragment' (Readability) prevents it from stripping our valid images.
-        if hasattr(self, 'using_json') and self.using_json:
-            # We still might want basic sanitization if needed, but for now return as-is to preserve full content
-            return html_fragment
-            
-        # Otherwise use standard cleaner for HTML fallback content
+        # We always use the consolidated cleaner to ensure image localization
+        # but for JSON-sourced content, we can be slightly less aggressive with stripping.
         return await clean_html_fragment(html_fragment, base_url, fetcher=self.fetcher, hero_img=main_img)
 
 

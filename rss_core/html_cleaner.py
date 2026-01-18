@@ -384,17 +384,69 @@ async def clean_html_fragment(
             link.set("target", "_blank")
             link.set("rel", "noopener")
         if "hk01.com" in base_url:
+            # 1. Remove specific known noise containers by class or ID
+            noise_selectors = [
+                "//*[contains(@class,'Related')]", 
+                "//*[contains(@class,'Recommend')]",
+                "//*[contains(@class,'ArticleDetail_Bottom')]",
+                "//div[@id='recommendArticles']",
+                "//div[contains(@class,'ArticleRevisions')]",
+                "//div[contains(@id,'ad_')]",
+                "//div[contains(@class,'AdWrapper')]"
+            ]
+            for selector in noise_selectors:
+                for node in root.xpath(selector):
+                    node.drop_tree()
+
+            # 2. Key-word based tail stripping (very aggressive)
+            tail_keywords = ["相關閱讀", "延伸閱讀", "相關連結", "推薦文章", "相關內容", "猜你喜歡", "車Cam", "熱門", "同場加映"]
+            
+            all_nodes = list(root.xpath(".//*"))
+            total_nodes = len(all_nodes)
+            
+            for idx, node in enumerate(all_nodes):
+                txt = (node.text_content() or "").strip()
+                if not txt: continue
+                
+                # If we hit a noise keyword in the bottom half, cut EVERYTHING
+                if any(k in txt for k in tail_keywords) and len(txt) < 80:
+                    if idx > total_nodes * 0.4:
+                        parent = node.getparent()
+                        if parent is not None:
+                            for sib in list(node.itersiblings()):
+                                sib.getparent().remove(sib)
+                            node.getparent().remove(node)
+                            break 
+
+            # 3. Individual link cleanup
             for link in root.xpath(".//a"):
-                link.drop_tag()
+                t = (link.text_content() or "").strip()
+                # If the link itself contains noise keywords, it's a related article link
+                if any(k in t for k in tail_keywords) or len(t) > 200:
+                    link.drop_tree()
+                    continue
+                
+                # Unwrap images, keep text
+                imgs = link.xpath(".//img")
+                if imgs:
+                    for img in imgs:
+                        link.getparent().insert(link.getparent().index(link), img)
+                    link.getparent().remove(link)
+                else:
+                    link.drop_tag()
+
+            # 4. Global line-break and empty node cleanup
             for br in root.xpath(".//br"):
                 br.drop_tag()
-            for node in root.xpath(".//p | .//div | .//section | .//span"):
-                if node.xpath(".//img"):
-                    continue
-                if (node.text_content() or "").strip() == "":
-                    parent = node.getparent()
-                    if parent is not None:
-                        parent.remove(node)
+            
+            # Remove empty paragraphs or divs at the end which often contain noise headers
+            while True:
+                if len(root) == 0: break
+                last = root[-1]
+                if last.tag in ('p', 'div', 'span') and not last.text_content().strip() and not last.xpath('.//img'):
+                    last.drop_tree()
+                else:
+                    break
 
         # CNBeta specific tail cleaning
         if "cnbeta" in base_url.lower():

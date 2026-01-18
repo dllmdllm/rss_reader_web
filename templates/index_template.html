@@ -1365,54 +1365,12 @@
             if (level === 2) document.body.classList.add('font-xl'); // XL
         }
 
+        renderSourceChips();
         renderList();
 
 
 
-        // Swipe Logic
-        let touchStartX = 0;
-        let touchStartY = 0;
-
-        document.addEventListener('touchstart', e => {
-            touchStartX = e.changedTouches[0].screenX;
-            touchStartY = e.changedTouches[0].screenY;
-        }, { passive: true });
-
-        document.addEventListener('touchend', e => {
-            if (!document.querySelector('.card.expanded')) return;
-
-            const touchEndX = e.changedTouches[0].screenX;
-            const touchEndY = e.changedTouches[0].screenY;
-
-            const diffX = touchEndX - touchStartX;
-            const diffY = touchEndY - touchStartY;
-
-            // Thresholds for Horizontal Swipe
-            if (Math.abs(diffX) > 80 && Math.abs(diffY) < 60) {
-                if (diffX > 0) navigateArticle(-1); // Swipe Right -> Prev
-                else navigateArticle(1); // Swipe Left -> Next
-            }
-        }, { passive: true });
-
-        function navigateArticle(offset) {
-            const expanded = document.querySelector('.card.expanded');
-            if (!expanded) return;
-            const link = expanded.dataset.link;
-            const currentIndex = currentList.findIndex(i => i.link === link);
-            if (currentIndex === -1) return;
-
-            const nextIndex = currentIndex + offset;
-            if (nextIndex >= 0 && nextIndex < currentList.length) {
-                const nextItem = currentList[nextIndex];
-                const nextCard = document.querySelector(`.card[data-link="${nextItem.link}"]`);
-                if (nextCard) {
-                    toggleCard(nextCard, nextItem); // toggleCard handles collapsing others
-
-                    // Optional: Show simple toast
-                    // alert(offset > 0 ? "下一則" : "上一則");
-                }
-            }
-        }
+        // Swipe logic removed
 
         // Sync Read History to Marquee immediately
         readHistory.forEach(link => {
