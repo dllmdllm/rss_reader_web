@@ -294,54 +294,74 @@ class AsyncFetcher:
             resp.raise_for_status()
             data = resp.content
             
-            ext = ".jpg"
-            if data.startswith(b"\x89PNG"): ext = ".png"
-            elif data.startswith(b"GIF"): ext = ".gif"
-            elif b"WEBP" in data[:16]: ext = ".webp"
+            # --- Compression Logic (Offloaded to Thread) ---
+            # Run CPU-bound image processing in a separate thread
+            processed_data, ext = await asyncio.to_thread(optimize_image_data, data)
             
-            hash_name = hashlib.sha1(normalized_key.encode("utf-8")).hexdigest()[:16]
-            
-            # --- Compression Logic ---
-            try:
-                if len(data) > 500 * 1024: # If larger than 500KB
-                    from PIL import Image
-                    from io import BytesIO
-                    
-                    img = Image.open(BytesIO(data))
-                    
-                    # Convert to RGB if necessary (e.g. RGBA pngs that are huge)
-                    # For transparency, WebP handles it well. If saving as JPEG, must be RGB.
-                    # Let's standardize on WebP for compressed images
-                    output = BytesIO()
-                    
-                    # Check mode
-                    if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
-                        # Use WebP for transparency
-                        img.save(output, format="WEBP", quality=80)
-                        ext = ".webp"
-                    else:
-                        # Use JPEG for standard photos
-                        if img.mode != "RGB":
-                            img = img.convert("RGB")
-                        img.save(output, format="JPEG", quality=75, optimize=True)
-                        ext = ".jpg"
-                        
-                    data = output.getvalue()
-            except Exception as e:
-                # If compression fails (e.g. PIL not installed or image corrupt), 
-                # fallback to original data
-                print(f"[Warn] Image compression failed for {url}: {e}")
-                pass
+            if not ext:
+                # If optimization skipped/failed, determine ext from raw data
+                ext = ".jpg"
+                if data.startswith(b"\x89PNG"): ext = ".png"
+                elif data.startswith(b"GIF"): ext = ".gif"
+                elif b"WEBP" in data[:16]: ext = ".webp"
+                final_data = data
+            else:
+                final_data = processed_data
             # -------------------------
 
+            hash_name = hashlib.sha1(normalized_key.encode("utf-8")).hexdigest()[:16]
             filename = f"{hash_name}{ext}"
             save_path = os.path.join(IMAGES_DIR, filename)
             
             os.makedirs(IMAGES_DIR, exist_ok=True)
             with open(save_path, "wb") as f:
-                f.write(data)
+                f.write(final_data)
                 
             self.image_cache[normalized_key] = {"path": filename, "timestamp": now, "url": url}
             return filename
         except Exception:
+            # print(f"Image fail {url}")
             return ""
+
+def optimize_image_data(data: bytes) -> tuple[bytes, str | None]:
+    """
+    Helper to resize and compress image data.
+    Returns (processed_bytes, extension) or (original_bytes, None) if skipped.
+    """
+    try:
+        # Optimization Threshold: 200KB
+        if len(data) < 200 * 1024:
+            return data, None
+            
+        from PIL import Image
+        from io import BytesIO
+        
+        img = Image.open(BytesIO(data))
+        
+        # Max Width Resize (e.g. 800px)
+        max_width = 800
+        if img.width > max_width:
+            ratio = max_width / img.width
+            new_height = int(img.height * ratio)
+            img = img.resize((max_width, new_height), Image.Resampling.LANCZOS)
+            
+        output = BytesIO()
+        ext = ".jpg"
+        
+        # Check mode and format
+        if img.mode in ("RGBA", "LA") or (img.mode == "P" and "transparency" in img.info):
+            # Use WebP for transparency
+            img.save(output, format="WEBP", quality=80)
+            ext = ".webp"
+        else:
+            # Use JPEG for standard photos
+            if img.mode != "RGB":
+                img = img.convert("RGB")
+            img.save(output, format="JPEG", quality=75, optimize=True)
+            ext = ".jpg"
+            
+        return output.getvalue(), ext
+        
+    except Exception as e:
+        # print(f"Compression error: {e}")
+        return data, None
