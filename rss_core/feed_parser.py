@@ -80,6 +80,23 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
     elif "on.cc" in source.lower():
         base_url = "https://hk.on.cc"
         
+    def is_blocked_item(title: str, url: str) -> bool:
+        clean_title = strip_html(title).strip()
+        
+        # 1. URL Filters
+        if '/zone/' in url or '/campaign/' in url: return True
+        
+        # 2. Title Keyword Filters
+        block_keywords = [
+            "如何隱藏", "App內廣告", "刪除會員帳戶", 
+            "會員資訊", "尊享會員優惠", "會員優惠不斷更新",
+            "如果你想解決", "低成本啟動方法", "轉數快 2024"
+        ]
+        if any(k in clean_title for k in block_keywords): return True
+        if clean_title == "會員資訊": return True
+        
+        return False
+
     try:
         if LXML_ETREE is None:
              # Basic regex fallback if lxml missing (unlikely in this env)
@@ -155,11 +172,10 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                         if url_path and title:
                              # Ensure text title
                              if not isinstance(title, str): continue
-
-                             # Filter specific sticky/ad articles
-                             if '如何隱藏《香港01》App內廣告' in title: continue
-                             if '刪除會員帳戶' in title: continue
                              
+                             if is_blocked_item(title, url_path):
+                                 continue
+
                              if url_path in seen: continue
                              seen.add(url_path)
                              
@@ -205,6 +221,8 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                 title = "".join(a.xpath(".//text()")).strip()
                 if not title or len(title) < 5: continue
                 
+                if is_blocked_item(title, href): continue
+
                 seen.add(href)
                 
                 full_url = href
@@ -233,12 +251,7 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                 
                 for rlink in raw_links:
                      if rlink in seen: continue
-                     seen.add(rlink)
                      
-                     full_url = rlink
-                     if not full_url.startswith('http'):
-                         full_url = base_url + rlink if rlink.startswith('/') else base_url + '/' + rlink
-                         
                      title = "HK01 Article"
                      # Try to find title
                      try:
@@ -251,6 +264,14 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                                  title = candidate
                      except: pass
                      
+                     if is_blocked_item(title, rlink): continue
+
+                     seen.add(rlink)
+                     
+                     full_url = rlink
+                     if not full_url.startswith('http'):
+                         full_url = base_url + rlink if rlink.startswith('/') else base_url + '/' + rlink
+                         
                      items.append(Item(
                         title=title,
                         link=full_url,
