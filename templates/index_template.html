@@ -1149,11 +1149,19 @@
                     const marquee = document.querySelector('.marquee');
                     const mHeight = marquee ? marquee.offsetHeight : 50;
 
-                    // targetY for the card: absolute Y - marquee height - small gap
-                    const targetY = cardEl.getBoundingClientRect().top + window.pageYOffset - mHeight - 8;
+                    // Use stable offsetTop to find absolute document position
+                    let absoluteTop = 0;
+                    let curr = cardEl;
+                    while (curr && curr !== document.body) {
+                        absoluteTop += curr.offsetTop;
+                        curr = curr.offsetParent;
+                    }
 
-                    window.scrollTo({ top: targetY, behavior: 'smooth' });
-                }, 100);
+                    // Align card top perfectly with marquee bottom
+                    const targetY = absoluteTop - mHeight;
+
+                    window.scrollTo({ top: Math.max(0, targetY), behavior: 'smooth' });
+                }, 150);
             }
         }
 
