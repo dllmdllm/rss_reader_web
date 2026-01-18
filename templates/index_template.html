@@ -1148,19 +1148,11 @@
                 setTimeout(() => {
                     const marquee = document.querySelector('.marquee');
                     const mHeight = marquee ? marquee.offsetHeight : 50;
-                    const wrapper = document.querySelector('.top-nav-wrapper');
 
-                    // targetY for the card
-                    const targetY = cardEl.getBoundingClientRect().top + window.pageYOffset - mHeight - 10;
+                    // targetY for the card: absolute Y - marquee height - small gap
+                    const targetY = cardEl.getBoundingClientRect().top + window.pageYOffset - mHeight - 8;
 
-                    // wrapperY is the top of the search bar
-                    const wrapperY = wrapper ? (wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight) : 0;
-
-                    // Never scroll past the search bar top if it means hiding it unnecessarily
-                    // This fixes the "jumping up a bit" for the first card.
-                    const finalY = Math.max(targetY, wrapperY);
-
-                    window.scrollTo({ top: finalY, behavior: 'smooth' });
+                    window.scrollTo({ top: targetY, behavior: 'smooth' });
                 }, 100);
             }
         }
