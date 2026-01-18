@@ -221,10 +221,11 @@ class AsyncFetcher:
                 "Referer": "https://9to5mac.com/",
             }
         
-        if entry.get("etag"):
-            headers["If-None-Match"] = entry["etag"]
-        if entry.get("last_modified"):
-            headers["If-Modified-Since"] = entry["last_modified"]
+        # FORCE REFRESH: Ignore Cache Headers
+        # if entry.get("etag"):
+        #     headers["If-None-Match"] = entry["etag"]
+        # if entry.get("last_modified"):
+        #     headers["If-Modified-Since"] = entry["last_modified"]
 
         try:
             resp = await self.client.get(url, headers=headers)
