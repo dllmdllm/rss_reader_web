@@ -1211,7 +1211,9 @@
             sourceRow.classList.add('show');
 
             // Calculate Counts for Sources regarding Current Category
-            const relevantItems = newsItems.filter(i => i.category === state.filterCat);
+            const relevantItems = state.filterCat === 'all'
+                ? newsItems
+                : newsItems.filter(i => i.category === state.filterCat);
             const countMap = {};
             relevantItems.forEach(i => {
                 countMap[i.source] = (countMap[i.source] || 0) + 1;
