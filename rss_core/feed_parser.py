@@ -283,10 +283,26 @@ def scrape_html_feed(text: str, source: str) -> list[Item]:
                     title = a.get("title") or "".join(a.xpath(".//text()")).strip()
                     if not title or len(title) < 5: continue
                     
+                    # Extract time from URL: .../bkn-202501160000...
+                    dt = datetime.now()
+                    t_match = re.search(r'bkn-(\d{12})', href)
+                    if t_match:
+                        try:
+                            ds = t_match.group(1)
+                            dt = datetime.strptime(ds, "%Y%m%d%H%M")
+                        except: pass
+                    else:
+                        # Fallback: YYYYMMDD
+                        t_match2 = re.search(r'/(\d{8})/', href)
+                        if t_match2:
+                            try:
+                                dt = datetime.strptime(t_match2.group(1), "%Y%m%d")
+                            except: pass
+
                     items.append(Item(
                         title=strip_html(title),
                         link=href,
-                        pub_dt=datetime.now(),
+                        pub_dt=dt,
                         pub_text="",
                         source=source,
                         rss_image="",
