@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="referrer" content="no-referrer">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RSS Reader</title>
+    <style>
+        :root {
+            --bg-body: #faebd7;
+            /* Old Newspaper / Antique White */
+            --bg-card: #ffffff;
+            --text-main: #2c2c2e;
+            --text-muted: #6e6e73;
+            --border: #d2d2d7;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --radius: 12px;
+            --max-width: 700px;
+        }
+
+        @media (min-width: 1024px) {
+            :root {
+                --max-width: 1100px;
+                /* Wider on Desktop */
+            }
+        }
+
+        :root {
+            /* Category Colors (Button) */
+            --col-news: #007aff;
+            --col-intl: #ff9500;
+            --col-ent: #ff2d55;
+            --col-tech: #5856d6;
+
+            /* Card Pale Backgrounds */
+            --bg-card-news: #f0f8ff;
+            --bg-card-intl: #fff8e1;
+            --bg-card-ent: #fff0f5;
+            --bg-card-tech: #f3e5f5;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            overflow-x: hidden;
+            /* Fix horizontal scroll */
+            position: relative;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-body);
+            color: var(--text-main);
+            padding-bottom: 80px;
+            /* Offset only for Fixed Marquee (31px + safe area) */
+            padding-top: calc(31px + env(safe-area-inset-top));
+            /* Support for hardware acceleration */
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* --- Header & Search --- */
+        .top-nav-wrapper {
+            position: relative;
+            /* Not fixed, scrolls with content */
+            z-index: 1000;
+            background: rgba(245, 245, 247, 0.98);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            width: 100%;
+        }
+
+        .site-header {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            padding: 8px 12px 12px;
+        }
+
+        .search-row {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .font-controls {
+            display: flex;
+            gap: 2px;
+            background: #e0e0e0;
+            padding: 2px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            align-items: center;
+        }
+
+        .font-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            color: #333;
+            transition: background 0.2s;
+        }
+
+        .font-btn:hover,
+        .font-btn.active {
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Font Sizing Classes applied to Body */
+
+        /* Level 1 (Default): Title 17px, Content 16px */
+
+        /* Level 2: Large */
+        body.font-lg .card-title-new {
+            font-size: 20px !important;
+        }
+
+        body.font-lg .content-text {
+            font-size: 20px !important;
+            line-height: 1.6;
+        }
+
+        /* Level 3: XL */
+        body.font-xl .card-title-new {
+            font-size: 24px !important;
+        }
+
+        body.font-xl .content-text {
+            font-size: 24px !important;
+            line-height: 1.6;
+        }
+
+        /* Desktop Image Optimization */
+        @media (min-width: 1024px) {
+
+            .content-text img,
+            .hero-img {
+                max-width: 60% !important;
+                /* Don't fill 1100px width */
+                max-height: 500px;
+                /* Cap height */
+                width: auto !important;
+                display: block;
+                margin: 10px 0;
+            }
+        }
+
+        .title {
+            font-weight: 700;
+            font-size: 18px;
+            white-space: nowrap;
+        }
+
+        .search-input-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            font-size: 14px;
+            background: #e9e9eb;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        input[type="text"]:focus {
+            background: #fff;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 2px rgba(0, 122, 255, 0.2);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #8e8e93;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            visibility: hidden;
+        }
+
+        /* --- Filters --- */
+        .filter-section {
+            max-width: var(--max-width);
+            margin: 8px auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chips-row {
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding-bottom: 4px;
+        }
+
+        .chips-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .chip {
+            padding: 4px 10px;
+            /* Compact padding */
+            border-radius: 12px;
+            background: #fff;
+            border: 1px solid var(--border);
+            font-size: 13px;
+            /* Uniform font */
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .chip.active {
+            color: #fff;
+            border-color: transparent;
+            font-weight: 600;
+        }
+
+        /* Category Button Colors */
+        .chip[data-cat="all"].active {
+            background: #333;
+        }
+
+        .chip[data-cat="news"] {
+            color: var(--col-news);
+            border-color: var(--col-news);
+        }
+
+        .chip[data-cat="news"].active {
+            background: var(--col-news);
+            color: #fff;
+        }
+
+        .chip[data-cat="intl"] {
+            color: var(--col-intl);
+            border-color: var(--col-intl);
+        }
+
+        .chip[data-cat="intl"].active {
+            background: var(--col-intl);
+            color: #fff;
+        }
+
+        .chip[data-cat="ent"] {
+            color: var(--col-ent);
+            border-color: var(--col-ent);
+        }
+
+        .chip[data-cat="ent"].active {
+            background: var(--col-ent);
+            color: #fff;
+        }
+
+        .chip[data-cat="tech"] {
+            color: var(--col-tech);
+            border-color: var(--col-tech);
+        }
+
+        .chip[data-cat="tech"].active {
+            background: var(--col-tech);
+            color: #fff;
+        }
+
+        /* Card Background Tints */
+        .card.news {
+            background: var(--bg-card-news);
+        }
+
+        .card.intl {
+            background: var(--bg-card-intl);
+        }
+
+        .card.ent {
+            background: var(--bg-card-ent);
+        }
+
+        .card.tech {
+            background: var(--bg-card-tech);
+        }
+
+
+        .sub-filters {
+            display: none;
+            /* Hidden by default */
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sub-filters.show {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* --- Marquee --- */
+        /* --- Fixed Marquee --- */
+        /* --- Fixed Marquee --- */
+        .marquee {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 2500;
+            background: #5c5c5e;
+            color: #ffffff;
+            font-size: 13px;
+            /* Add padding to move text below Dynamic Island */
+            padding-top: env(safe-area-inset-top);
+            height: calc(31px + env(safe-area-inset-top));
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            overflow: hidden;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+        }
+
+        .marquee-content {
+            display: inline-block;
+            animation: scroll 300s linear infinite;
+            /* Slowed down from 60s (80% slower) */
+            will-change: transform;
+        }
+
+        .marquee-item {
+            display: inline-block;
+            margin-right: 30px;
+            opacity: 1;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.2s;
+            cursor: pointer;
+            text-decoration: none;
+            color: #ffffff;
+            /* Pure white text */
+        }
+
+        /* Ticker Bullet Color */
+        .marquee-item::before {
+            content: "✦";
+            color: #ff9500;
+            /* News Orange */
+            margin-right: 8px;
+            font-weight: 900;
+        }
+
+        @media (hover: hover) {
+            .marquee-item:hover {
+                color: #ffffff;
+                text-decoration: none;
+            }
+        }
+
+        .marquee-item.read {
+            font-weight: 500;
+            color: #ffffff;
+            /* Keep white */
+            opacity: 0.5;
+            /* Dim via opacity instead */
+        }
+
+        .marquee-item.read::before {
+            color: #ff9500;
+            /* Keep orange star or dim it? user said 1 orange star is enough */
+            opacity: 0.6;
+            /* Dim star slightly for read */
+        }
+
+        @media (hover: hover) {
+            .marquee:hover .marquee-content {
+                animation-play-state: paused;
+            }
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        /* --- News List --- */
+        main {
+            max-width: var(--max-width);
+            margin: 20px auto;
+            padding: 0 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            /* Tighter spacing */
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            /* overflow: hidden; -- Removed to allow external glow */
+            cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s;
+            position: relative;
+        }
+
+        .card.read .card-title {
+            color: #888;
+            font-weight: 400;
+        }
+
+        /* Siri Glow Effect */
+        @keyframes flow-glow {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Siri Glow Effect - Layered approach to keep category background */
+        @keyframes siri-flow {
+            0% {
+                background-position: 0% 50%;
+                box-shadow: 0 0 15px rgba(0, 122, 255, 0.4);
+            }
+
+            50% {
+                background-position: 100% 50%;
+                box-shadow: 0 0 25px rgba(255, 0, 204, 0.5);
+            }
+
+            100% {
+                background-position: 0% 50%;
+                box-shadow: 0 0 15px rgba(0, 122, 255, 0.4);
+            }
+        }
+
+        .card.focus-glow {
+            transform: scale(1.02);
+            z-index: 10;
+            background: transparent !important;
+            /* Hide original background to show layers */
+            border-radius: var(--radius);
+            /* Keep radius */
+        }
+
+        /* Layer 1 (Bottom): The Flowing Gradient Glow (Border) */
+        .card.focus-glow::before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: -3px;
+            right: -3px;
+            bottom: -3px;
+            background: linear-gradient(90deg, #33ccff, #007aff, #d400d4, #33ccff);
+            background-size: 300% 300%;
+            border-radius: calc(var(--radius) + 3px);
+            z-index: -2;
+            animation: siri-flow 3s ease infinite;
+            filter: blur(4px);
+            opacity: 0.9;
+        }
+
+        /* Layer 2 (Middle): The Original Card Background (Solid) */
+        /* This covers the center of the gradient, leaving only the edges visible */
+        .card.focus-glow::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: var(--radius);
+            z-index: -1;
+        }
+
+        /* Restore Category Colors for the Inner Layer */
+        .card.focus-glow.news::after {
+            background: var(--bg-card-news);
+        }
+
+        .card.focus-glow.intl::after {
+            background: var(--bg-card-intl);
+        }
+
+        .card.focus-glow.ent::after {
+            background: var(--bg-card-ent);
+        }
+
+        .card.focus-glow.tech::after {
+            background: var(--bg-card-tech);
+        }
+
+        /* Ensure the card creates stacking context for these pseudo elements */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: box-shadow 0.2s, background 0.2s, transform 0.2s;
+            position: relative;
+            isolation: isolate;
+        }
+
+
+
+        /* Collapsed View */
+        .card-header {
+            padding: 16px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .thumb-col {
+            flex-shrink: 0;
+            width: 80px;
+            height: 60px;
+        }
+
+        .thumb {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 6px;
+            background: #eee;
+        }
+
+        .info-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 4px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        .source-tag {
+            font-weight: 500;
+            color: #333;
+            background: rgba(0, 0, 0, 0.08);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Expanded View */
+        .card-body {
+            display: none;
+            padding: 0 16px 20px;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 10px;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .card.expanded .card-body {
+            display: block;
+        }
+
+        /* Expanded: Hide thumbnail in header to avoid duplicate? 
+           Or simpler: keep it, and show Hero large in body */
+
+        .hero-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 16px 0;
+            display: block;
+        }
+
+        .content-text {
+            font-size: 18px !important;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        /* Force override inline styles from specific feeds (e.g. Unwire) */
+        .content-text * {
+            font-size: 18px !important;
+            line-height: 1.6 !important;
+        }
+
+        /* Handle content images from HTML */
+        .content-text img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin: 8px 0;
+        }
+
+        /* --- Footer & Utils --- */
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 40px;
+        }
+
+        .back-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--text-main);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+
+        .back-top.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* --- Vertical Card Layout (New) --- */
+        .card-header.vertical {
+            flex-direction: column;
+            gap: 8px;
+            padding: 16px;
+        }
+
+        .card-header.vertical .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 0;
+            -webkit-line-clamp: 3;
+        }
+
+        .cat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .cat-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: 12px;
+            color: #fff;
+            background: #888;
+        }
+
+        .cat-badge.news {
+            background: #007aff;
+        }
+
+        .cat-badge.tech {
+            background: #5856d6;
+        }
+
+        .cat-badge.ent {
+            background: #ff2d55;
+        }
+
+        .cat-badge.intl {
+            background: #ff9500;
+        }
+
+        .thumb-large-wrap {
+            width: 100%;
+            margin-top: 6px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #f2f2f2;
+            min-height: 10px;
+        }
+
+        .thumb-large {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            max-height: 400px;
+            /* Constraint height */
+            object-fit: cover;
+        }
+
+        .meta-bottom {
+            font-size: 12px;
+            color: #8e8e93;
+            margin-top: 6px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        /* --- Horizontal New Layout (Thumb Left + Date Below) --- */
+        .card-header.horizontal-new {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            align-items: flex-start;
+        }
+
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            width: 80px;
+            /* Fixed width for thumb column */
+            flex-shrink: 0;
+            gap: 6px;
+        }
+
+        .thumb-square {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #e0e0e0;
+            /* Gray placeholder */
+            display: block;
+        }
+
+        .date-under-thumb {
+            font-size: 13px;
+            color: #8e8e93;
+            text-align: center;
+            line-height: 1.2;
+            white-space: pre-wrap;
+            /* Allow wrapping if needed */
+        }
+
+        .right-col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 8px;
+            /* Gap between Title and Tags */
+            min-width: 0;
+            /* Fix flex overflow */
+        }
+
+        .card-title-new {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.4;
+            margin: 0;
+            color: var(--text-main);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            transition: font-weight 0.2s, opacity 0.2s;
+        }
+
+        .card.read .card-title-new {
+            font-weight: 400;
+            opacity: 0.7;
+        }
+
+        .meta-tags-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .share-btn-v2 {
+            background: #e0e0e0 !important;
+            border: 1px solid #c0c0c0 !important;
+            cursor: pointer;
+            padding: 6px;
+            color: #333 !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s, transform 0.1s;
+            margin-left: auto;
+            /* Push to right */
+            width: 32px;
+            height: 32px;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .share-btn-v2:active {
+            transform: scale(0.9);
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-btn-v2:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        .share-btn-v2 svg {
+            width: 18px;
+            height: 18px;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+
+        .source-tag {
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+        }
+
+        .source-tag:hover {
+            opacity: 0.7;
+        }
+
+        .index-num {
+            display: inline-block;
+            background: rgba(0, 0, 0, 0.05);
+            color: var(--text-muted);
+            font-weight: 700;
+            font-size: 13px;
+            line-height: 1;
+            padding: 4px 8px;
+            border-radius: 6px;
+            margin-right: 8px;
+            vertical-align: text-bottom;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="marquee">
+        <div class="marquee-content">
+            {% for item in marquee_list %}
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                item.text
+                }}</span>
+            {% endfor %}
+            <!-- Duplicate for loop -->
+            {% for item in marquee_list %}
+            <span class="marquee-item" data-link="{{ item.link }}" onclick="focusCard(this.dataset.link)">{{
+                item.text
+                }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="top-nav-wrapper">
+        <header class="site-header">
+            <div class="search-row">
+                <div class="search-input-wrap">
+                    <input type="text" id="searchInput" placeholder="搜尋內容...">
+                    <button class="clear-btn" id="clearBtn">✕</button>
+                </div>
+                <!-- Font Controls -->
+                <div class="font-controls">
+                    <button class="font-btn" onclick="setFontSize(0)"
+                        style="font-size:13px; font-weight:500;">A</button>
+                    <button class="font-btn" onclick="setFontSize(2)"
+                        style="font-size:19px; font-weight:700;">A</button>
+                </div>
+            </div>
+            <div class="filter-section">
+                <!-- Level 1: Categories -->
+                <div class="chips-row" id="catFilters">
+                    <div class="chip active" data-cat="all">全部 <span class="count"></span></div>
+                    <div class="chip" data-cat="news">新聞 <span class="count"></span></div>
+                    <div class="chip" data-cat="intl">國際 <span class="count"></span></div>
+                    <div class="chip" data-cat="ent">娛樂 <span class="count"></span></div>
+                    <div class="chip" data-cat="tech">科技 <span class="count"></span></div>
+                </div>
+                <!-- Level 2: Sources (Hidden by default) -->
+                <div class="chips-row sub-filters" id="sourceFilters">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </header>
+    </div>
+
+    <main id="newsList">
+        <!-- Cards will be injected here -->
+    </main>
+
+    <div class="footer">
+        Updated: {{ build_time }} • Auto-refresh: {{ refresh_seconds }}s
+    </div>
+
+    <div class="back-top" id="backTop">↑</div>
+
+    <!-- DATA INJECTION -->
+    <script id="newsData" type="application/json">
+{{ news_data_json | safe }}
+</script>
+
+    <script>
+        // --- APP LOGIC ---
+
+        // 1. Data Parsing
+        const rawData = JSON.parse(document.getElementById('newsData').textContent);
+        const readHistory = new Set(JSON.parse(localStorage.getItem('readHistory') || '[]'));
+
+        // Clean Data
+        const newsItems = rawData.map((item, idx) => ({
+            ...item,
+            id: idx, // Simple ID
+            read: readHistory.has(item.link)
+        }));
+
+        // State
+        let state = {
+            filterCat: 'all',
+            filterSource: 'all',
+            search: ''
+        };
+        let currentList = []; // Global for navigation
+
+        // DOM Elements
+        const listEl = document.getElementById('newsList');
+        const catChips = document.querySelectorAll('#catFilters .chip');
+        const sourceRow = document.getElementById('sourceFilters');
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearBtn');
+
+        // --- RENDER FUNCTIONS ---
+
+        function renderList() {
+            // Filter
+            const filtered = newsItems.filter(item => {
+                const matchCat = state.filterCat === 'all' || item.category === state.filterCat;
+                const matchSource = state.filterSource === 'all' || item.source === state.filterSource;
+                const matchSearch = !state.search || item.search_text.toLowerCase().includes(state.search);
+                return matchCat && matchSource && matchSearch;
+            });
+
+            // Update Global for Navigation
+            currentList = filtered;
+
+            // Update Counts on main chips (optional, keeps UI alive)
+            updateCounts();
+
+            // Render HTML
+            if (filtered.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center; padding:40px; color:#999">沒有相關新聞</div>';
+                return;
+            }
+
+            // Use document fragment for perf
+            const frag = document.createDocumentFragment();
+
+            // Cat Map
+            const catNames = { news: '新聞', ent: '娛樂', tech: '科技', intl: '國際' };
+
+            filtered.forEach((item, idx) => {
+                const card = document.createElement('div');
+                // Add distinct category class for background coloring
+                card.className = `card ${item.read ? 'read' : ''} ${item.category}`;
+                card.dataset.id = item.id;
+                card.dataset.link = item.link;
+
+                // Thumb logic
+                // Provide a transparent pixel or verify broken images if needed, 
+                // but for now relying on browser or empty 'hero_img'
+                // User wants "Gray Square" if empty.
+                const thumbSrc = item.hero_img || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2UwZTBlMCIvPjwvc3ZnPg=='; // Gray 80x80 box
+
+                const catLabel = catNames[item.category] || '其它';
+
+                // Layout: Left Col (Thumb + Date) | Right Col (Title + Cat/Source)
+                card.innerHTML = `
+                <div class="card-header horizontal-new">
+                    <!-- Left Col -->
+                    <div class="left-col">
+                        <img src="${thumbSrc}" class="thumb-square" loading="lazy" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4MCIgaGVpZ2h0PSI4MCI+PHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0iI2UwZTBlMCIvPjwvc3ZnPg=='">
+                        <div class="date-under-thumb">${item.pub_fmt}</div>
+                    </div>
+                    
+                    <!-- Right Col -->
+                    <div class="right-col">
+                        <h3 class="card-title-new"><span class="index-num">${idx + 1}</span>${item.title}</h3>
+                        <div class="meta-tags-row">
+                            <span class="cat-badge ${item.category}">${catLabel}</span>
+                            <a href="${item.link}" target="_blank" class="source-tag" onclick="event.stopPropagation()">${item.source}</a>
+                            <button class="share-btn-v2" title="分享" aria-label="分享">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                    <polyline points="16 6 12 2 8 6"></polyline>
+                                    <line x1="12" y1="2" x2="12" y2="15"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Injection point for full content -->
+                </div>
+            `;
+
+                // Interaction
+                card.querySelector('.card-header').addEventListener('click', () => toggleCard(card, item));
+
+                // Share Interaction (Safe Listener)
+                const sBtn = card.querySelector('.share-btn-v2');
+                if (sBtn) sBtn.addEventListener('click', (e) => shareItem(e, item.link, item.title));
+
+                frag.appendChild(card);
+            });
+
+            listEl.innerHTML = '';
+            listEl.appendChild(frag);
+        }
+
+        // Helper to scroll to the start of news list
+        function scrollToListTop() {
+            const wrapper = document.querySelector('.top-nav-wrapper');
+            const marquee = document.querySelector('.marquee');
+            if (wrapper && marquee) {
+                const mHeight = marquee.offsetHeight;
+                // Scroll so the wrapper (Search bar) is right under the marquee
+                const y = wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight;
+                window.scrollTo({ top: y, behavior: 'smooth' });
+            }
+        }
+
+        function toggleCard(cardEl, item) {
+            const isExpanded = cardEl.classList.contains('expanded');
+
+            // Collapse all other cards (Accordion Effect)
+            document.querySelectorAll('.card.expanded').forEach(other => {
+                if (other !== cardEl) {
+                    other.classList.remove('expanded', 'focus-glow');
+                }
+            });
+
+            if (isExpanded) {
+                cardEl.classList.remove('expanded');
+                cardEl.classList.remove('focus-glow');
+            } else {
+                cardEl.classList.add('expanded', 'focus-glow');
+
+                // Mark as Read
+                if (!item.read) {
+                    item.read = true;
+                    readHistory.add(item.link);
+                    localStorage.setItem('readHistory', JSON.stringify(Array.from(readHistory)));
+                    cardEl.classList.add('read');
+
+                    // Sync Marquee
+                    document.querySelectorAll(`.marquee-item[data-link="${item.link}"]`).forEach(el => {
+                        el.classList.add('read');
+                    });
+                }
+
+                // Inject content if not already injected
+                const body = cardEl.querySelector('.card-body');
+                if (!body.querySelector('.content-text')) {
+                    const heroHtml = item.hero_img ? `<img src="${item.hero_img}" class="hero-img">` : '';
+                    body.innerHTML = `
+                    ${heroHtml}
+                    <div class="content-text">${item.content || '(無內容)'}</div>
+                    <!-- Bottom Link Removed as per request -->
+                `;
+                }
+
+                cardEl.classList.add('expanded');
+
+                // Scroll to card top for better reading
+                setTimeout(() => {
+                    const marquee = document.querySelector('.marquee');
+                    const mHeight = marquee ? marquee.offsetHeight : 50;
+                    const wrapper = document.querySelector('.top-nav-wrapper');
+
+                    // targetY for the card
+                    const targetY = cardEl.getBoundingClientRect().top + window.pageYOffset - mHeight - 10;
+
+                    // wrapperY is the top of the search bar
+                    const wrapperY = wrapper ? (wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight) : 0;
+
+                    // Never scroll past the search bar top if it means hiding it unnecessarily
+                    // This fixes the "jumping up a bit" for the first card.
+                    const finalY = Math.max(targetY, wrapperY);
+
+                    window.scrollTo({ top: finalY, behavior: 'smooth' });
+                }, 100);
+            }
+        }
+
+        function updateCounts() {
+            // Count for current 'source' context possibly? 
+            // For simplicity, count totals by Category globally
+            const counts = { all: 0, news: 0, intl: 0, ent: 0, tech: 0 };
+            newsItems.forEach(i => {
+                counts.all++;
+                if (counts[i.category] !== undefined) counts[i.category]++;
+            });
+
+            catChips.forEach(chip => {
+                const cat = chip.dataset.cat;
+                if (counts[cat] !== undefined) {
+                    chip.querySelector('.count').textContent = `(${counts[cat]})`;
+                }
+            });
+        }
+
+        function renderSourceChips() {
+            // User requested specific lists per category group
+            // Group 1: News, Intl, Ent -> RTHK, HK01, on.cc, MingPao, Singtao
+            // Group 2: Tech -> unwire, cnbeta, hkepc, 9to5mac
+
+            // Normalize names for comparison if needed, currently source strings are:
+            // "RTHK", "MingPao", "Singtao", "HK01", "on.cc", "HKEPC", "unwire.hk", "CNBeta", "9to5Mac"
+
+            const groupGeneral = ['HK01', 'MingPao', 'on.cc', 'RTHK', 'Singtao']; // Alphabetical-ish/User order? User asked Alphabetical.
+            // Alphabetical: HK01, MingPao, on.cc, RTHK, Singtao
+            const groupTech = ['9to5Mac', 'CNBeta', 'HKEPC', 'unwire.hk', 'HK01', 'on.cc'];
+
+            let targetSources = [];
+
+            if (['news', 'intl', 'ent'].includes(state.filterCat)) {
+                targetSources = groupGeneral;
+            } else if (state.filterCat === 'tech') {
+                targetSources = groupTech;
+            } else {
+                // 'all' -> Show combined
+                const allSet = new Set();
+                newsItems.forEach(i => allSet.add(i.source));
+                targetSources = Array.from(allSet).sort();
+            }
+
+            sourceRow.innerHTML = '';
+            sourceRow.classList.add('show');
+
+            // Calculate Counts for Sources regarding Current Category
+            const relevantItems = state.filterCat === 'all'
+                ? newsItems
+                : newsItems.filter(i => i.category === state.filterCat);
+            const countMap = {};
+            relevantItems.forEach(i => {
+                countMap[i.source] = (countMap[i.source] || 0) + 1;
+            });
+
+            // 'All Sources' button matching category color?
+            const allBtn = document.createElement('div');
+            allBtn.className = `chip ${state.filterSource === 'all' ? 'active' : ''} `;
+            allBtn.dataset.cat = state.filterCat; // Inherit color style
+            allBtn.innerHTML = `所有來源 <span class="count">(${relevantItems.length})</span>`;
+            allBtn.onclick = () => { state.filterSource = 'all'; renderSourceChips(); renderList(); };
+            sourceRow.appendChild(allBtn);
+
+            // Render specific list
+            targetSources.forEach(src => {
+                if (state.filterCat === 'ent' && src === 'RTHK') return;
+
+                // Only add if we actually have data for this source? 
+                // User might want to see the button even if empty (to know it's tracked). 
+                // But cleaner to show only if available in 'newsItems'?
+                // Let's check availability to avoid dead buttons.
+                const exists = newsItems.some(i => i.source.toLowerCase().includes(src.toLowerCase().replace('.hk', '')));
+
+                if (exists) {
+                    const cnt = countMap[src] || 0;
+                    const btn = document.createElement('div');
+                    btn.className = `chip ${state.filterSource === src ? 'active' : ''} `;
+                    // Hack: use the current category data-attribute to style these source chips same as parent
+                    btn.dataset.cat = state.filterCat;
+
+                    btn.innerHTML = `${src} <span class="count">(${cnt})</span>`;
+                    btn.onclick = () => {
+                        if (state.filterSource === src) state.filterSource = 'all';
+                        else state.filterSource = src;
+                        renderSourceChips();
+                        renderList();
+                        scrollToListTop();
+                    };
+                    sourceRow.appendChild(btn);
+                }
+            });
+        }
+
+        // --- EVENTS ---
+
+        // Category Chips
+        catChips.forEach(chip => {
+            chip.addEventListener('click', () => {
+                catChips.forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+
+                state.filterCat = chip.dataset.cat;
+                state.filterSource = 'all'; // Reset source on cat change
+
+                renderSourceChips();
+                renderList();
+                scrollToListTop();
+            });
+        });
+
+        // Search
+        searchInput.addEventListener('input', (e) => {
+            state.search = e.target.value.toLowerCase().trim();
+            clearBtn.style.visibility = state.search ? 'visible' : 'hidden';
+            renderList();
+        });
+
+        clearBtn.addEventListener('click', () => {
+            state.search = '';
+            searchInput.value = '';
+            clearBtn.style.visibility = 'hidden';
+            renderList();
+        });
+
+        // Back to Top
+        document.getElementById('backTop').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+        window.addEventListener('scroll', () => {
+            document.getElementById('backTop').classList.toggle('show', window.scrollY > 300);
+        });
+
+        // Marquee Interaction
+        function focusCard(link) {
+            const card = document.querySelector(`.card[data-link="${link}"]`);
+            if (card) {
+                // Scroll to center
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+                // Highlight/Expand
+                if (!card.classList.contains('expanded')) {
+                    const item = rawData.find(i => i.link === link); // Use rawData
+                    if (item) toggleCard(card, item);
+                } else {
+                    // Already expanded, just scroll to it
+                    const marquee = document.querySelector('.marquee');
+                    const mHeight = marquee ? marquee.offsetHeight : 50;
+                    const wrapper = document.querySelector('.top-nav-wrapper');
+                    const targetY = card.getBoundingClientRect().top + window.pageYOffset - mHeight - 10;
+                    const wrapperY = wrapper ? (wrapper.getBoundingClientRect().top + window.pageYOffset - mHeight) : 0;
+                    const finalY = Math.max(targetY, wrapperY);
+                    window.scrollTo({ top: finalY, behavior: 'smooth' });
+                }
+            } else {
+                alert('該新聞不在列表顯示範圍 (可能被過濾)');
+            }
+        }
+
+        // Auto Refresh
+        setTimeout(() => location.reload(), {{ refresh_seconds }} * 1000);
+
+        function shareItem(e, url, title) {
+            e.stopPropagation();
+            if (navigator.share) {
+                navigator.share({
+                    title: title,
+                    url: url
+                }).catch(err => console.log('Share dismissed', err));
+            } else {
+                navigator.clipboard.writeText(url).then(() => alert('連結已複製'));
+            }
+        }
+
+
+        // Init
+        updateCounts();
+
+        // Font Size Init
+        let fontLevel = parseInt(localStorage.getItem('fontSizeLevel')) || 0;
+        // 0: Normal, 1: Large, 2: XL
+        applyFontSize(fontLevel);
+
+        function setFontSize(level) {
+            fontLevel = level;
+            applyFontSize(fontLevel);
+            localStorage.setItem('fontSizeLevel', fontLevel);
+
+            // Update active state visual
+            document.querySelectorAll('.font-btn').forEach((btn, idx) => {
+                // Map idx 0 -> level 0, idx 1 -> level 2 ? No, hard to map directly unless ID.
+                // Simplified: highlight based on level.
+                if (level === 0 && idx === 0) btn.classList.add('active');
+                else if (level === 2 && idx === 1) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+        }
+
+        function applyFontSize(level) {
+            document.body.classList.remove('font-lg', 'font-xl');
+            if (level === 1) document.body.classList.add('font-lg');
+            if (level === 2) document.body.classList.add('font-xl'); // XL
+        }
+
+        renderSourceChips();
+        renderList();
+
+
+
+        // Swipe logic removed
+
+        // Sync Read History to Marquee immediately
+        readHistory.forEach(link => {
+            document.querySelectorAll(`.marquee-item[data-link="${link}"]`).forEach(el => {
+                el.classList.add('read');
+            });
+        });
+    </script>
+</body>
+
+</html>
